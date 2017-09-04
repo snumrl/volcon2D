@@ -1,0 +1,158 @@
+<Muscles>
+ 	<unit>
+		<mesh type="Rectangle" nx="8" ny="2"/>
+
+		<origin>
+			<anchor body="Torso" x="0.085" y="-0.16"/>
+		</origin>
+		<insertion>
+			<anchor body="Torso" x="0.0825" y="0.1525"/>
+		</insertion>
+	</unit> 
+	<unit>
+		<mesh type="Rectangle" nx="4" ny="1" />
+		<origin>
+			<anchor body="NeckR" x="-0.0647009" y="-0.0763974"/>
+		</origin>
+		<insertion>
+			<anchor body="NeckR" x="0.0713718" y="-0.0724623"/>
+		</insertion>
+	</unit>
+	
+	 <unit>
+		<mesh type="Rectangle" nx="5" ny="1" />
+		<origin>
+			<anchor body="NeckR" x="-0.103211" y="0.065657"/>
+
+		</origin>
+		<insertion>
+			<anchor body="NeckR" x="0.0915714" y="0.0787767"/>
+		</insertion>
+	</unit>
+	
+	<unit>
+		<mesh type="Rectangle" nx="4" ny="1" />
+		<origin>
+			<anchor body="ShoulderR" x="-0.0551083" y="-0.0733881"/>
+		</origin>
+		<insertion>
+			<anchor body="ShoulderR" x="0.0784239" y="-0.0740327"/>
+		</insertion>
+	</unit>
+	
+	<unit>
+		<mesh type="Rectangle" nx="5" ny="1" />
+		<origin>
+			<anchor body="ShoulderR" x="-0.110724" y="0.069683"/>
+		</origin>
+		<insertion>
+			<anchor body="ShoulderR" x="0.102038" y="0.0763789"/>
+
+		</insertion>
+	</unit>
+
+
+	<unit>
+		<mesh type="Rectangle" nx="4" ny="1"/>
+		<origin>
+			<anchor body="ElbowR" x="-0.053097" y="-0.0672689"/>
+		</origin>
+		<insertion>
+			<anchor body="ElbowR" x="0.0702166" y="-0.0647686"/>
+		</insertion>
+	</unit>
+
+
+	<unit>
+		<mesh type="Rectangle" nx="4" ny="1"/>
+		<origin>
+			<anchor body="ElbowR" x="-0.048559" y="0.0663749"/>
+		</origin>
+		<insertion>
+			<anchor body="ElbowR" x="0.0818519" y="0.0712998"/>
+		</insertion>
+	</unit>
+
+
+
+
+
+
+
+
+	<unit>
+		<mesh type="Rectangle" nx="8" ny="1"/>
+
+		<origin>
+			<anchor body="Torso" x="-0.085" y="-0.16"/>
+		</origin>
+		<insertion>
+			<anchor body="Torso" x="-0.0825" y="0.1525"/>
+		</insertion>
+	</unit> 
+	<unit>
+		<mesh type="Rectangle" nx="4" ny="1" />
+		<origin>
+			<anchor body="NeckL" x="-0.0647009" y="-0.0763974"/>
+		</origin>
+		<insertion>
+			<anchor body="NeckL" x="0.0713718" y="-0.0724623"/>
+		</insertion>
+	</unit>
+	
+	 <unit>
+		<mesh type="Rectangle" nx="5" ny="1" />
+		<origin>
+			<anchor body="NeckL" x="-0.103211" y="0.065657"/>
+
+		</origin>
+		<insertion>
+			<anchor body="NeckL" x="0.0915714" y="0.0787767"/>
+		</insertion>
+	</unit>
+	
+	<unit>
+		<mesh type="Rectangle" nx="4" ny="1" />
+		<origin>
+			<anchor body="ShoulderL" x="-0.0551083" y="-0.0733881"/>
+		</origin>
+		<insertion>
+			<anchor body="ShoulderL" x="0.0784239" y="-0.0740327"/>
+		</insertion>
+	</unit>
+	
+	<unit>
+		<mesh type="Rectangle" nx="5" ny="1" />
+		<origin>
+			<anchor body="ShoulderL" x="-0.110724" y="0.069683"/>
+		</origin>
+		<insertion>
+			<anchor body="ShoulderL" x="0.102038" y="0.0763789"/>
+
+		</insertion>
+	</unit>
+
+
+	<unit>
+		<mesh type="Rectangle" nx="4" ny="1"/>
+		<origin>
+			<anchor body="ElbowL" x="-0.053097" y="-0.0672689"/>
+		</origin>
+		<insertion>
+			<anchor body="ElbowL" x="0.0702166" y="-0.0647686"/>
+		</insertion>
+	</unit>
+
+
+	<unit>
+		<mesh type="Rectangle" nx="4" ny="1"/>
+		<origin>
+			<anchor body="ElbowL" x="-0.048559" y="0.0663749"/>
+		</origin>
+		<insertion>
+			<anchor body="ElbowL" x="0.0818519" y="0.0712998"/>
+		</insertion>
+	</unit>
+
+</Muscles>
+

@@ -1,0 +1,1029 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"insertion_",
+				"insertion_way_points"
+			],
+			[
+				"origin",
+				"origin_way_points"
+			],
+			[
+				"GL_TRAI",
+				"GL_TRIANGLE_FAN"
+			],
+			[
+				"mM",
+				"mMuscleStiffness"
+			],
+			[
+				"mTim",
+				"mTimeStep"
+			],
+			[
+				"simul",
+				"Simulator"
+			],
+			[
+				"getNum",
+				"GetNumMuscles"
+			],
+			[
+				"qdd_des",
+				"m_qdd_des"
+			],
+			[
+				"F_vol_active_",
+				"F_vol_active_anal"
+			],
+			[
+				"LightDe",
+				"LigthDepth"
+			],
+			[
+				"depthMV",
+				"depthMVPID"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "MusculoSkeletalSystem.h",
+			"settings":
+			{
+				"buffer_size": 2109,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "vmcon2D.sublime-project",
+			"settings":
+			{
+				"buffer_size": 65,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "fem2D/include/MuscleConstraint.h",
+			"settings":
+			{
+				"buffer_size": 1763,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "fem2D/include/RectangleMesh.h",
+			"settings":
+			{
+				"buffer_size": 674,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "fem2D/srcs/RectangleMesh.cpp",
+			"settings":
+			{
+				"buffer_size": 3382,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Helper.cpp",
+			"settings":
+			{
+				"buffer_size": 20503,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "main.cpp",
+			"settings":
+			{
+				"buffer_size": 3984,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "MusculoSkeletalSystem.cpp",
+			"settings":
+			{
+				"buffer_size": 7627,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Scene.cpp",
+			"settings":
+			{
+				"buffer_size": 5221,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "fem2D/srcs/SoftBodySimulator.cpp",
+			"settings":
+			{
+				"buffer_size": 15181,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "fem2D/include/SoftBodySimulator.h",
+			"settings":
+			{
+				"buffer_size": 3685,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Simulator.cpp",
+			"settings":
+			{
+				"buffer_size": 976,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Simulator.h",
+			"settings":
+			{
+				"buffer_size": 924,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Helper.h",
+			"settings":
+			{
+				"buffer_size": 1427,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 92.0,
+		"last_filter": "install",
+		"selected_items":
+		[
+			[
+				"install",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 485.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/seunghwan/Desktop/vmcon2D"
+	],
+	"file_history":
+	[
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/srcs/CorotateFEMConstraint.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/srcs/SpringConstraint.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/srcs/AttachmentConstraint.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/SoftBodySimulator.h",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/srcs/FEMConstraint.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/srcs/MuscleConstraint.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/MuscleConstraint.h",
+		"/home/seunghwan/Desktop/vmcon2D/Helper.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/export/muscle_parameter_2.xml",
+		"/home/seunghwan/Desktop/vmcon2D/Scene.h",
+		"/home/seunghwan/Desktop/vmcon2D/export/muscle_parameter.xml",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/srcs/RectangleMesh.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/Helper.h",
+		"/home/seunghwan/Desktop/vmcon2D/Scene.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/main.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/Camera2D.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/srcs/SoftBodySimulator.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/TendonConstraint.h",
+		"/home/seunghwan/Desktop/vmcon2D/MusculoSkeletalSystem.h",
+		"/home/seunghwan/Desktop/vmcon2D/Simulator.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/Simulator.h",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/srcs/TendonConstraint.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/OBJLoader.h",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/srcs/OBJLoader.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/MusculoSkeletalSystem.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/export/MuscleParameter.xml",
+		"/home/seunghwan/Desktop/vmcon2D/MusculoSkeletalSystem/MusculoSkeletalSystem.h",
+		"/home/seunghwan/Desktop/vmcon2D/MusculoSkeletalSystem/MusculoSkeletalSystem.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/FEMConstraint.h",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/CorotateFEMConstraint.h",
+		"/home/seunghwan/Desktop/vmcon2D/MusculoSkeletalSystem/Muscle.h",
+		"/home/seunghwan/Desktop/dart/tutorials/tutorialMultiPendulum-Finished/tutorialMultiPendulum-Finished.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/SpringConstraint.h",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/NeoHookeanFEMConstraint.h",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/LinearMuscleConstraint.h",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/Constraint.h",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/AttachmentConstraint.h",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/VenantKirchhoffFEMConstraint.h",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/ConstraintHeaders.h",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/srcs/Simulator.cpp",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/include/Simulator.h",
+		"/home/seunghwan/Desktop/vmcon2D/CMakeLists.txt",
+		"/home/seunghwan/Desktop/vmcon2D/fem2D/CMakeLists.txt",
+		"/home/seunghwan/Desktop/dart/dart/gui/Win2D.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Muscle/VOLMuscle.h",
+		"/home/seunghwan/Desktop/dart/dart/dynamics/EulerJoint.hpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/export/MuscleParameter.xml",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Actuator/MUActuator.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Muscle/VOLMuscle.cpp",
+		"/home/seunghwan/Desktop/dart/dart/dynamics/Skeleton.hpp",
+		"/home/seunghwan/Desktop/dart/dart/dynamics/Skeleton.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Actuator/MuscleNLP.h",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Actuator/MuscleNLP.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Muscle/LSMuscle.h",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Window.h",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Window.cpp",
+		"/home/seunghwan/Desktop/dart/dart/gui/GlutWindow.hpp",
+		"/home/seunghwan/Desktop/dart/dart/gui/GlutWindow.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Helper.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/main.cpp",
+		"/home/seunghwan/Desktop/dart/dart/dynamics/BallJoint.hpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Muscle/LSMuscle.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/VMCON/Volumetric_Muscle.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Manipulator.h",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/BVH/BVH_Data.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Controller/TRController.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Actuator/MuscleQP.h",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Actuator/JTActuator.h",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Actuator/Actuator_Base.h",
+		"/home/seunghwan/Desktop/dart/dart/gui/SimWindow.hpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Optimizer/QuadraticProgramming.cpp",
+		"/home/seunghwan/Desktop/dart/dart/gui/SimWindow.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Actuator/MUActuator.h",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Controller/BController.h",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Manipulator.cpp",
+		"/home/seunghwan/Desktop/dart/dart/utils/FileInfoWorld.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Actuator/JTActuator.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/vmcon.sublime-project",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/MusculoSkeletalSystem/MusculoSkeletalSystem.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/export/motion/simple.bvh",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Optimizer/IPOPT/IpoptSolver.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Actuator/MuscleQP.cpp",
+		"/home/seunghwan/Desktop/Dynamics/Dynamics.sublime-project",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Optimizer/IPOPT/IpoptProblem.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/EngineInterfaceLocal/ENGINE_INTERFACE_LOCAL.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/EngineBackend/ELASTIC_SOLVER.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Optimizer/GeneralProgramming.h",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Optimizer/QuadraticProgramming.h",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Optimizer/GeneralProgramming.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Optimizer/IPOPT/IpoptProblem.h",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Optimizer/IPOPT/IpoptSolver.h",
+		"/home/seunghwan/Desktop/Ipopt-3.2.1/Ipopt/src/Interfaces/IpIpoptApplication.cpp",
+		"/home/seunghwan/Desktop/Ipopt-3.2.1/Ipopt/src/Interfaces/IpIpoptApplication.hpp",
+		"/home/seunghwan/Desktop/Ipopt-3.2.1/Ipopt/src/Algorithm/IpIpoptAlg.hpp",
+		"/home/seunghwan/Desktop/Ipopt-3.2.1/Ipopt/src/Algorithm/IpDefaultIterateInitializer.cpp",
+		"/home/seunghwan/Desktop/Ipopt-3.2.1/Ipopt/src/Algorithm/IpDefaultIterateInitializer.hpp",
+		"/home/seunghwan/Desktop/Ipopt-3.2.1/Ipopt/src/Algorithm/IpIpoptAlg.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/nova-projects/opengl_3d/Config.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/nova-projects/opengl_3d/Config.h",
+		"/home/seunghwan/Desktop/nova/Projects/nova-projects/opengl_3d/main.cpp",
+		"/home/seunghwan/Desktop/dart/dart/dynamics/Shape.hpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/VMCON/data/Muscle_Param_20170317_2.xml",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Actuator/Actuator_Base.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Controller/JTController.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Controller/JTController.h",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Controller/Controller_Base.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/Controller/BController.cpp",
+		"/home/seunghwan/Desktop/nova/Projects/volumetric-muscle-controller/SIMPLE_VMCON/BVH/BVH_Edit.cpp",
+		"/home/seunghwan/Desktop/gographics/srcs/main.cpp",
+		"/home/seunghwan/Desktop/go_graphics/graphics3/srcs/Light.cpp",
+		"/home/seunghwan/Desktop/go_graphics/graphics3/shaders/shadow.frag",
+		"/home/seunghwan/Desktop/go_graphics/graphics3/shaders/depth.frag",
+		"/home/seunghwan/Desktop/go_graphics/graphics3/srcs/main.cpp",
+		"/home/seunghwan/Desktop/gographics/srcs/Object.cpp",
+		"/home/seunghwan/Desktop/ogl-master/tutorial16_shadowmaps/ShadowMapping_SimpleVersion.fragmentshader",
+		"/home/seunghwan/Desktop/ogl-master/tutorial16_shadowmaps/ShadowMapping_SimpleVersion.vertexshader",
+		"/home/seunghwan/Desktop/ogl-master/tutorial16_shadowmaps/tutorial16.cpp",
+		"/home/seunghwan/Desktop/go_graphics/graphics3/srcs/Light.h",
+		"/home/seunghwan/Desktop/go_graphics/graphics3/shaders/phong.vert",
+		"/home/seunghwan/Desktop/go_graphics/graphics3/shaders/phong.frag",
+		"/home/seunghwan/Desktop/go_graphics/graphics3/srcs/Object.cpp",
+		"/home/seunghwan/Desktop/go_graphics/graphics3/srcs/Camera.cpp",
+		"/home/seunghwan/Desktop/go_graphics/graphics3/CMakeLists.txt",
+		"/home/seunghwan/Desktop/go_graphics/graphics3/srcs/Object.h",
+		"/home/seunghwan/Desktop/go_graphics/graphics2/srcs/main.cpp",
+		"/home/seunghwan/Desktop/ogl-master/tutorial16_shadowmaps/tutorial16_SimpleVersion.cpp",
+		"/home/seunghwan/LearnOpenGL/src/glad.c",
+		"/home/seunghwan/LearnOpenGL/src/5.advanced_lighting/3.1.1.shadow_mapping_depth/shadow_mapping_depth.cpp"
+	],
+	"find":
+	{
+		"height": 38.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"EvalConstraintsHessian",
+			"Conjugate",
+			"ConjugateGradient",
+			"//",
+			"ConjugateGradient",
+			"quasi",
+			"EvalGradient",
+			"stepsize",
+			"Stepsize",
+			"EvalConstraintsHessian",
+			"ConjugateGradient",
+			"Eval",
+			"EvalGradient",
+			"cout",
+			"std::cout",
+			"mCacheR",
+			"quasi",
+			"std::cout",
+			"stepsize",
+			"IntegrateQuasiStatic",
+			"alp",
+			"stepsize",
+			"EvalConstraintsGradient",
+			"alpha",
+			"IntegrateQuasiStatic",
+			"ConjugateGradi",
+			"alpha",
+			"alpoha",
+			"integrate",
+			"alpha",
+			"jacobian",
+			"dir",
+			"ComputeStepSize",
+			"IntegrateQuasiStatic",
+			"alph",
+			"std::cout",
+			"UpdatePositionsAndVelocities",
+			"IntegrateQuasiStatic",
+			"EvalConstraintsGradient",
+			"TimeStepping",
+			"EvalConstraintsGradient",
+			"TimeStepping",
+			"zero",
+			"ConjugateGradient",
+			"glLineWidth",
+			"point",
+			"void DrawArrow(const Eigen::Vector2d& p, const Eigen::Vector2d& v);",
+			"Quasi",
+			"precompute",
+			"IMPLICIT_PROJECTIVE",
+			"PROJECTIVE",
+			"Precon",
+			"Pre",
+			"internal",
+			"EvalConstraintsGradient",
+			"ComputeInternalForces",
+			"origin_way_points",
+			"mAct",
+			"muscleConstraints",
+			"ElbowL",
+			"j",
+			"));\n",
+			"push_back",
+			"p_origin",
+			"origin",
+			"p_ori",
+			"1E4",
+			"std::cout",
+			"StepSize",
+			"i_ori",
+			"insertionAttachedBody",
+			"ComputeStepSize",
+			"fabs(",
+			"mCachel",
+			"std::cout",
+			">\n",
+			"root",
+			"origin",
+			"AnchorPoint",
+			"mMu",
+			"Youngs",
+			"TendonConstraint",
+			"size",
+			");\n",
+			"push_back",
+			"DrawLines",
+			"push_back",
+			"Element",
+			")\n",
+			"f_toe",
+			",0",
+			"replay",
+			"\t\n",
+			"\n\t",
+			"mTimer",
+			"mSimulator",
+			"sSimulator",
+			"Simulator",
+			"Render\\",
+			"Render",
+			"current",
+			"drawSkeleton",
+			"active_contribution_only",
+			"1f",
+			"GetPose",
+			"computeForwardKinematics",
+			"m_motion_tracker",
+			"auto",
+			"hand_bounding_box_left",
+			"m_previous_x",
+			"iteration_count",
+			"m_anchors",
+			"Write",
+			"ofs",
+			"num_muscle",
+			"\n\t\t",
+			"virtual",
+			"override",
+			"muscles",
+			"std::cout",
+			"m_problem",
+			"optimize",
+			"optimze",
+			"frame_count",
+			"out",
+			"torso",
+			"\n\t\t</unit>",
+			"directory"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"PROJECTIVE_DYNAMICS",
+			"(",
+			"",
+			"soft_simulator",
+			"SoftBodySimulator",
+			"",
+			"\n\t\t\t<VolParam start=\"1\" end=\"2\"/>\n\t\t</unit>",
+			"0.5",
+			"0.3",
+			"0.2",
+			"0.3",
+			"0.5",
+			"[i]"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "MusculoSkeletalSystem.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2109,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								684,
+								684
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "vmcon2D.sublime-project",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 65,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								65,
+								65
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "fem2D/include/MuscleConstraint.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1763,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								610,
+								610
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "fem2D/include/RectangleMesh.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 674,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								459,
+								459
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 13,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "fem2D/srcs/RectangleMesh.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3382,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3062,
+								3062
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++11/C++11.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2178.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "Helper.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 20503,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								16338,
+								16338
+							]
+						],
+						"settings":
+						{
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++11/C++11.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 9744.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "main.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3984,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2445,
+								2445
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++11/C++11.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1550.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 7,
+					"file": "MusculoSkeletalSystem.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7627,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7457,
+								7457
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++11/C++11.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 4972.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "Scene.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5221,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2176,
+								2176
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++11/C++11.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1386.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "fem2D/srcs/SoftBodySimulator.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 15181,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								10985,
+								10985
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++11/C++11.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 10098.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "fem2D/include/SoftBodySimulator.h",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 3685,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1099,
+								1099
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 594.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "Simulator.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 976,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								852,
+								852
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++11/C++11.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 286.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "Simulator.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 924,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								420,
+								420
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 13,
+					"file": "Helper.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1427,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1427,
+								1427
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 12,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 30.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.501112934995,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "vmcon2D.sublime-project",
+	"replace":
+	{
+		"height": 70.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 317.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
