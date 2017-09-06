@@ -39,8 +39,8 @@ file(GLOB octocon2d_srcs "octocon2D/*.h" "octocon2D/*.cpp")
 
 if (ENABLE_VMCON2D)
 	project(vmcon2D)
-	find_package(DART REQUIRED COMPONENTS utils-urdf gui CONFIG)
-
+	find_package(DART REQUIRED COMPONENTS utils-urdf gui optimizer-ipopt CONFIG)
+	add_compile_options(-DHAVE_CSTDDEF)
 	include_directories(${DART_INCLUDE_DIRS})
 
 	add_executable(vmcon2D ${vmcon2d_srcs})

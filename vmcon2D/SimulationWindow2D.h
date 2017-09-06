@@ -8,7 +8,11 @@
 #include "fem2D/World.h"
 #include "fem2D/Mesh/MeshHeaders.h"
 #include "fem2D/Constraint/ConstraintHeaders.h"
+#include <IpTNLP.hpp>
+#include <IpIpoptApplication.hpp>
 #include <vector>
+
+class MuscleOptimization;
 class MusculoSkeletalSystem;
 enum MOUSE_MODE
 {
@@ -33,6 +37,11 @@ protected:
 	FEM::World*					mSoftWorld;
 	dart::simulation::WorldPtr  mRigidWorld;
 	MusculoSkeletalSystem*		mMusculoSkeletalSystem;
+
+	Eigen::VectorXd							mRestPose;
+	Eigen::VectorXd							mPreviousPose;
+	Ipopt::SmartPtr<Ipopt::TNLP> 			 mMuscleOptimization;
+	Ipopt::SmartPtr<Ipopt::IpoptApplication> mMuscleOptimizationSolver;
 
 	bool 						mIsPlay;
 	bool 						mIsReplay;

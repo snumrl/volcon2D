@@ -78,7 +78,7 @@ Initialize()
 
 void
 World::
-TimeStepping()
+TimeStepping(bool isIntegrated)
 {
 	if(!mIsInitialized){
 		std::cout<<"Engine not initialized."<<std::endl;
@@ -112,13 +112,13 @@ TimeStepping()
 	default:
 	break;
 	}
-	
 	UpdatePositionsAndVelocities(x_n1);
-
 	mV *= mDampingCoefficinent;
-
-	mTime += mTimeStep;
-	mFrame++;
+	if(isIntegrated)
+	{	
+		mTime += mTimeStep;
+		mFrame++;
+	}
 }
 Eigen::VectorXd
 World::
@@ -142,67 +142,70 @@ ComputeJacobian(std::vector<MuscleConstraint*>& mc
 	Eigen::VectorXd ret(attachment_vector.size()*2);
 
 	Ji.setZero();
-	for(int i =0;i<attachment_vector.size();i++)	
-		attachment_vector[i]->EvalGradient(Xplusdx,Ji);
-		
-	Ji = -Ji;
+
 	for(int i =0;i<attachment_vector.size();i++)	
 		attachment_vector[i]->EvalGradient(mX,Ji);
+		
+	Ji = -Ji;
+	
+	for(int i =0;i<attachment_vector.size();i++)	
+		attachment_vector[i]->EvalGradient(Xplusdx,Ji);
 
-	Ji -= dg_da;
+	Ji += dg_da;
 
 	for(int i =0;i<attachment_vector.size();i++)
-		ret.block<2,1>(i*2,0) = Ji.block<2,1>(attachment_vector[i]->GetI0()*2,0);
+		ret.block<2,1>(i*2,0) = -Ji.block<2,1>(attachment_vector[i]->GetI0()*2,0);
 	
 	//Numerical Jacobian
 	// for(double delta =0.001;delta<1.0;delta*=2)
 	// {
-	// 	double save_activation = mc[0]->GetActivationLevel();
-	// 	Eigen::VectorXd save_X = mX;
-	// 	Eigen::VectorXd g_0(mX.rows()),g_1(mX.rows());
-	// 	g_0.setZero();
-	// 	g_1.setZero();
+		// double delta = 0.01;
+		// double save_activation = mc[0]->GetActivationLevel();
+		// Eigen::VectorXd save_X = mX;
+		// Eigen::VectorXd g_0(mX.rows()),g_1(mX.rows());
+		// g_0.setZero();
+		// g_1.setZero();
 		
-	// 	double a_minus_dx = save_activation-delta;
-	// 	double a_plus_dx = save_activation+delta;
-	// 	if(a_plus_dx>1.0)
-	// 		a_plus_dx =1.0;
-	// 	if(a_minus_dx<0.0)
-	// 		a_minus_dx =0.0;
+		// double a_minus_dx = save_activation-delta;
+		// double a_plus_dx = save_activation+delta;
+		// if(a_plus_dx>1.0)
+		// 	a_plus_dx =1.0;
+		// if(a_minus_dx<0.0)
+		// 	a_minus_dx =0.0;
 
 
-	// 	for(auto& c : mc)
-	// 		c->SetActivationLevel(a_minus_dx);
+		// for(auto& c : mc)
+		// 	c->SetActivationLevel(a_minus_dx);
 
-	// 	if(mIntegrationMethod == QUASI_STATIC)
-	// 		mX = IntegrateQuasiStatic();
-	// 	else
-	// 		mX = IntegrateProjectiveQuasiStatic();
+		// if(mIntegrationMethod == QUASI_STATIC)
+		// 	mX = IntegrateQuasiStatic();
+		// else
+		// 	mX = IntegrateProjectiveQuasiStatic();
 
-	// 	for(int i =0;i<attachment_vector.size();i++)	
-	// 		attachment_vector[i]->EvalGradient(mX,g_0);
+		// for(int i =0;i<attachment_vector.size();i++)	
+		// 	attachment_vector[i]->EvalGradient(mX,g_0);
 
-	// 	for(auto& c : mc)
-	// 		c->SetActivationLevel(a_plus_dx);
+		// for(auto& c : mc)
+		// 	c->SetActivationLevel(a_plus_dx);
 
-	// 	if(mIntegrationMethod == QUASI_STATIC)
-	// 		mX = IntegrateQuasiStatic();
-	// 	else
-	// 		mX = IntegrateProjectiveQuasiStatic();
+		// if(mIntegrationMethod == QUASI_STATIC)
+		// 	mX = IntegrateQuasiStatic();
+		// else
+		// 	mX = IntegrateProjectiveQuasiStatic();
 
-	// 	for(int i =0;i<attachment_vector.size();i++)	
-	// 		attachment_vector[i]->EvalGradient(mX,g_1);
+		// for(int i =0;i<attachment_vector.size();i++)	
+		// 	attachment_vector[i]->EvalGradient(mX,g_1);
 
-	// 	for(auto& c : mc)
-	// 		c->SetActivationLevel(save_activation);
+		// for(auto& c : mc)
+		// 	c->SetActivationLevel(save_activation);
 
-	// 	mX = save_X;
-	// 	Eigen::VectorXd Ji = (g_1 - g_0)*(1.0/(a_plus_dx-a_minus_dx));
-	// 	Eigen::VectorXd ret(attachment_vector.size()*2);
-	// 	for(int i =0;i<attachment_vector.size();i++)
-	// 		ret.block<2,1>(i*2,0) = Ji.block<2,1>(attachment_vector[i]->GetI0()*2,0);
+		// mX = save_X;
+		// Eigen::VectorXd Ji = (g_1 - g_0)*(1.0/(a_plus_dx-a_minus_dx));
+		// Eigen::VectorXd ret(attachment_vector.size()*2);
+		// for(int i =0;i<attachment_vector.size();i++)
+		// 	ret.block<2,1>(i*2,0) = Ji.block<2,1>(attachment_vector[i]->GetI0()*2,0);
 	
-	// 	std::cout<<"Numerical (da : "<<a_plus_dx-a_minus_dx<<") :"<<ret.transpose()<<std::endl;
+		// std::cout<<"Numerical (da : "<<a_plus_dx-a_minus_dx<<") :"<<ret.transpose()<<std::endl;
 	// }
 	// exit(0);
 	return ret;

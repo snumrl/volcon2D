@@ -4,10 +4,12 @@
 #include "GUI/GL_function.h"
 #include "FEM2D_Interface.h"
 #include "DART_Interface.h"
+#include "MuscleOptimization.h"
 #include "fem2D/Constraint/ConstraintHeaders.h"
 #include "GL/glut.h"
 using namespace dart::dynamics;
 using namespace dart::simulation;
+using namespace Ipopt;
 
 SimulationWindow2D::
 SimulationWindow2D()
@@ -29,8 +31,8 @@ Initialize()
 	mSoftWorld = new FEM::World(
 		// FEM::IntegrationMethod::IMPLICIT_NEWTON_METHOD,		//Integration Method
 		// FEM::IntegrationMethod::QUASI_STATIC,		//Integration Method
-		// FEM::IntegrationMethod::PROJECTIVE_QUASI_STATIC,		//Integration Method
-		FEM::IntegrationMethod::PROJECTIVE_DYNAMICS,		//Integration Method
+		FEM::IntegrationMethod::PROJECTIVE_QUASI_STATIC,		//Integration Method
+		// FEM::IntegrationMethod::PROJECTIVE_DYNAMICS,		//Integration Method
 		1.0/1000.0,										//time_step
 		50, 											//max_iteration	
 		0.999											//damping_coeff
@@ -41,34 +43,84 @@ Initialize()
 	mRigidWorld->addSkeleton(mMusculoSkeletalSystem->GetSkeleton());
 	mMusculoSkeletalSystem->Initialize(mSoftWorld);
 	mSoftWorld->Initialize();
+
+	mMuscleOptimization = new MuscleOptimization(mSoftWorld,mRigidWorld,mMusculoSkeletalSystem);
+	mMuscleOptimizationSolver = new IpoptApplication();
+	mMuscleOptimizationSolver->Options()->SetStringValue("mu_strategy", "adaptive");
+	mMuscleOptimizationSolver->Options()->SetStringValue("jac_c_constant", "no");
+	mMuscleOptimizationSolver->Options()->SetStringValue("hessian_constant", "yes");
+	// mMuscleOptimizationSolver->Options()->SetStringValue("mehrotra_algorithm", "yes");
+	mMuscleOptimizationSolver->Options()->SetIntegerValue("print_level", 1);
+	mMuscleOptimizationSolver->Options()->SetIntegerValue("max_iter", 30);
+	mMuscleOptimizationSolver->Options()->SetNumericValue("tol", 1e-4);
+
+	mRestPose = mMusculoSkeletalSystem->GetSkeleton()->getPositions();
+	mPreviousPose = mRestPose;
 }
 void
 SimulationWindow2D::
 TimeStepping()
 {
+	//Compute Optimal Activation Level
+	// Compute desired Torque : PD control
+	auto& skel =mMusculoSkeletalSystem->GetSkeleton();
+
+		Eigen::VectorXd pos_m = mRestPose;
+		Eigen::VectorXd vel_m(pos_m.rows());
+		vel_m.setZero();
+
+		Eigen::VectorXd pos = skel->getPositions();
+		Eigen::VectorXd vel = skel->getVelocities();
+		std::cout<<"Pose diff : "<<skel->getPositionDifferences(pos_m,pos).transpose()<<std::endl;
+		Eigen::VectorXd kp(pos_m.rows()),kv(pos_m.rows());
+		for(int i =0;i<pos_m.rows();i++)
+		{
+			kp[i] = 500.0;
+			kv[i] = 2*sqrt(kp[i]);
+		}
+		Eigen::VectorXd qdd_desired = 
+					skel->getPositionDifferences(pos_m,pos).cwiseProduct(kp) +
+					(vel_m - vel).cwiseProduct(kv);
+
+
+		static_cast<MuscleOptimization*>(GetRawPtr(mMuscleOptimization))->Update(qdd_desired);
+
+		if(mTime == 0.0){
+			mMuscleOptimizationSolver->Initialize();
+			mMuscleOptimizationSolver->OptimizeTNLP(mMuscleOptimization);	
+		}
+		else
+			mMuscleOptimizationSolver->ReOptimizeTNLP(mMuscleOptimization);	
+		
+		std::cout<<"Desired Torque :\n"<<qdd_desired.transpose()<<std::endl;
+
+	Eigen::VectorXd solution =  static_cast<MuscleOptimization*>(GetRawPtr(mMuscleOptimization))->GetSolution();
+	Eigen::VectorXd qdd = solution.head(skel->getNumDofs());
+	Eigen::VectorXd activation = solution.tail(mMusculoSkeletalSystem->GetNumMuscles()); 
+	std::cout<<"qdd :\n"<<qdd.transpose()<<std::endl;
+
+	mMusculoSkeletalSystem->SetActivationLevel(activation);	
+	mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
+	// skel->setForces(skel->getMassMatrix()*qdd+skel->getCoriolisAndGravityForces());
+
+	mPreviousPose = skel->getPositions();
+
 	if(mSoftWorld->GetTime()<mTime)
 		mSoftWorld->TimeStepping();
 	mRigidWorld->step();
 
 	mMusculoSkeletalSystem->TransformAttachmentPoints();
-	mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
-	auto a = mMusculoSkeletalSystem->GetActivationLevel();
-	mMusculoSkeletalSystem->SetActivationLevel(a);
 
-	auto J = mMusculoSkeletalSystem->ComputeForceDerivative(mSoftWorld);
-	auto b = mMusculoSkeletalSystem->ComputeForce(mSoftWorld);
-
-	b -= J*a;
-	
 	mRecords.push_back(new Record());
 	auto rec = mRecords.back();
 	rec->time = mTime;
 	rec->rigid_body_positions = mMusculoSkeletalSystem->GetSkeleton()->getPositions();
 	rec->soft_body_positions = mSoftWorld->GetPositions();
-	rec->activation_levels = a;
+	rec->activation_levels = activation;
 	for(auto& muscle : mMusculoSkeletalSystem->GetMuscles())
 		rec->muscle_forces.push_back(std::make_pair(muscle->force_origin,muscle->force_insertion));
 	mTime+=mTimeStep;
+	std::cout<<std::endl<<std::endl;
 }
 void
 SimulationWindow2D::
@@ -178,6 +230,7 @@ Keyboard(unsigned char key,int x,int y)
 		case '8' : act[8] += 0.1;break;
 		case '9' : act[9] += 0.1;break;
 		case '0' : act[0] += 0.1;break;
+		case 'g' : mMusculoSkeletalSystem->GetSkeleton()->getBodyNode(3)->addExtForce(Eigen::Vector3d::Random()*100,Eigen::Vector3d::Random());break;
 		case 27: exit(0);break;
 		default : break;
 	}
@@ -258,12 +311,17 @@ void
 SimulationWindow2D::
 Timer(int value)
 {
-	if(mIsPlay)
+	if(mIsPlay){
 		TimeStepping();
+		
+	}
 	else if(mIsReplay){
-		SetRecord(mRecords[mRecordFrame++]);
+		SetRecord(mRecords[mRecordFrame]);
+		mRecordFrame+=33;
 		if(mRecordFrame>=mRecords.size())
 			mRecordFrame=0;
+		mDisplayTimeout = 1000/30;
+		
 	}
 	glutPostRedisplay();
 	glutTimerFunc(mDisplayTimeout, TimerEvent,1);

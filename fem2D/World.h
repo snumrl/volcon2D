@@ -33,7 +33,7 @@ public:
 		double damping_coeff = 0.999
 		);
 	void 								Initialize();
-	void 								TimeStepping();
+	void 								TimeStepping(bool isIntegrated = true);
 	Eigen::VectorXd						ComputeJacobian(std::vector<MuscleConstraint*>& mc,std::vector<AttachmentConstraint*>& attachment_vector);
 
 	void 								AddBody(const Eigen::VectorXd& x0,const std::vector<Constraint*>& c,const double& mass = 1.0);

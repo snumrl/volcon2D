@@ -216,7 +216,7 @@ ApplyForcesToSkeletons(FEM::World* world)
 		Eigen::Vector3d f_origin_3D(fo[0],fo[1],0.0);
 		Eigen::Vector3d f_insertion_3D(fi[0],fi[1],0.0);
 
-		origin_way_points[no-1].first->addExtForce(f_origin_3D,origin_way_points[no-1].second,true,true);
+		origin_way_points[no-1].first->addExtForce(f_origin_3D,origin_way_points[no-1].second);
 		insertion_way_points[ni -1].first->addExtForce(f_insertion_3D,insertion_way_points[ni-1].second);
 
 		muscle->force_origin =fo;
@@ -247,10 +247,10 @@ ComputeForceDerivative(FEM::World* world)
 			J.block<2,1>(j*4+2,i) = fi;
 		}
 	}
-	for(int i =0;i<J.rows();i++)
-		for(int j =0;j<J.cols();j++)
-			if(fabs(J(i,j))<1E-4)
-				J(i,j) =0.0;				
+	// for(int i =0;i<J.rows();i++)
+	// 	for(int j =0;j<J.cols();j++)
+	// 		if(fabs(J(i,j))<1E-4)
+	// 			J(i,j) =0.0;				
 
 	return J;
 }
@@ -283,9 +283,9 @@ ComputeForce(FEM::World* world)
 		b.block<2,1>(4*i+0,0) = fo;
 		b.block<2,1>(4*i+2,0) = fi;
 	}
-	for(int i =0;i<b.rows();i++)
-		if(fabs(b[i])<1E-4)
-			b[i] = 0.0;
+	// for(int i =0;i<b.rows();i++)
+	// 	if(fabs(b[i])<1E-4)
+	// 		b[i] = 0.0;
 
 	return b;
 }
@@ -367,6 +367,14 @@ MakeSkeleton(MusculoSkeletalSystem* ms)
 	// skel->getDof(4)->setPositionLimits(0.0,1.57);
 	skel->getDof(3)->setPositionLimits(-2.0,2.0);
 	// skel->getDof(6)->setPositionLimits(-2.0,2.0);
+	
+	// skel->getDof(0)->setPositionLimits(0.0,0.0);
+	// skel->getDof(1)->setPositionLimits(-0.1,0.2);
+	// // skel->getDof(2)->setPositionLimits(-0.2,0.0);
+	// skel->getDof(2)->setPositionLimits(-1.0,-1.0);
+	// // skel->getDof(4)->setPositionLimits(0.0,1.57);
+	// skel->getDof(3)->setPositionLimits(-1.0,-1.0);
+	// // skel->getDof(6)->setPositionLimits(-2.0,2.0);
 	
 	for(int i =0;i<skel->getNumDofs();i++)
 		skel->getDof(i)->getJoint()->setPositionLimitEnforced(true);
