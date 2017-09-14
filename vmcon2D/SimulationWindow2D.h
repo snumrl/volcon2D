@@ -14,6 +14,7 @@
 
 class MuscleOptimization;
 class MusculoSkeletalSystem;
+typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;
 enum MOUSE_MODE
 {
 	CAMERA_CONTROL,
@@ -22,22 +23,26 @@ enum MOUSE_MODE
 struct Record
 {
 	double			time;
-	Eigen::VectorXd rigid_body_positions;
+	std::vector<Eigen::VectorXd> rigid_body_positions;
 	Eigen::VectorXd soft_body_positions;
 	Eigen::VectorXd activation_levels;
 	std::vector<std::pair<Eigen::Vector2d,Eigen::Vector2d>> muscle_forces;
 
 };
-
 class SimulationWindow2D : public Window2D
 {
 protected:
 	MOUSE_MODE					mMouseMode;
 	FEM::AttachmentConstraint* 	mDragConstraint;
+	AnchorPoint					mDragAnchorPoint;
+	Eigen::VectorXd				mTargetPositions;
+
+	Eigen::VectorXd 			mKp,mKv;
+
 	FEM::World*					mSoftWorld;
 	dart::simulation::WorldPtr  mRigidWorld;
 	MusculoSkeletalSystem*		mMusculoSkeletalSystem;
-
+	std::vector<dart::dynamics::SkeletonPtr> mBalls;
 	Eigen::VectorXd							mRestPose;
 	Eigen::VectorXd							mPreviousPose;
 	Ipopt::SmartPtr<Ipopt::TNLP> 			 mMuscleOptimization;
@@ -45,6 +50,7 @@ protected:
 
 	bool 						mIsPlay;
 	bool 						mIsReplay;
+	bool 						mIsPaused;
 	
 	std::vector<Record*>		mRecords;
 	int 						mRecordFrame;
@@ -53,9 +59,11 @@ public:
 	SimulationWindow2D();
 	void Initialize();
 
-	void TimeStepping();
+	bool TimeStepping();  //return true if soft simulation is updated.
 	void SetRecord(Record* rec);
 public:
+	Eigen::VectorXd ComputePDForces();
+	Eigen::VectorXd SolveIK(const Eigen::Vector3d& target_position,AnchorPoint ap);
 	void Display() override;
 	void Keyboard(unsigned char key,int x,int y) override;
 	void Mouse(int button, int state, int x, int y) override;

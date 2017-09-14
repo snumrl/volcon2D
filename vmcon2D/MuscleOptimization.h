@@ -68,6 +68,6 @@ class MuscleOptimization : public Ipopt::TNLP
 	Eigen::MatrixXd						mM_minus_JtA;
 	Eigen::VectorXd						mJtp_minus_c;	
 
-
+	int 								mSparseUpdateCount;
 };
 #endif

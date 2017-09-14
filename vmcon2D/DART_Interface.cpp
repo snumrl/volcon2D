@@ -80,7 +80,25 @@ void MakeWeldBody(const SkeletonPtr& skel,
 
     bn->setInertia(inertia);
 }
+void
+MakeBall(const SkeletonPtr& skel,const double& radius,const double& mass)
+{
+    ShapePtr shape = std::shared_ptr<SphereShape>(new SphereShape(radius));
+    dart::dynamics::Inertia inertia;
+    inertia.setMass(mass);
+    inertia.setMoment(shape->computeInertia(mass));
 
+    FreeJoint::Properties prop;
+    prop.mT_ParentBodyToJoint.setIdentity();
+    prop.mT_ChildBodyToJoint.setIdentity();
+
+    BodyNodePtr bn = skel->createJointAndBodyNodePair<FreeJoint>(
+      nullptr,prop,BodyNode::AspectProperties("ball")).second;
+
+    auto sn = bn->createShapeNodeWith<VisualAspect, CollisionAspect, DynamicsAspect>(shape);
+
+    bn->setInertia(inertia);
+}
 void
 DrawSkeleton(const dart::dynamics::SkeletonPtr& skel)
 {

@@ -4,7 +4,7 @@
 using namespace Ipopt;
 MuscleOptimization::
 MuscleOptimization(FEM::World* soft_world,const dart::simulation::WorldPtr&	rigid_world, MusculoSkeletalSystem* ms)
-	:mSoftWorld(soft_world),mRigidWorld(rigid_world),mMusculoSkeletalSystem(ms),mWeightTracking(1.0),mWeightEffort(0.001)
+	:mSoftWorld(soft_world),mRigidWorld(rigid_world),mMusculoSkeletalSystem(ms),mWeightTracking(0.1),mWeightEffort(1.0),mSparseUpdateCount(0)
 {
 	int num_muscles =  mMusculoSkeletalSystem->GetNumMuscles();
 	int dofs 		=  mMusculoSkeletalSystem->GetSkeleton()->getNumDofs();  
@@ -80,6 +80,8 @@ UpdateConstraints(const Eigen::VectorXd& act)
 	auto& prev_act = mMusculoSkeletalSystem->GetActivationLevel();
 	int num_muscles =  mMusculoSkeletalSystem->GetNumMuscles();
 	int dofs 		=  mMusculoSkeletalSystem->GetSkeleton()->getNumDofs(); 
+	mSparseUpdateCount++;
+	if(mSparseUpdateCount==5)
 	if( (act-prev_act).norm()>1E-5)
 	{
 		mMusculoSkeletalSystem->SetActivationLevel(act);
@@ -92,9 +94,11 @@ UpdateConstraints(const Eigen::VectorXd& act)
 		// std::cout<<"A : "<<mA.transpose()<<std::endl;
 		// std::cout<<"p : "<<mP.transpose()<<std::endl<<std::endl;
 		//Update Cache
+
 		mM_minus_JtA.block(0,0,dofs,dofs)= mMusculoSkeletalSystem->GetSkeleton()->getMassMatrix();
 		mM_minus_JtA.block(0,dofs,dofs,num_muscles)= -mJt*mA;
 		mJtp_minus_c = mJt*mP - mMusculoSkeletalSystem->GetSkeleton()->getCoriolisAndGravityForces();
+		mSparseUpdateCount = 0;
 	}
 }
 bool
@@ -133,7 +137,7 @@ MuscleOptimization::
 get_starting_point(	Index n, bool init_x, Number* x,bool init_z, Number* z_L, Number* z_U,Index m, bool init_lambda,Number* lambda)
 {
 	for(int i =0;i<n;i++)
-		x[i] = 0.0;
+		x[i] = mSolution[i];
 
 	return true;
 }

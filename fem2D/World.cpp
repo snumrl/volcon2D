@@ -132,7 +132,7 @@ ComputeJacobian(std::vector<MuscleConstraint*>& mc
 	for(auto& c: mc)
 		c->Evaldg_da(mX,dg_da);
 	Eigen::VectorXd dx_da;
-	if(mIntegrationMethod == QUASI_STATIC)
+	if(mIntegrationMethod == QUASI_STATIC || mIntegrationMethod == IMPLICIT_NEWTON_METHOD)
 		dx_da= -ConjugateGradient(dg_da,mX);
 	else
 		dx_da = -mQuasiStaticSolver.solve(dg_da);
@@ -742,8 +742,8 @@ ComputeExternalForces()
 
 	//Add Gravity forces
 	for(int i=0;i<mNumVertices;i++)
-		// mExternalForces[2*i+1] = -9.81;
-		mExternalForces[2*i+1] = 0.0;
+		mExternalForces[2*i+1] = -9.81;
+		// mExternalForces[2*i+1] = 0.0;
 
 	mExternalForces = mMassMatrix * mExternalForces;
 
