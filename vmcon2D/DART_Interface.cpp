@@ -100,7 +100,7 @@ MakeBall(const SkeletonPtr& skel,const double& radius,const double& mass)
     bn->setInertia(inertia);
 }
 void
-DrawSkeleton(const dart::dynamics::SkeletonPtr& skel)
+DrawSkeleton(const dart::dynamics::SkeletonPtr& skel,const Eigen::Vector3d& color)
 {
     glDisable(GL_DEPTH_TEST);
 
@@ -117,14 +117,13 @@ DrawSkeleton(const dart::dynamics::SkeletonPtr& skel)
             {
                 const auto* box = static_cast<const BoxShape*>(shape);
                 const auto& size = box->getSize();
-                DrawCapsule(T,size[0],size[1]);
+                DrawCapsule(T,size[0],size[1],color);
             }
             else if (shape->is<SphereShape>())
             {
                 const auto* sphere = static_cast<const SphereShape*>(shape);
                 const auto& r = sphere->getRadius();
-                glColor3f(0.6,0.6,0.6);
-                DrawSphere(T,r);
+                DrawSphere(T,r,color);
 
             }
             

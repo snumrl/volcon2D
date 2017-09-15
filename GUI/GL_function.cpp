@@ -2,7 +2,7 @@
 #include "GL/glut.h"
 
 void
-DrawStringOnScreen(float _x, float _y, const std::string& _s,bool _bigFont)
+DrawStringOnScreen(float _x, float _y, const std::string& _s,bool _bigFont,const Eigen::Vector3d& color)
 {
     // draws text on the screen
     GLint oldMode;
@@ -17,6 +17,7 @@ DrawStringOnScreen(float _x, float _y, const std::string& _s,bool _bigFont)
     glPushMatrix();
     glLoadIdentity();
     glRasterPos2f(_x, _y);
+    glColor3f(color[0],color[1],color[2]);
     unsigned int length = _s.length();
     for (unsigned int c = 0; c < length; c++) {
     if (_bigFont)
@@ -31,37 +32,41 @@ DrawStringOnScreen(float _x, float _y, const std::string& _s,bool _bigFont)
     glMatrixMode(oldMode);
 }
 void
-DrawPoint(const Eigen::Vector2d& p)
+DrawPoint(const Eigen::Vector2d& p,const Eigen::Vector3d& color)
 {
     glBegin(GL_POINTS);
+    glColor3f(color[0],color[1],color[2]);
     glVertex2f(p[0],p[1]);
     glEnd();
 }
 
 void
-DrawLines(const Eigen::Vector2d& p,const Eigen::Vector2d& q)
+DrawLines(const Eigen::Vector2d& p,const Eigen::Vector2d& q,const Eigen::Vector3d& color)
 {
     glBegin(GL_LINES);
+    glColor3f(color[0],color[1],color[2]);
     glVertex2f(p[0],p[1]);
     glVertex2f(q[0],q[1]);
     glEnd();
 }
 
 void
-DrawTriangle(const Eigen::Vector2d& a,const Eigen::Vector2d& b,const Eigen::Vector2d& c)
+DrawTriangle(const Eigen::Vector2d& a,const Eigen::Vector2d& b,const Eigen::Vector2d& c,const Eigen::Vector3d& color)
 {
     glBegin(GL_TRIANGLES);
+    glColor3f(color[0],color[1],color[2]);
     glVertex2f(a[0],a[1]);
     glVertex2f(b[0],b[1]);
     glVertex2f(c[0],c[1]);
     glEnd();
 }
 void
-DrawArrow(const Eigen::Vector2d& p, const Eigen::Vector2d& v)
+DrawArrow(const Eigen::Vector2d& p, const Eigen::Vector2d& v,const Eigen::Vector3d& color)
 {
     double thickness = 0.004;
     glLineWidth(thickness);
     glBegin(GL_LINES);
+    glColor3f(color[0],color[1],color[2]);
     glVertex2f(p[0], p[1]);
     glVertex2f(p[0]+v[0], p[1]+v[1]);
     glEnd();
@@ -82,11 +87,12 @@ DrawArrow(const Eigen::Vector2d& p, const Eigen::Vector2d& v)
     glLineWidth(1.0);
 }
 void
-DrawSphere(const Eigen::Isometry3d& T,const float& r)
+DrawSphere(const Eigen::Isometry3d& T,const float& r,const Eigen::Vector3d& color)
 {
     glPushMatrix();
     glMultMatrixd(T.matrix().data());
     glBegin(GL_TRIANGLE_FAN);
+    glColor3f(color[0],color[1],color[2]);
     glVertex2f(0,0);
     for(float phi = 0;phi<=3.141592*2.0+1E-4;phi+=3.141592/8.0)
     {
@@ -104,14 +110,14 @@ DrawSphere(const Eigen::Isometry3d& T,const float& r)
     glPopMatrix();
 }
 void
-DrawCapsule(const Eigen::Isometry3d& T,float w,float h)
+DrawCapsule(const Eigen::Isometry3d& T,float w,float h,const Eigen::Vector3d& color)
 {
     glPushMatrix();
     glMultMatrixd(T.matrix().data());
     if(w<h)
     {
         double diff = h - w;
-        glColor3f(0.8,0.8,0.8);
+        glColor3f(color[0],color[1],color[2]);
         glBegin(GL_QUADS);
         glVertex2f(w/2,diff/2);
         glVertex2f(-w/2,diff/2);
@@ -176,7 +182,7 @@ DrawCapsule(const Eigen::Isometry3d& T,float w,float h)
     else
     {
         double diff = w - h;
-        glColor3f(0.8,0.8,0.8);
+        glColor3f(color[0],color[1],color[2]);
         glBegin(GL_QUADS);
         glVertex2f(diff/2,h/2);
         glVertex2f(-diff/2,h/2);

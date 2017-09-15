@@ -8,10 +8,11 @@
 #include "fem2D/World.h"
 #include "fem2D/Mesh/MeshHeaders.h"
 #include "fem2D/Constraint/ConstraintHeaders.h"
+
 #include <IpTNLP.hpp>
 #include <IpIpoptApplication.hpp>
 #include <vector>
-
+class Controller;
 class MuscleOptimization;
 class MusculoSkeletalSystem;
 typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;
@@ -35,19 +36,14 @@ protected:
 	MOUSE_MODE					mMouseMode;
 	FEM::AttachmentConstraint* 	mDragConstraint;
 	AnchorPoint					mDragAnchorPoint;
-	Eigen::VectorXd				mTargetPositions;
-
-	Eigen::VectorXd 			mKp,mKv;
-
+	
 	FEM::World*					mSoftWorld;
 	dart::simulation::WorldPtr  mRigidWorld;
 	MusculoSkeletalSystem*		mMusculoSkeletalSystem;
-	std::vector<dart::dynamics::SkeletonPtr> mBalls;
-	Eigen::VectorXd							mRestPose;
-	Eigen::VectorXd							mPreviousPose;
-	Ipopt::SmartPtr<Ipopt::TNLP> 			 mMuscleOptimization;
-	Ipopt::SmartPtr<Ipopt::IpoptApplication> mMuscleOptimizationSolver;
 
+	std::vector<dart::dynamics::SkeletonPtr> mBalls;
+
+	Controller*					mController;
 	bool 						mIsPlay;
 	bool 						mIsReplay;
 	bool 						mIsPaused;
@@ -62,8 +58,7 @@ public:
 	bool TimeStepping();  //return true if soft simulation is updated.
 	void SetRecord(Record* rec);
 public:
-	Eigen::VectorXd ComputePDForces();
-	Eigen::VectorXd SolveIK(const Eigen::Vector3d& target_position,AnchorPoint ap);
+	
 	void Display() override;
 	void Keyboard(unsigned char key,int x,int y) override;
 	void Mouse(int button, int state, int x, int y) override;

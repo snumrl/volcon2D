@@ -81,7 +81,7 @@ UpdateConstraints(const Eigen::VectorXd& act)
 	int num_muscles =  mMusculoSkeletalSystem->GetNumMuscles();
 	int dofs 		=  mMusculoSkeletalSystem->GetSkeleton()->getNumDofs(); 
 	mSparseUpdateCount++;
-	if(mSparseUpdateCount==5)
+	if(mSparseUpdateCount==3)
 	if( (act-prev_act).norm()>1E-5)
 	{
 		mMusculoSkeletalSystem->SetActivationLevel(act);

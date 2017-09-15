@@ -10,26 +10,22 @@ DrawConstraint(Constraint* c,const Eigen::VectorXd& X)
 	if(type == ConstraintType::ATTACHMENT)
 	{
 		auto* cc = static_cast<AttachmentConstraint*>(c);
-		glColor3f(1,0,0);
-		DrawLines(cc->GetP(),X.block<2,1>(cc->GetI0()*2,0));
+		DrawLines(cc->GetP(),X.block<2,1>(cc->GetI0()*2,0),Eigen::Vector3d(1,0,0));
 	}
 	else if(type == ConstraintType::SPRING)
 	{
 		auto* cc = static_cast<SpringConstraint*>(c);
-		glColor3f(0,0,0);
-		DrawLines(X.block<2,1>(cc->GetI0()*2,0),X.block<2,1>(cc->GetI1()*2,0));
+		DrawLines(X.block<2,1>(cc->GetI0()*2,0),X.block<2,1>(cc->GetI1()*2,0),Eigen::Vector3d(0,0,0));
 	}
 	else if(type == ConstraintType::COROTATE)
 	{
 		auto* cc = static_cast<CorotateFEMConstraint*>(c);
 
-		glColor3f(0.8,0.8,0.8);
-		DrawTriangle(X.block<2,1>(cc->GetI0()*2,0),X.block<2,1>(cc->GetI1()*2,0),X.block<2,1>(cc->GetI2()*2,0));
+		DrawTriangle(X.block<2,1>(cc->GetI0()*2,0),X.block<2,1>(cc->GetI1()*2,0),X.block<2,1>(cc->GetI2()*2,0),Eigen::Vector3d(0.8,0.8,0.8));
 		
-		glColor3f(0,0,0);
-		DrawLines(X.block<2,1>(cc->GetI0()*2,0),X.block<2,1>(cc->GetI1()*2,0));
-		DrawLines(X.block<2,1>(cc->GetI1()*2,0),X.block<2,1>(cc->GetI2()*2,0));
-		DrawLines(X.block<2,1>(cc->GetI2()*2,0),X.block<2,1>(cc->GetI0()*2,0));
+		DrawLines(X.block<2,1>(cc->GetI0()*2,0),X.block<2,1>(cc->GetI1()*2,0),Eigen::Vector3d(0,0,0));
+		DrawLines(X.block<2,1>(cc->GetI1()*2,0),X.block<2,1>(cc->GetI2()*2,0),Eigen::Vector3d(0,0,0));
+		DrawLines(X.block<2,1>(cc->GetI2()*2,0),X.block<2,1>(cc->GetI0()*2,0),Eigen::Vector3d(0,0,0));
 	}
 	// else if(type == ConstraintType::NEO_HOOKEAN)
 	// {
@@ -43,13 +39,12 @@ DrawConstraint(Constraint* c,const Eigen::VectorXd& X)
 	{
 		auto* cc = static_cast<MuscleConstraint*>(c);
         const auto& act = cc->GetActivationLevel();
-        glColor3f(0.8,0.8-0.3*act,0.8-0.3*act);
-        DrawTriangle(X.block<2,1>(cc->GetI0()*2,0),X.block<2,1>(cc->GetI1()*2,0),X.block<2,1>(cc->GetI2()*2,0));
         
-        glColor3f(0,0,0);
-        DrawLines(X.block<2,1>(cc->GetI0()*2,0),X.block<2,1>(cc->GetI1()*2,0));
-        DrawLines(X.block<2,1>(cc->GetI1()*2,0),X.block<2,1>(cc->GetI2()*2,0));
-        DrawLines(X.block<2,1>(cc->GetI2()*2,0),X.block<2,1>(cc->GetI0()*2,0));
+        DrawTriangle(X.block<2,1>(cc->GetI0()*2,0),X.block<2,1>(cc->GetI1()*2,0),X.block<2,1>(cc->GetI2()*2,0),Eigen::Vector3d(0.8,0.8-0.3*act,0.8-0.3*act));
+        
+        DrawLines(X.block<2,1>(cc->GetI0()*2,0),X.block<2,1>(cc->GetI1()*2,0),Eigen::Vector3d(0,0,0));
+        DrawLines(X.block<2,1>(cc->GetI1()*2,0),X.block<2,1>(cc->GetI2()*2,0),Eigen::Vector3d(0,0,0));
+        DrawLines(X.block<2,1>(cc->GetI2()*2,0),X.block<2,1>(cc->GetI0()*2,0),Eigen::Vector3d(0,0,0));
 
 
 
@@ -71,7 +66,7 @@ DrawConstraint(Constraint* c,const Eigen::VectorXd& X)
 		// double min_h = (h0<h1?h0:h1);
 		// min_h = (min_h<h2?min_h:h2);
   //       // glLineWidth(3.0);
-  //       glColor3f(act,0.0,1.0-act);
+  //       Eigen::Vector3d(act,0.0,1.0-act);
   //       DrawArrow(cen,-0.2*min_h*dir);
   //       DrawArrow(cen,0.2*min_h*dir);
 	}
@@ -99,48 +94,45 @@ DrawMuscle(Muscle* muscle,const Eigen::VectorXd& x)
 
 
     // glPointSize(5.0);
-    // glColor3f(1,0,0);
+    // Eigen::Vector3d(1,0,0);
     // DrawPoint(x.block<2,1>(muscle->origin->GetAttachedNode()*2,0));
-    // glColor3f(0,0,1);
+    // Eigen::Vector3d(0,0,1);
     // DrawPoint(x.block<2,1>(muscle->insertion->GetAttachedNode()*2,0));
     // glPointSize(1.0);
 
     {
-        glColor3f(0,0,1);
+    ;
         std::vector<Eigen::Vector2d> p;
         for(auto& ap : muscle->originWayPoints)
             p.push_back(GetPoint(ap));
 
         for(int i = 0;i<p.size()-1;i++)
-            DrawLines(p[i],p[i+1]);
-        DrawLines(x.block<2,1>(muscle->origin->GetI0()*2,0),p[0]);
-        glColor3f(0.7,0,0.5);
+            DrawLines(p[i],p[i+1],Eigen::Vector3d(0,0,1));
+        DrawLines(x.block<2,1>(muscle->origin->GetI0()*2,0),p[0],Eigen::Vector3d(0,0,1));
+
         if(muscle->force_origin.norm()>1E0)
-            DrawArrow(p.back(),0.00001*muscle->force_origin);
+            DrawArrow(p.back(),0.00001*muscle->force_origin,Eigen::Vector3d(0.7,0,0.5));
         glPointSize(2.0);
-        glColor3f(0,0,0);
         for(auto& v : p)
-            DrawPoint(v);
+            DrawPoint(v,Eigen::Vector3d(0,0,0));
         glPointSize(1.0);
     }
 
     {
-        glColor3f(0,0,1);
         std::vector<Eigen::Vector2d> p;
         for(auto& ap : muscle->insertionWayPoints)
             p.push_back(GetPoint(ap));
 
         for(int i = 0;i<p.size()-1;i++)
-            DrawLines(p[i],p[i+1]);
-        DrawLines(x.block<2,1>(muscle->insertion->GetI0()*2,0),p[0]);
-        glColor3f(0.7,0,0.5);
+            DrawLines(p[i],p[i+1],Eigen::Vector3d(0,0,1));
+        DrawLines(x.block<2,1>(muscle->insertion->GetI0()*2,0),p[0],Eigen::Vector3d(0,0,1));
+        
         if(muscle->force_insertion.norm()>1E0)
-            DrawArrow(p.back(),0.00001*muscle->force_insertion);
+            DrawArrow(p.back(),0.00001*muscle->force_insertion,Eigen::Vector3d(0.7,0,0.5));
 
         glPointSize(2.0);
-        glColor3f(0,0,0);
         for(auto& v : p)
-            DrawPoint(v);
+            DrawPoint(v, Eigen::Vector3d(0,0,0));
         glPointSize(1.0);
     }
 
