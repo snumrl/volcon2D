@@ -330,7 +330,7 @@ DrawConstraint	vmcon2D/FEM2D_Interface.cpp	/^DrawConstraint(Constraint* c,const 
 DrawConstraints	octocon2D/FEM2D_Interface.cpp	/^DrawConstraints(std::vector<Constraint*>& cs,const Eigen::VectorXd& X)$/;"	f
 DrawConstraints	vmcon2D/FEM2D_Interface.cpp	/^DrawConstraints(std::vector<Constraint*>& cs,const Eigen::VectorXd& X)$/;"	f
 DrawLines	GUI/GL_function.cpp	/^DrawLines(const Eigen::Vector2d& p,const Eigen::Vector2d& q,const Eigen::Vector3d& color)$/;"	f
-DrawMachine	vmcon2D/FSM_Interface.cpp	/^DrawMachine(Machine* machine,double x,double y)$/;"	f
+DrawMachine	vmcon2D/FSM_Interface.cpp	/^DrawMachine(Machine* machine,double x,double y,std::map<State*,Eigen::Vector2d> state_positions)$/;"	f
 DrawMuscle	vmcon2D/FEM2D_Interface.cpp	/^DrawMuscle(Muscle* muscle,const Eigen::VectorXd& x)$/;"	f
 DrawPoint	GUI/GL_function.cpp	/^DrawPoint(const Eigen::Vector2d& p,const Eigen::Vector3d& color)$/;"	f
 DrawSkeleton	vmcon2D/DART_Interface.cpp	/^DrawSkeleton(const dart::dynamics::SkeletonPtr& skel,const Eigen::Vector3d& color)$/;"	f

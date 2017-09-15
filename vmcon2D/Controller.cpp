@@ -98,7 +98,7 @@ ComputeActivationLevels()
 	// std::cout<<"qdd :\n"<<qdd.transpose()<<std::endl;
 
 	mMusculoSkeletalSystem->SetActivationLevel(activation);	
-
+	// skel->setForces(skel->getMassMatrix()*qdd_desired + skel->getCoriolisAndGravityForces());
 	return activation;
 }
 Eigen::VectorXd
@@ -114,11 +114,27 @@ ComputePDForces()
 	Eigen::VectorXd pos = skel->getPositions();
 	Eigen::VectorXd vel = skel->getVelocities();
 
-	Eigen::VectorXd pos_diff =skel->getPositionDifferences(pos_m,pos);
+	for(int i = 0;i<pos.rows();i++)
+		pos[i] = dart::math::wrapToPi(pos[i]);
+	for(int i = 0;i<pos.rows();i++)
+		pos_m[i] = dart::math::wrapToPi(pos_m[i]);
+	Eigen::VectorXd pos_diff(pos.rows());// =skel->getPositionDifferences(pos_m,pos);
+		pos_diff.setZero();
+	for(int i =0;i<pos.rows();i++)
+	{
+		double phi = pos[i];
+		double two_phi = 2*3.141592 + pos[i];
+
+		pos_diff[i] = pos_m[i] -(phi<two_phi?phi:two_phi);
+	}
+	// Eigen::VectorXd pos_diff =pos_m-pos;
+
+	// std::cout<<pos_diff.transpose()<<std::endl;
+	pos_diff = skel->getPositionDifferences(pos_m,pos);
 	for(int i = 0;i<pos_diff.rows();i++)
 		pos_diff[i] = dart::math::wrapToPi(pos_diff[i]);
 	Eigen::VectorXd qdd_desired = 
-				pos_diff.cwiseProduct(mKp) +
+				pos_diff.cwiseProduct(mKp)+
 				(vel_m - vel).cwiseProduct(mKv);
 
 	return qdd_desired;

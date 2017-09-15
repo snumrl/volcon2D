@@ -5,9 +5,9 @@
 #include "GL/glut.h"
 
 void
-DrawMachine(Machine* machine,double x,double y)
+DrawMachine(Machine* machine,double x,double y,std::map<State*,Eigen::Vector2d> state_positions)
 {
-	    // draws text on the screen
+	   // draws text on the screen
     GLint oldMode;
     glGetIntegerv(GL_MATRIX_MODE, &oldMode);
     glMatrixMode(GL_PROJECTION);
@@ -27,29 +27,33 @@ DrawMachine(Machine* machine,double x,double y)
     double fontsize = 0.007;
     int slice = states.size();
     double phi = 0.0;
-    ;
-    std::map<State*,Eigen::Vector3d> state_position;
     Eigen::Isometry3d T;
     T.setIdentity();
 
-
+    bool isStatePostionsNull = false;
+    if(state_positions.size()==0)
+        isStatePostionsNull = true;
     for(auto& state_pair : states)
     {
     	auto state = state_pair.second;
 
-    	state_position.insert(std::make_pair(state,Eigen::Vector3d(x + Radius*cos(phi),x+Radius*sin(phi),0)));
-    	T.translation() = state_position[state];
+        if(isStatePostionsNull)
+    	   state_positions.insert(std::make_pair(state,Eigen::Vector2d(Radius*cos(phi),Radius*sin(phi))));
+
+        T.translation()[0] = x+state_positions[state][0];
+    	T.translation()[1] = y+state_positions[state][1];
 
         if(machine->GetCurrentState() == state)
         {
+
             DrawSphere(T,radius,Eigen::Vector3d(0.9,0.5,0.5));    
-            DrawStringOnScreen(x + Radius*cos(phi)-0.5*fontsize*state_pair.first.size(),x+Radius*sin(phi)-0.5*fontsize,state_pair.first,false,Eigen::Vector3d(0,0,0));
+            DrawStringOnScreen(x+state_positions[state][0]-0.5*fontsize*state_pair.first.size(),y+state_positions[state][1]-0.5*fontsize,state_pair.first,false,Eigen::Vector3d(0,0,0));
 
         }
         else
         {
             DrawSphere(T,radius,Eigen::Vector3d(0.9,0.9,0.9));    
-            DrawStringOnScreen(x + Radius*cos(phi)-0.5*fontsize*state_pair.first.size(),x+Radius*sin(phi)-0.5*fontsize,state_pair.first,false,Eigen::Vector3d(0,0,0));
+            DrawStringOnScreen(x+state_positions[state][0]-0.5*fontsize*state_pair.first.size(),y+state_positions[state][1]-0.5*fontsize,state_pair.first,false,Eigen::Vector3d(0,0,0));
         }
 
     	phi += 2*3.141592/(double)slice;
@@ -60,16 +64,16 @@ DrawMachine(Machine* machine,double x,double y)
     	auto state = state_pair.second;
 
         auto& event = state->GetEvents();
-        Eigen::Vector3d p0 = state_position[state];
+        Eigen::Vector2d p0 = state_positions[state];
         for(auto& next_state : event)
         {
-            Eigen::Vector3d p1 = state_position[next_state.second];
+            Eigen::Vector2d p1 = state_positions[next_state.second];
 
             Eigen::Vector2d p,v;
-            p[0] = p0[0];
-            p[1] = p0[1];
-            v[0] = p1[0]-p[0];
-            v[1] = p1[1]-p[1];
+            p[0] = p0[0]+x;
+            p[1] = p0[1]+y;
+            v[0] = p1[0]-p[0]+x;
+            v[1] = p1[1]-p[1]+y;
 
             p += radius*v.normalized();
             v -= 2*radius*(v.normalized()).eval();

@@ -799,7 +799,7 @@ __FSM_H__	vmcon2D/FSM.h	2;"	d
 mCurrentState	vmcon2D/FSM.h	/^	State*					mCurrentState;$/;"	m	class:Machine
 mEvents	vmcon2D/FSM.h	/^	std::map<std::string,State*>	mEvents;$/;"	m	class:State
 mStates	vmcon2D/FSM.h	/^	std::map<std::string,State*>		mStates;$/;"	m	class:Machine
-DrawMachine	vmcon2D/FSM_Interface.cpp	/^DrawMachine(Machine* machine,double x,double y)$/;"	f
+DrawMachine	vmcon2D/FSM_Interface.cpp	/^DrawMachine(Machine* machine,double x,double y,std::map<State*,Eigen::Vector2d> state_positions)$/;"	f
 MakeMachine	vmcon2D/FSM_Interface.cpp	/^MakeMachine(const std::string& path,Machine* machine)$/;"	f
 __FSM_INTERFACE_H__	vmcon2D/FSM_Interface.h	2;"	d
 AddTargetPositions	vmcon2D/IKOptimization.cpp	/^AddTargetPositions(AnchorPoint ap,const Eigen::Vector3d& target)$/;"	f	class:IKOptimization

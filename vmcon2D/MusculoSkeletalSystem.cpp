@@ -360,11 +360,18 @@ MakeSkeleton(MusculoSkeletalSystem* ms)
 	
 	skel->setPositions(pos);
 	skel->computeForwardKinematics(true,false,false);
+	// skel->getDof(0)->setPositionLimits(-0.0,0.0);
+	// skel->getDof(1)->setPositionLimits(0.0,0.0);
+	// skel->getDof(2)->setPositionLimits(-0.0,0.0);
+	// skel->getDof(3)->setPositionLimits(0.0,0.0);
+	// skel->getDof(4)->setPositionLimits(0.0,0.0);
+
 	skel->getDof(0)->setPositionLimits(-0.1,0.1);
 	skel->getDof(1)->setPositionLimits(0.0,0.2);
 	skel->getDof(2)->setPositionLimits(-0.2,0.0);
 	skel->getDof(3)->setPositionLimits(-1.57,0.0);
 	skel->getDof(4)->setPositionLimits(0.0,1.57);
+
 	// skel->getDof(5)->setPositionLimits(-2.0,2.0);
 	// skel->getDof(6)->setPositionLimits(-2.0,2.0);
 	
