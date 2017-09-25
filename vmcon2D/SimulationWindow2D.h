@@ -15,6 +15,8 @@
 class Controller;
 class MuscleOptimization;
 class MusculoSkeletalSystem;
+class Machine;
+class State;
 typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;
 enum MOUSE_MODE
 {
@@ -28,7 +30,7 @@ struct Record
 	Eigen::VectorXd soft_body_positions;
 	Eigen::VectorXd activation_levels;
 	std::vector<std::pair<Eigen::Vector2d,Eigen::Vector2d>> muscle_forces;
-
+	State*	state;
 };
 class SimulationWindow2D : public Window2D
 {

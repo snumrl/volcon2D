@@ -5,6 +5,8 @@
 #include "fem2D/World.h"
 #include "dart/dart.hpp"
 #include "dart/simulation/simulation.hpp"
+
+
 class MusculoSkeletalSystem;
 class MuscleOptimization : public Ipopt::TNLP
 {
@@ -58,7 +60,7 @@ class MuscleOptimization : public Ipopt::TNLP
 	dart::simulation::WorldPtr  		mRigidWorld;
 	MusculoSkeletalSystem*				mMusculoSkeletalSystem;
 
-	double								mWeightTracking,mWeightEffort;
+	double								mWeightTracking,mWeightEffort,mWeightReinforceEndEffector;
 	Eigen::VectorXd						mQddDesired;
 	Eigen::VectorXd						mSolution;
 
@@ -67,6 +69,13 @@ class MuscleOptimization : public Ipopt::TNLP
 
 	Eigen::MatrixXd						mM_minus_JtA;
 	Eigen::VectorXd						mJtp_minus_c;	
+
+	std::vector<std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d>>	mEndEffector;
+	Eigen::VectorXd						mYddDesired;
+	Eigen::MatrixXd						mdydd_dqdd;
+
+	void 								ComputeYdd(const Eigen::VectorXd& qdd,Eigen::VectorXd& ydd);
+	void 								ComputedYdd();
 
 	int 								mSparseUpdateCount;
 };

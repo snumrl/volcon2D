@@ -4,7 +4,7 @@
 using namespace Ipopt;
 MuscleOptimization::
 MuscleOptimization(FEM::World* soft_world,const dart::simulation::WorldPtr&	rigid_world, MusculoSkeletalSystem* ms)
-	:mSoftWorld(soft_world),mRigidWorld(rigid_world),mMusculoSkeletalSystem(ms),mWeightTracking(0.1),mWeightEffort(1.0),mSparseUpdateCount(0)
+	:mSoftWorld(soft_world),mRigidWorld(rigid_world),mMusculoSkeletalSystem(ms),mWeightTracking(1.0),mWeightEffort(1.0),mWeightReinforceEndEffector(0.0),mSparseUpdateCount(0)
 {
 	int num_muscles =  mMusculoSkeletalSystem->GetNumMuscles();
 	int dofs 		=  mMusculoSkeletalSystem->GetSkeleton()->getNumDofs();  
@@ -26,6 +26,16 @@ MuscleOptimization(FEM::World* soft_world,const dart::simulation::WorldPtr&	rigi
 
 	mM_minus_JtA.setZero();
 	mJtp_minus_c.setZero();
+
+	// mEndEffector.push_back(std::make_pair(mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandL"),Eigen::Vector3d(0,0,0)));
+	// mEndEffector.push_back(std::make_pair(mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR"),Eigen::Vector3d(0,0,0)));
+
+	mYddDesired.resize(2*mEndEffector.size());
+	mdydd_dqdd.resize(2*mEndEffector.size(),dofs);
+
+	mYddDesired.setZero();
+	mdydd_dqdd.setZero();
+
 }
 MuscleOptimization::
 ~MuscleOptimization()
@@ -39,7 +49,6 @@ Update(const Eigen::VectorXd& qdd_desired)
 	mQddDesired = qdd_desired;
 
 	//Update Jt
-	// mJt.setZero();
 	int index = 0;
 	auto& skel = mMusculoSkeletalSystem->GetSkeleton();
 	int dofs = skel->getNumDofs();
@@ -47,23 +56,23 @@ Update(const Eigen::VectorXd& qdd_desired)
 	{
 		mJt.block(0,index*4,dofs,2) = (skel->getLinearJacobian(muscle->originWayPoints.back().first,muscle->originWayPoints.back().second).block(0,0,2,dofs)).transpose();
 		mJt.block(0,index*4 + 2,dofs,2) = (skel->getLinearJacobian(muscle->insertionWayPoints.back().first,muscle->insertionWayPoints.back().second).block(0,0,2,dofs)).transpose();
-		// std::cout<<mJt<<std::endl<<std::endl;
 		index++;
 	}
 	int num_muscles =  mMusculoSkeletalSystem->GetNumMuscles();
-	//Update A,p
 	mA = mMusculoSkeletalSystem->ComputeForceDerivative(mSoftWorld);
 	mP = mMusculoSkeletalSystem->ComputeForce(mSoftWorld);
 
 	mP = mP-mA*mMusculoSkeletalSystem->GetActivationLevel();
-	// std::cout<<"A : "<<mA<<std::endl;
-	// std::cout<<"p : "<<mP.transpose()<<std::endl<<std::endl;
-	//Update Cache
+
 	mM_minus_JtA.setZero();
 	mM_minus_JtA.block(0,0,dofs,dofs)= mMusculoSkeletalSystem->GetSkeleton()->getMassMatrix();
 	mM_minus_JtA.block(0,dofs,dofs,num_muscles)= -mJt*mA;
 	mJtp_minus_c = mJt*mP - mMusculoSkeletalSystem->GetSkeleton()->getCoriolisAndGravityForces();
-	// std::cout<<"END"<<std::endl;
+
+	//Compute Endeffector Things
+
+	// ComputeYdd(mQddDesired,mYddDesired);
+	// ComputedYdd();
 }
 
 const Eigen::VectorXd&
@@ -109,7 +118,7 @@ get_nlp_info(	Index& n, Index& m, Index& nnz_jac_g,Index& nnz_h_lag, IndexStyleE
 	n = m + mMusculoSkeletalSystem->GetNumMuscles();
 
 	nnz_jac_g = n*m;			//g : full matrix
-	nnz_h_lag = n;				//H : identity
+	nnz_h_lag = m*m+(n-m);				//H : full matrix
 
 	index_style = TNLP::C_STYLE;
 }
@@ -147,18 +156,28 @@ eval_f(	Index n, const Number* x, bool new_x, Number& obj_value)
 {
 	double track = 0.0;
 	double effort = 0.0;
+	double ee = 0.0;
 
 	int m = mMusculoSkeletalSystem->GetSkeleton()->getNumDofs();
+	Eigen::VectorXd qdd(m),ydd(2*mEndEffector.size());
 
 	for(int i=0;i<m;i++)
-		track += (x[i]-mQddDesired[i])*(x[i]-mQddDesired[i]);
-	track *= mWeightTracking;
+		qdd[i] = x[i];
+
+	track = mWeightTracking*((qdd-mQddDesired).squaredNorm());
 
 	for(int i=m;i<n;i++)
 		effort += x[i]*x[i];
 	effort *= mWeightEffort;
 
-	obj_value = track + effort;
+	ComputeYdd(qdd,ydd);
+	ee = mWeightReinforceEndEffector*((ydd-mYddDesired).squaredNorm());
+
+	// std::cout<<"Track : "<<track<<std::endl;
+	// std::cout<<"effort : "<<effort<<std::endl;
+	// std::cout<<"ee : "<<ee<<std::endl;
+	// std::cout<<std::endl;
+	obj_value = track + effort + ee;
 
 	return true;
 }
@@ -167,10 +186,21 @@ MuscleOptimization::
 eval_grad_f(Index n, const Number* x, bool new_x, Number* grad_f)
 {
 	int m = mMusculoSkeletalSystem->GetSkeleton()->getNumDofs();
+	Eigen::VectorXd qdd(m),ydd(2*mEndEffector.size());
+	for(int i=0;i<m;i++)
+		qdd[i] = x[i];
+
 	for(int i=0;i<m;i++)
 		grad_f[i] = 2.0*mWeightTracking*(x[i]-mQddDesired[i]);
 	for(int i=m;i<n;i++)
 		grad_f[i] = 2.0*mWeightEffort*(x[i]);
+
+	ComputeYdd(qdd,ydd);
+
+	auto g_ee = 2.0*mWeightReinforceEndEffector*(mdydd_dqdd.transpose())*(ydd-mYddDesired);
+
+	for(int i =0;i<m;i++)
+		grad_f[i] += g_ee[i];
 
 	return true;
 }
@@ -236,7 +266,16 @@ eval_h( Index n, const Number* x, bool new_x,Number obj_factor, Index m, const N
 
 	if(values == NULL)
 	{
-		for(int i=0;i<n;i++)
+		for(int i =0;i<m;i++)
+		{
+			for(int j =0;j<m;j++)
+			{
+				iRow[nnz] = i;
+				jCol[nnz++] = j;
+			}
+		}
+
+		for(int i =m;i<n;i++)
 		{
 			iRow[nnz] = i;
 			jCol[nnz++] = i;
@@ -244,8 +283,17 @@ eval_h( Index n, const Number* x, bool new_x,Number obj_factor, Index m, const N
 	}
 	else
 	{
-		for(int i=0;i<m;i++)
-			values[nnz++] = 2.0*obj_factor*mWeightTracking;
+		Eigen::MatrixXd dyddTdydd = 2.0*mWeightReinforceEndEffector*(mdydd_dqdd.transpose() * mdydd_dqdd);
+		for(int i =0;i<m;i++)
+		{
+			for(int j =0;j<m;j++)
+			{
+				if(i==j)
+					values[nnz++] = dyddTdydd(i,j) + 2.0*obj_factor*mWeightTracking;
+				else
+					values[nnz++] = dyddTdydd(i,j);
+			}
+		}
 		for(int i=m;i<n;i++)
 			values[nnz++] = 2.0*obj_factor*mWeightEffort;
 	}
@@ -258,4 +306,53 @@ finalize_solution(	SolverReturn status,Index n, const Number* x, const Number* z
 {
 	for(int i=0;i<n;i++)
 		mSolution[i] = x[i];
+}
+
+
+
+
+
+void
+MuscleOptimization::
+ComputeYdd(const Eigen::VectorXd& qdd,Eigen::VectorXd& ydd)
+{
+	ydd.setZero();
+	auto& skel = mMusculoSkeletalSystem->GetSkeleton();
+	int index = 0;
+	for(auto& ee : mEndEffector)
+	{
+		auto* bn = ee.first;
+		auto  xb = ee.second;
+		auto  J  = skel->getJacobian(bn);
+		auto  Jqdd = J * qdd;
+		Eigen::Affine3d T;
+		T.linear() 		= dart::math::makeSkewSymmetric(Jqdd.head(3));
+		T.translation()	= Jqdd.tail(3);
+
+		ydd.block<2,1>(index*2,0) = (T*xb).block<2,1>(0,0);
+		index++;
+	}
+}
+void
+MuscleOptimization::
+ComputedYdd()
+{
+	auto& skel = mMusculoSkeletalSystem->GetSkeleton();
+	mdydd_dqdd.setZero();
+	int index = 0;
+	for(auto& ee : mEndEffector)
+	{
+		auto* bn = ee.first;
+		auto  xb = ee.second;
+		auto  J  = skel->getJacobian(bn);
+		for(int i =0;i<J.cols();i++)
+		{
+			Eigen::Affine3d T;
+			T.linear() 		= dart::math::makeSkewSymmetric(J.block<3,1>(0,i));
+			T.translation()	= J.block<3,1>(3,i);
+
+			mdydd_dqdd.block<2,1>(index*2,i) = (T*xb).block<2,1>(0,0);
+		}
+		index++;
+	}
 }

@@ -5,6 +5,7 @@
 #include "FEM2D_Interface.h"
 #include "DART_Interface.h"
 #include "FSM_Interface.h"
+#include "FSM.h"
 #include "MuscleOptimization.h"
 #include "fem2D/Constraint/ConstraintHeaders.h"
 #include "Controller.h"
@@ -44,10 +45,10 @@ Initialize()
 	MakeMuscles("../vmcon2D/export/muscle_parameter.xml",mMusculoSkeletalSystem);
 
 	mRigidWorld->addSkeleton(mMusculoSkeletalSystem->GetSkeleton());
-	for(int i =0;i<3;i++)
+	for(int i =0;i<1;i++)
 	{
 		mBalls.push_back(Skeleton::create("Ball_"+std::to_string(i)));
-		MakeBall(mBalls.back(),0.03,0.6);	
+		MakeBall(mBalls.back(),0.076,0.13);	
 		auto pos = mBalls.back()->getPositions();
 		// std::cout<<pos.transpose()<<std::endl;
 		pos.tail(3) = Eigen::Vector3d(i*0.1,-0.3,0);
@@ -58,7 +59,7 @@ Initialize()
 	mMusculoSkeletalSystem->Initialize(mSoftWorld);
 	mSoftWorld->Initialize();
 
-	mController->Initialize(mSoftWorld,mRigidWorld,mMusculoSkeletalSystem);
+	mController->Initialize(mSoftWorld,mRigidWorld,mMusculoSkeletalSystem,mBalls);
 	mDragAnchorPoint = std::make_pair(mMusculoSkeletalSystem->GetSkeleton()->getBodyNode(0),Eigen::Vector3d(0,0,0));
 
 }
@@ -74,7 +75,7 @@ TimeStepping()
 	if(mSoftWorld->GetTime()<=mTime)
 	{
 		is_fem_updated =true;
-		mController->ComputeActivationLevels();
+		mMusculoSkeletalSystem->SetActivationLevel(mController->Compute());	
 	}
 
 	mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
@@ -99,6 +100,8 @@ TimeStepping()
 	rec->activation_levels = mMusculoSkeletalSystem->GetActivationLevel();
 	for(auto& muscle : mMusculoSkeletalSystem->GetMuscles())
 		rec->muscle_forces.push_back(std::make_pair(muscle->force_origin,muscle->force_insertion));
+
+	rec->state = mController->GetMachine()->GetCurrentState();
 	mTime+=mTimeStep;
 	// std::cout<<std::endl<<std::endl;
 	return is_fem_updated;
@@ -124,6 +127,7 @@ SetRecord(Record* rec)
         muscle->insertion->GetP() = GetPoint(muscle->insertionWayPoints[0]);
         count++;
     }
+    mController->GetMachine()->SetCurrentState(rec->state);
 }
 
 
@@ -183,7 +187,7 @@ Display()
 		mMusculoSkeletalSystem->GetSkeleton()->computeForwardKinematics(true,false,false);
 	}
 	for(auto& ball : mBalls)
-		DrawSkeleton(ball);
+		DrawSkeleton(ball,Eigen::Vector3d(0.4,0.8,0.4));
 	for(auto& muscle :mMusculoSkeletalSystem->GetMuscles())
 		DrawMuscle(muscle,x);
 	glEnable(GL_DEPTH_TEST);

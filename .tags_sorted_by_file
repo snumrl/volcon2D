@@ -461,6 +461,7 @@ FEM	fem2D/Constraint/Constraint.h	/^namespace FEM$/;"	n
 HILL_TYPE_MUSCLE	fem2D/Constraint/Constraint.h	/^	HILL_TYPE_MUSCLE,$/;"	e	enum:FEM::ConstraintType
 LINEAR_MUSCLE	fem2D/Constraint/Constraint.h	/^	LINEAR_MUSCLE,$/;"	e	enum:FEM::ConstraintType
 NEO_HOOKEAN	fem2D/Constraint/Constraint.h	/^	NEO_HOOKEAN,$/;"	e	enum:FEM::ConstraintType
+PW_LINEAR_MUSCLE	fem2D/Constraint/Constraint.h	/^	PW_LINEAR_MUSCLE,$/;"	e	enum:FEM::ConstraintType
 SPRING	fem2D/Constraint/Constraint.h	/^	SPRING,$/;"	e	enum:FEM::ConstraintType
 TENDON	fem2D/Constraint/Constraint.h	/^	TENDON$/;"	e	enum:FEM::ConstraintType
 VENANT_KIRCHHOFF	fem2D/Constraint/Constraint.h	/^	VENANT_KIRCHHOFF,$/;"	e	enum:FEM::ConstraintType
@@ -580,6 +581,38 @@ mActivationLevel	fem2D/Constraint/MuscleConstraint.h	/^	double mActivationLevel;
 mCacheL	fem2D/Constraint/MuscleConstraint.h	/^	double mCacheL;$/;"	m	class:FEM::MuscleConstraint
 mCacheddT	fem2D/Constraint/MuscleConstraint.h	/^	Eigen::Matrix2d mCacheddT;$/;"	m	class:FEM::MuscleConstraint
 mFiberDirection	fem2D/Constraint/MuscleConstraint.h	/^	Eigen::Vector2d	mFiberDirection;$/;"	m	class:FEM::MuscleConstraint
+AddOffset	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^AddOffset(const int& offset)$/;"	f	class:PWLinearMuscleConstraint
+ComputeDesiredL	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^ComputeDesiredL()$/;"	f	class:PWLinearMuscleConstraint
+ComputeL	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^ComputeL(const Eigen::VectorXd& x)$/;"	f	class:PWLinearMuscleConstraint
+ComputeU	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^ComputeU(const double& tau)$/;"	f	class:PWLinearMuscleConstraint
+ComputedU	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^ComputedU(const double& tau)$/;"	f	class:PWLinearMuscleConstraint
+ComputeddU	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^ComputeddU(const double& tau)$/;"	f	class:PWLinearMuscleConstraint
+EvalGradient	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^EvalGradient(const Eigen::VectorXd& x, Eigen::VectorXd& gradient)$/;"	f	class:PWLinearMuscleConstraint
+EvalHessian	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^EvalHessian(const Eigen::VectorXd& x, const Eigen::VectorXd& dx, Eigen::VectorXd& dg)$/;"	f	class:PWLinearMuscleConstraint
+EvalPotentialEnergy	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^EvalPotentialEnergy(const Eigen::VectorXd& x)$/;"	f	class:PWLinearMuscleConstraint
+EvaluateDVector	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^EvaluateDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d)$/;"	f	class:PWLinearMuscleConstraint
+EvaluateJMatrix	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^EvaluateJMatrix(int index, std::vector<Eigen::Triplet<double>>& J_triplets)$/;"	f	class:PWLinearMuscleConstraint
+EvaluateLMatrix	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^EvaluateLMatrix(std::vector<Eigen::Triplet<double>>& L_triplets)$/;"	f	class:PWLinearMuscleConstraint
+GetDof	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^GetDof()$/;"	f	class:PWLinearMuscleConstraint
+GetNumHessianTriplets	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^GetNumHessianTriplets()$/;"	f	class:PWLinearMuscleConstraint
+GetType	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^GetType()$/;"	f	class:PWLinearMuscleConstraint
+PWLinearMuscleConstraint	fem2D/Constraint/PWLinearMuscleConstraint.cpp	/^PWLinearMuscleConstraint(const double& stiffness,const std::vector<int>& index,const double& l0)$/;"	f	class:PWLinearMuscleConstraint
+FEM	fem2D/Constraint/PWLinearMuscleConstraint.h	/^namespace FEM$/;"	n
+PWLinearMuscleConstraint	fem2D/Constraint/PWLinearMuscleConstraint.h	/^class PWLinearMuscleConstraint : public Constraint$/;"	c	namespace:FEM
+__PW_LINEAR_MUSCLE_CONSTRAINT_H__	fem2D/Constraint/PWLinearMuscleConstraint.h	2;"	d
+mActivationLevel	fem2D/Constraint/PWLinearMuscleConstraint.h	/^	double mActivationLevel;$/;"	m	class:FEM::PWLinearMuscleConstraint
+mIndex	fem2D/Constraint/PWLinearMuscleConstraint.h	/^	std::vector<int> mIndex;$/;"	m	class:FEM::PWLinearMuscleConstraint
+ml0	fem2D/Constraint/PWLinearMuscleConstraint.h	/^	double ml0;$/;"	m	class:FEM::PWLinearMuscleConstraint
+override	fem2D/Constraint/PWLinearMuscleConstraint.h	/^	ConstraintType GetType() override;$/;"	m	class:FEM::PWLinearMuscleConstraint
+override	fem2D/Constraint/PWLinearMuscleConstraint.h	/^	double  EvalPotentialEnergy(const Eigen::VectorXd& x) override;$/;"	m	class:FEM::PWLinearMuscleConstraint
+override	fem2D/Constraint/PWLinearMuscleConstraint.h	/^	int GetDof() override;$/;"	m	class:FEM::PWLinearMuscleConstraint
+override	fem2D/Constraint/PWLinearMuscleConstraint.h	/^	int GetNumHessianTriplets() override;$/;"	m	class:FEM::PWLinearMuscleConstraint
+override	fem2D/Constraint/PWLinearMuscleConstraint.h	/^	void AddOffset(const int& offset) override;$/;"	m	class:FEM::PWLinearMuscleConstraint
+override	fem2D/Constraint/PWLinearMuscleConstraint.h	/^    void EvalGradient(const Eigen::VectorXd& x, Eigen::VectorXd& gradient) override;$/;"	m	class:FEM::PWLinearMuscleConstraint
+override	fem2D/Constraint/PWLinearMuscleConstraint.h	/^    void EvalHessian(const Eigen::VectorXd& x, const Eigen::VectorXd& dx, Eigen::VectorXd& dg) override;$/;"	m	class:FEM::PWLinearMuscleConstraint
+override	fem2D/Constraint/PWLinearMuscleConstraint.h	/^    void EvaluateDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d) override;$/;"	m	class:FEM::PWLinearMuscleConstraint
+override	fem2D/Constraint/PWLinearMuscleConstraint.h	/^    void EvaluateJMatrix(int index, std::vector<Eigen::Triplet<double>>& J_triplets) override;$/;"	m	class:FEM::PWLinearMuscleConstraint
+override	fem2D/Constraint/PWLinearMuscleConstraint.h	/^    void EvaluateLMatrix(std::vector<Eigen::Triplet<double>>& L_triplets) override;$/;"	m	class:FEM::PWLinearMuscleConstraint
 AddOffset	fem2D/Constraint/SpringConstraint.cpp	/^AddOffset(const int& offset) $/;"	f	class:SpringConstraint
 EvalGradient	fem2D/Constraint/SpringConstraint.cpp	/^EvalGradient(const Eigen::VectorXd& x, Eigen::VectorXd& gradient)$/;"	f	class:SpringConstraint
 EvalHessian	fem2D/Constraint/SpringConstraint.cpp	/^EvalHessian(const Eigen::VectorXd& x, const Eigen::VectorXd& dx, Eigen::VectorXd& dg)$/;"	f	class:SpringConstraint
@@ -750,30 +783,76 @@ override	octocon2D/SimulationWindow2D.h	/^	void Mouse(int button, int state, int
 override	octocon2D/SimulationWindow2D.h	/^	void Reshape(int w, int h) override;$/;"	m	class:SimulationWindow2D
 override	octocon2D/SimulationWindow2D.h	/^	void Timer(int value) override;$/;"	m	class:SimulationWindow2D
 main	octocon2D/main.cpp	/^int main(int argc,char** argv)$/;"	f
-ComputeActivationLevels	vmcon2D/Controller.cpp	/^ComputeActivationLevels()$/;"	f	class:Controller
+DrawConstraint	plush2D/FEM2D_Interface.cpp	/^DrawConstraint(Constraint* c,const Eigen::VectorXd& X)$/;"	f
+DrawConstraints	plush2D/FEM2D_Interface.cpp	/^DrawConstraints(std::vector<Constraint*>& cs,const Eigen::VectorXd& X)$/;"	f
+__FEM2D_INTERFACE_H__	plush2D/FEM2D_Interface.h	2;"	d
+Initialize	plush2D/Octopus.cpp	/^Initialize(FEM::World* world)$/;"	f	class:Octopus
+Octopus	plush2D/Octopus.cpp	/^Octopus(const std::string& mesh_file)$/;"	f	class:Octopus
+Octopus	plush2D/Octopus.h	/^class Octopus$/;"	c
+__OCTOPUS_H__	plush2D/Octopus.h	2;"	d
+mActivationLevels	plush2D/Octopus.h	/^	Eigen::VectorXd							mActivationLevels;$/;"	m	class:Octopus
+mMesh	plush2D/Octopus.h	/^	FEM::Mesh*								mMesh;$/;"	m	class:Octopus
+mMuscles	plush2D/Octopus.h	/^	std::vector<FEM::PWLinearMuscleConstraint*>	mMuscles;$/;"	m	class:Octopus
+Display	plush2D/SimulationWindow2D.cpp	/^Display()$/;"	f	class:SimulationWindow2D
+Keyboard	plush2D/SimulationWindow2D.cpp	/^Keyboard(unsigned char key,int x,int y)$/;"	f	class:SimulationWindow2D
+Motion	plush2D/SimulationWindow2D.cpp	/^Motion(int x, int y)$/;"	f	class:SimulationWindow2D
+Mouse	plush2D/SimulationWindow2D.cpp	/^Mouse(int button, int state, int x, int y)$/;"	f	class:SimulationWindow2D
+Reshape	plush2D/SimulationWindow2D.cpp	/^Reshape(int w, int h)$/;"	f	class:SimulationWindow2D
+SimulationWindow2D	plush2D/SimulationWindow2D.cpp	/^SimulationWindow2D(FEM::World* soft_world,Octopus* oct)$/;"	f	class:SimulationWindow2D
+Timer	plush2D/SimulationWindow2D.cpp	/^Timer(int value)$/;"	f	class:SimulationWindow2D
+CAMERA_CONTROL	plush2D/SimulationWindow2D.h	/^	CAMERA_CONTROL,$/;"	e	enum:MOUSE_MODE
+CONSTRAINT_CONTROL	plush2D/SimulationWindow2D.h	/^	CONSTRAINT_CONTROL$/;"	e	enum:MOUSE_MODE
+MOUSE_MODE	plush2D/SimulationWindow2D.h	/^enum MOUSE_MODE$/;"	g
+SimulationWindow2D	plush2D/SimulationWindow2D.h	/^class SimulationWindow2D : public Window2D$/;"	c
+__SIMULATION_WINDOW_H__	plush2D/SimulationWindow2D.h	2;"	d
+mDragConstraint	plush2D/SimulationWindow2D.h	/^	FEM::AttachmentConstraint* 	mDragConstraint;$/;"	m	class:SimulationWindow2D
+mIsPlay	plush2D/SimulationWindow2D.h	/^	bool 						mIsPlay;$/;"	m	class:SimulationWindow2D
+mMouseMode	plush2D/SimulationWindow2D.h	/^	MOUSE_MODE					mMouseMode;$/;"	m	class:SimulationWindow2D
+mOctopus	plush2D/SimulationWindow2D.h	/^	Octopus*					mOctopus;$/;"	m	class:SimulationWindow2D
+mSoftWorld	plush2D/SimulationWindow2D.h	/^	FEM::World*					mSoftWorld;$/;"	m	class:SimulationWindow2D
+override	plush2D/SimulationWindow2D.h	/^	void Display() override;$/;"	m	class:SimulationWindow2D
+override	plush2D/SimulationWindow2D.h	/^	void Keyboard(unsigned char key,int x,int y) override;$/;"	m	class:SimulationWindow2D
+override	plush2D/SimulationWindow2D.h	/^	void Motion(int x, int y) override;$/;"	m	class:SimulationWindow2D
+override	plush2D/SimulationWindow2D.h	/^	void Mouse(int button, int state, int x, int y) override;$/;"	m	class:SimulationWindow2D
+override	plush2D/SimulationWindow2D.h	/^	void Reshape(int w, int h) override;$/;"	m	class:SimulationWindow2D
+override	plush2D/SimulationWindow2D.h	/^	void Timer(int value) override;$/;"	m	class:SimulationWindow2D
+main	plush2D/main.cpp	/^int main(int argc,char** argv)$/;"	f
+Attach	vmcon2D/Controller.cpp	/^Attach(const WorldPtr& world,BodyNode* bn)$/;"	f	class:BallInfo
+BallInfo	vmcon2D/Controller.cpp	/^BallInfo(const dart::constraint::WeldJointConstraintPtr& cons,const dart::dynamics::SkeletonPtr& skel)$/;"	f	class:BallInfo
+Compute	vmcon2D/Controller.cpp	/^Compute()$/;"	f	class:Controller
+ComputeFallingPosition	vmcon2D/Controller.cpp	/^ComputeFallingPosition(double h,Eigen::Vector3d& fp)$/;"	f	class:BallInfo
 ComputePDForces	vmcon2D/Controller.cpp	/^ComputePDForces()$/;"	f	class:Controller
 Controller	vmcon2D/Controller.cpp	/^Controller()$/;"	f	class:Controller
 GetMachine	vmcon2D/Controller.cpp	/^GetMachine()$/;"	f	class:Controller
+GetPosition	vmcon2D/Controller.cpp	/^GetPosition(Eigen::Vector3d& p)$/;"	f	class:BallInfo
 GetTargetPositions	vmcon2D/Controller.cpp	/^GetTargetPositions()$/;"	f	class:Controller
-Initialize	vmcon2D/Controller.cpp	/^Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSystem* musculo_skeletal_system)$/;"	f	class:Controller
+Initialize	vmcon2D/Controller.cpp	/^Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSystem* musculo_skeletal_system,const std::vector<SkeletonPtr>& balls)$/;"	f	class:Controller
+Release	vmcon2D/Controller.cpp	/^Release(const WorldPtr& world)$/;"	f	class:BallInfo
 SetTargetPositions	vmcon2D/Controller.cpp	/^SetTargetPositions(const Eigen::VectorXd& tp)$/;"	f	class:Controller
 SolveIK	vmcon2D/Controller.cpp	/^SolveIK(const Eigen::Vector3d& target_position,AnchorPoint ap)$/;"	f	class:Controller
 AnchorPoint	vmcon2D/Controller.h	/^typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;$/;"	t
+BallInfo	vmcon2D/Controller.h	/^class BallInfo$/;"	c
 Controller	vmcon2D/Controller.h	/^class Controller$/;"	c
 __CONTROLLER_H__	vmcon2D/Controller.h	2;"	d
-mFSM	vmcon2D/Controller.h	/^	Machine*		mFSM;$/;"	m	class:Controller
-mIKOptimization	vmcon2D/Controller.h	/^	Ipopt::SmartPtr<Ipopt::TNLP>			 mIKOptimization;$/;"	m	class:Controller
-mIKSolver	vmcon2D/Controller.h	/^	Ipopt::SmartPtr<Ipopt::IpoptApplication> mIKSolver;$/;"	m	class:Controller
-mKp	vmcon2D/Controller.h	/^	Eigen::VectorXd 			mKp,mKv;$/;"	m	class:Controller
-mKv	vmcon2D/Controller.h	/^	Eigen::VectorXd 			mKp,mKv;$/;"	m	class:Controller
-mMuscleOptimization	vmcon2D/Controller.h	/^	Ipopt::SmartPtr<Ipopt::TNLP> 			 mMuscleOptimization;$/;"	m	class:Controller
-mMuscleOptimizationSolver	vmcon2D/Controller.h	/^	Ipopt::SmartPtr<Ipopt::IpoptApplication> mMuscleOptimizationSolver;$/;"	m	class:Controller
-mMusculoSkeletalSystem	vmcon2D/Controller.h	/^	MusculoSkeletalSystem*		mMusculoSkeletalSystem;$/;"	m	class:Controller
-mPreviousPose	vmcon2D/Controller.h	/^	Eigen::VectorXd							mPreviousPose;$/;"	m	class:Controller
-mRestPose	vmcon2D/Controller.h	/^	Eigen::VectorXd							mRestPose;$/;"	m	class:Controller
-mRigidWorld	vmcon2D/Controller.h	/^	dart::simulation::WorldPtr  mRigidWorld;$/;"	m	class:Controller
-mSoftWorld	vmcon2D/Controller.h	/^	FEM::World*					mSoftWorld;$/;"	m	class:Controller
-mTargetPositions	vmcon2D/Controller.h	/^	Eigen::VectorXd				mTargetPositions;$/;"	m	class:Controller
+constraint	vmcon2D/Controller.h	/^	dart::constraint::WeldJointConstraintPtr 	constraint;$/;"	m	class:BallInfo
+isReleased	vmcon2D/Controller.h	/^	bool 										isReleased;$/;"	m	class:BallInfo
+mBalls	vmcon2D/Controller.h	/^	std::vector<BallInfo*>						mBalls;$/;"	m	class:Controller
+mFSM	vmcon2D/Controller.h	/^	Machine*									mFSM;$/;"	m	class:Controller
+mIKOptimization	vmcon2D/Controller.h	/^	Ipopt::SmartPtr<Ipopt::TNLP>			 	mIKOptimization;$/;"	m	class:Controller
+mIKSolver	vmcon2D/Controller.h	/^	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mIKSolver;$/;"	m	class:Controller
+mKp	vmcon2D/Controller.h	/^	Eigen::VectorXd 							mKp,mKv;$/;"	m	class:Controller
+mKv	vmcon2D/Controller.h	/^	Eigen::VectorXd 							mKp,mKv;$/;"	m	class:Controller
+mMuscleOptimization	vmcon2D/Controller.h	/^	Ipopt::SmartPtr<Ipopt::TNLP> 			 	mMuscleOptimization;$/;"	m	class:Controller
+mMuscleOptimizationSolver	vmcon2D/Controller.h	/^	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mMuscleOptimizationSolver;$/;"	m	class:Controller
+mMusculoSkeletalSystem	vmcon2D/Controller.h	/^	MusculoSkeletalSystem*						mMusculoSkeletalSystem;$/;"	m	class:Controller
+mPreviousPose	vmcon2D/Controller.h	/^	Eigen::VectorXd								mPreviousPose;$/;"	m	class:Controller
+mRestPose	vmcon2D/Controller.h	/^	Eigen::VectorXd								mRestPose;$/;"	m	class:Controller
+mRigidWorld	vmcon2D/Controller.h	/^	dart::simulation::WorldPtr  				mRigidWorld;$/;"	m	class:Controller
+mSoftWorld	vmcon2D/Controller.h	/^	FEM::World*									mSoftWorld;$/;"	m	class:Controller
+mTargetPositions	vmcon2D/Controller.h	/^	Eigen::VectorXd								mTargetPositions;$/;"	m	class:Controller
+releasedPoint	vmcon2D/Controller.h	/^	Eigen::Vector3d								releasedPoint;$/;"	m	class:BallInfo
+releasedVelocity	vmcon2D/Controller.h	/^	Eigen::Vector3d								releasedVelocity;$/;"	m	class:BallInfo
+skeleton	vmcon2D/Controller.h	/^	dart::dynamics::SkeletonPtr 				skeleton;$/;"	m	class:BallInfo
 DrawSkeleton	vmcon2D/DART_Interface.cpp	/^DrawSkeleton(const dart::dynamics::SkeletonPtr& skel,const Eigen::Vector3d& color)$/;"	f
 MakeBall	vmcon2D/DART_Interface.cpp	/^MakeBall(const SkeletonPtr& skel,const double& radius,const double& mass)$/;"	f
 MakeBody	vmcon2D/DART_Interface.cpp	/^MakeBody(const SkeletonPtr& skel,const BodyNodePtr& parent,const std::string& name,$/;"	f
@@ -789,22 +868,32 @@ AddEvent	vmcon2D/FSM.cpp	/^AddEvent(const std::string& name,State* next_state)$/
 AddState	vmcon2D/FSM.cpp	/^AddState(const std::string& name)$/;"	f	class:Machine
 GetCurrentState	vmcon2D/FSM.cpp	/^GetCurrentState()$/;"	f	class:Machine
 GetEvents	vmcon2D/FSM.cpp	/^GetEvents()$/;"	f	class:State
+GetMotion	vmcon2D/FSM.cpp	/^GetMotion(Eigen::VectorXd& motion)$/;"	f	class:State
+GetMotion	vmcon2D/FSM.cpp	/^GetMotion(Eigen::VectorXd& ret)$/;"	f	class:Machine
 GetNextState	vmcon2D/FSM.cpp	/^GetNextState(const std::string& event_name)$/;"	f	class:State
 GetStates	vmcon2D/FSM.cpp	/^GetStates()$/;"	f	class:Machine
+GetTime	vmcon2D/FSM.cpp	/^GetTime()$/;"	f	class:State
 Machine	vmcon2D/FSM.cpp	/^Machine()$/;"	f	class:Machine
+ReadMotion	vmcon2D/FSM.cpp	/^void ReadMotion(const std::string path,std::vector<std::pair<double,Eigen::VectorXd>>& motion)$/;"	f
+SetCurrentState	vmcon2D/FSM.cpp	/^SetCurrentState(State* s)$/;"	f	class:Machine
+SetTime	vmcon2D/FSM.cpp	/^SetTime(const double& t)$/;"	f	class:State
+State	vmcon2D/FSM.cpp	/^State(const std::string& motion_path)$/;"	f	class:State
 Trigger	vmcon2D/FSM.cpp	/^Trigger(const std::string& name)$/;"	f	class:Machine
 Machine	vmcon2D/FSM.h	/^class Machine$/;"	c
 State	vmcon2D/FSM.h	/^class State$/;"	c
 __FSM_H__	vmcon2D/FSM.h	2;"	d
 mCurrentState	vmcon2D/FSM.h	/^	State*					mCurrentState;$/;"	m	class:Machine
 mEvents	vmcon2D/FSM.h	/^	std::map<std::string,State*>	mEvents;$/;"	m	class:State
+mMotion	vmcon2D/FSM.h	/^	std::vector<std::pair<double,Eigen::VectorXd>>	mMotion;$/;"	m	class:State
 mStates	vmcon2D/FSM.h	/^	std::map<std::string,State*>		mStates;$/;"	m	class:Machine
+mTimeElapsed	vmcon2D/FSM.h	/^	double							mTimeElapsed;$/;"	m	class:State
 DrawMachine	vmcon2D/FSM_Interface.cpp	/^DrawMachine(Machine* machine,double x,double y,std::map<State*,Eigen::Vector2d> state_positions)$/;"	f
 MakeMachine	vmcon2D/FSM_Interface.cpp	/^MakeMachine(const std::string& path,Machine* machine)$/;"	f
 __FSM_INTERFACE_H__	vmcon2D/FSM_Interface.h	2;"	d
 AddTargetPositions	vmcon2D/IKOptimization.cpp	/^AddTargetPositions(AnchorPoint ap,const Eigen::Vector3d& target)$/;"	f	class:IKOptimization
 ClearTarget	vmcon2D/IKOptimization.cpp	/^ClearTarget()$/;"	f	class:IKOptimization
 GetSolution	vmcon2D/IKOptimization.cpp	/^GetSolution()$/;"	f	class:IKOptimization
+GetTargets	vmcon2D/IKOptimization.cpp	/^GetTargets()$/;"	f	class:IKOptimization
 IKOptimization	vmcon2D/IKOptimization.cpp	/^IKOptimization(const SkeletonPtr& skeleton)$/;"	f	class:IKOptimization
 eval_f	vmcon2D/IKOptimization.cpp	/^eval_f(	Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Number& obj_value) $/;"	f	class:IKOptimization
 eval_g	vmcon2D/IKOptimization.cpp	/^eval_g(	Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Index m, Ipopt::Number* g) $/;"	f	class:IKOptimization
@@ -832,6 +921,8 @@ override	vmcon2D/IKOptimization.h	/^												Ipopt::Index* jCol, Ipopt::Numbe
 override	vmcon2D/IKOptimization.h	/^	 bool					eval_f(	Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Number& obj_value) override;$/;"	m	class:IKOptimization
 override	vmcon2D/IKOptimization.h	/^	 bool					eval_g(	Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Index m, Ipopt::Number* g) override;$/;"	m	class:IKOptimization
 override	vmcon2D/IKOptimization.h	/^	 bool					eval_grad_f(Ipopt::Index n, const Ipopt::Number* x, bool new_x, Ipopt::Number* grad_f) override;$/;"	m	class:IKOptimization
+ComputeYdd	vmcon2D/MuscleOptimization.cpp	/^ComputeYdd(const Eigen::VectorXd& qdd,Eigen::VectorXd& ydd)$/;"	f	class:MuscleOptimization
+ComputedYdd	vmcon2D/MuscleOptimization.cpp	/^ComputedYdd()$/;"	f	class:MuscleOptimization
 GetSolution	vmcon2D/MuscleOptimization.cpp	/^GetSolution()$/;"	f	class:MuscleOptimization
 MuscleOptimization	vmcon2D/MuscleOptimization.cpp	/^MuscleOptimization(FEM::World* soft_world,const dart::simulation::WorldPtr&	rigid_world, MusculoSkeletalSystem* ms)$/;"	f	class:MuscleOptimization
 Update	vmcon2D/MuscleOptimization.cpp	/^Update(const Eigen::VectorXd& qdd_desired)$/;"	f	class:MuscleOptimization
@@ -849,6 +940,7 @@ get_starting_point	vmcon2D/MuscleOptimization.cpp	/^get_starting_point(	Index n,
 MuscleOptimization	vmcon2D/MuscleOptimization.h	/^class MuscleOptimization : public Ipopt::TNLP$/;"	c
 __MUSCLE_OPTIMIZATION_H__	vmcon2D/MuscleOptimization.h	2;"	d
 mA	vmcon2D/MuscleOptimization.h	/^	Eigen::MatrixXd						mJt,mA;$/;"	m	class:MuscleOptimization
+mEndEffector	vmcon2D/MuscleOptimization.h	/^	std::vector<std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d>>	mEndEffector;$/;"	m	class:MuscleOptimization
 mJt	vmcon2D/MuscleOptimization.h	/^	Eigen::MatrixXd						mJt,mA;$/;"	m	class:MuscleOptimization
 mJtp_minus_c	vmcon2D/MuscleOptimization.h	/^	Eigen::VectorXd						mJtp_minus_c;	$/;"	m	class:MuscleOptimization
 mM_minus_JtA	vmcon2D/MuscleOptimization.h	/^	Eigen::MatrixXd						mM_minus_JtA;$/;"	m	class:MuscleOptimization
@@ -859,8 +951,11 @@ mRigidWorld	vmcon2D/MuscleOptimization.h	/^	dart::simulation::WorldPtr  		mRigid
 mSoftWorld	vmcon2D/MuscleOptimization.h	/^	FEM::World*							mSoftWorld;$/;"	m	class:MuscleOptimization
 mSolution	vmcon2D/MuscleOptimization.h	/^	Eigen::VectorXd						mSolution;$/;"	m	class:MuscleOptimization
 mSparseUpdateCount	vmcon2D/MuscleOptimization.h	/^	int 								mSparseUpdateCount;$/;"	m	class:MuscleOptimization
-mWeightEffort	vmcon2D/MuscleOptimization.h	/^	double								mWeightTracking,mWeightEffort;$/;"	m	class:MuscleOptimization
-mWeightTracking	vmcon2D/MuscleOptimization.h	/^	double								mWeightTracking,mWeightEffort;$/;"	m	class:MuscleOptimization
+mWeightEffort	vmcon2D/MuscleOptimization.h	/^	double								mWeightTracking,mWeightEffort,mWeightReinforceEndEffector;$/;"	m	class:MuscleOptimization
+mWeightReinforceEndEffector	vmcon2D/MuscleOptimization.h	/^	double								mWeightTracking,mWeightEffort,mWeightReinforceEndEffector;$/;"	m	class:MuscleOptimization
+mWeightTracking	vmcon2D/MuscleOptimization.h	/^	double								mWeightTracking,mWeightEffort,mWeightReinforceEndEffector;$/;"	m	class:MuscleOptimization
+mYddDesired	vmcon2D/MuscleOptimization.h	/^	Eigen::VectorXd						mYddDesired;$/;"	m	class:MuscleOptimization
+mdydd_dqdd	vmcon2D/MuscleOptimization.h	/^	Eigen::MatrixXd						mdydd_dqdd;$/;"	m	class:MuscleOptimization
 override	vmcon2D/MuscleOptimization.h	/^															Ipopt::IpoptCalculatedQuantities* ip_cq) override;$/;"	m	class:MuscleOptimization
 override	vmcon2D/MuscleOptimization.h	/^															Ipopt::Number* lambda) override;$/;"	m	class:MuscleOptimization
 override	vmcon2D/MuscleOptimization.h	/^														Ipopt::Index m, Ipopt::Number* g_l, Ipopt::Number* g_u) override;	$/;"	m	class:MuscleOptimization
@@ -952,5 +1047,6 @@ override	vmcon2D/SimulationWindow2D.h	/^	void Reshape(int w, int h) override;$/;
 override	vmcon2D/SimulationWindow2D.h	/^	void Timer(int value) override;$/;"	m	class:SimulationWindow2D
 rigid_body_positions	vmcon2D/SimulationWindow2D.h	/^	std::vector<Eigen::VectorXd> rigid_body_positions;$/;"	m	struct:Record
 soft_body_positions	vmcon2D/SimulationWindow2D.h	/^	Eigen::VectorXd soft_body_positions;$/;"	m	struct:Record
+state	vmcon2D/SimulationWindow2D.h	/^	State*	state;$/;"	m	struct:Record
 time	vmcon2D/SimulationWindow2D.h	/^	double			time;$/;"	m	struct:Record
 main	vmcon2D/main.cpp	/^int main(int argc,char** argv)$/;"	f

@@ -48,7 +48,7 @@ public:
 	void 								SetPositions(const Eigen::VectorXd& p);
 	std::vector<Constraint*>&			GetConstraints();
 
-private:	
+public:
 	Eigen::VectorXd 					IntegrateSymplecticExplicit();
 	Eigen::VectorXd 					IntegrateSemiImplicit();
 	Eigen::VectorXd 					IntegrateNewtonMethod();
@@ -58,7 +58,9 @@ private:
 	
 	void 								FactorizeLLT(const Eigen::SparseMatrix<double>& A, Eigen::SimplicialLLT<Eigen::SparseMatrix<double>>& lltSolver);
 	void 								FactorizeLDLT(const Eigen::SparseMatrix<double>& A, Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>& ldltSolver);
+
 	Eigen::VectorXd 					ConjugateGradient(const Eigen::VectorXd& b,const Eigen::VectorXd& x0);
+	
 	double 								ComputeStepSize(const Eigen::VectorXd& x,const Eigen::VectorXd& gradient,const Eigen::VectorXd& descent);
 	void 								PreComputeProjectiveDynamics();
 	void 								InversionFree(Eigen::VectorXd& x);

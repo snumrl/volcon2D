@@ -430,8 +430,8 @@ IntegrateQuasiStatic()
 	}
 	
 
-	std::cout<<"Iteration ("<<i<<")"<<std::endl;
-	std::cout<<"Force norm : "<<g.squaredNorm()<<std::endl;
+	// std::cout<<"Iteration ("<<i<<")"<<std::endl;
+	// std::cout<<"Force norm : "<<g.squaredNorm()<<std::endl;
 	return x_n1;	
 }
 
@@ -551,7 +551,8 @@ ConjugateGradient(const Eigen::VectorXd& b,const Eigen::VectorXd& x0)
 			rs_old = rs_new;
 			break;
 		}
-
+		if(rs_old<rs_new)
+			break;
 		p = r + (rs_new/rs_old)* p;
 		rs_old = rs_new;
 	}
@@ -742,8 +743,8 @@ ComputeExternalForces()
 
 	//Add Gravity forces
 	for(int i=0;i<mNumVertices;i++)
-		mExternalForces[2*i+1] = -9.81;
-		// mExternalForces[2*i+1] = 0.0;
+		// mExternalForces[2*i+1] = -9.81;
+		mExternalForces[2*i+1] = 0.0;
 
 	mExternalForces = mMassMatrix * mExternalForces;
 

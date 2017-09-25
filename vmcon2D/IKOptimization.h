@@ -14,6 +14,7 @@ class IKOptimization : public Ipopt::TNLP
 {
 public:
 	void AddTargetPositions(AnchorPoint ap,const Eigen::Vector3d& target);
+	const std::vector<std::pair<AnchorPoint,Eigen::Vector3d>>& GetTargets();
 	IKOptimization(const dart::dynamics::SkeletonPtr& skeleton);
 	void ClearTarget();
 	const Eigen::VectorXd& GetSolution();

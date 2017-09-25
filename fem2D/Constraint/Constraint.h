@@ -14,6 +14,7 @@ enum ConstraintType
 	VENANT_KIRCHHOFF,
 	HILL_TYPE_MUSCLE,
 	LINEAR_MUSCLE,
+	PW_LINEAR_MUSCLE,
 	TENDON
 };
 class Constraint
