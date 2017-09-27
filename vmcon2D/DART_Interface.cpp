@@ -96,7 +96,7 @@ MakeBall(const SkeletonPtr& skel,const double& radius,const double& mass)
       nullptr,prop,BodyNode::AspectProperties("ball")).second;
 
     auto sn = bn->createShapeNodeWith<VisualAspect, CollisionAspect, DynamicsAspect>(shape);
-
+    bn->setCollidable(false);
     bn->setInertia(inertia);
 }
 void

@@ -5,18 +5,15 @@
 	<State name="RIGHT_CATCH"/>
 	<State name="LEFT_CATCH"/>
 
-	<Event name="start_right" from="STAND" to="RIGHT_SWING"/>
-	<Event name="start_left" from="STAND" to="LEFT_SWING"/>
+	<Event name="start" from="STAND" to="RIGHT_SWING"/>
 
 	<Event name="end" from="RIGHT_SWING" to="LEFT_CATCH"/>
 	<Event name="end" from="LEFT_SWING" to="RIGHT_CATCH"/>
 
+	<Event name="end_same_hand" from="RIGHT_SWING" to="RIGHT_CATCH"/>
+	<Event name="end_same_hand" from="LEFT_SWING" to="LEFT_CATCH"/>
+
 	<Event name="catch" from="LEFT_CATCH" to="LEFT_SWING"/>
 	<Event name="catch" from="RIGHT_CATCH" to="RIGHT_SWING"/>
 
-	<Event name="stop" from="RIGHT_SWING" to="STAND"/>
-	<Event name="stop" from="LEFT_SWING" to="STAND"/>
-	<Event name="stop" from="RIGHT_CATCH" to="STAND"/>
-	<Event name="stop" from="LEFT_CATCH" to="STAND"/>
-	
 </Machine>

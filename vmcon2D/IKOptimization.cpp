@@ -18,6 +18,7 @@ AddTargetPositions(AnchorPoint ap,const Eigen::Vector3d& target)
 	}
 	if(!isAlreadyExist)
 		mTargets.push_back(std::make_pair(ap,target));
+
 	// for(int i =0;i<mTargets.size();i++)
 	// {
 	// 	std::cout<<"Target "<<i<<" : "<<mTargets[i].first.first->getName()<<" -> "<<mTargets[i].second.transpose()<<std::endl;
@@ -31,8 +32,9 @@ GetTargets()
 }
 IKOptimization::
 IKOptimization(const SkeletonPtr& skeleton)
-	:mSkeleton(skeleton),mSolution(Eigen::VectorXd(skeleton->getNumDofs()))
+	:mSkeleton(skeleton),mSolution(skeleton->getPositions())
 {
+	
 }
 void
 IKOptimization::

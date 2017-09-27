@@ -37,7 +37,7 @@ Initialize()
 		// FEM::IntegrationMethod::QUASI_STATIC,		//Integration Method
 		FEM::IntegrationMethod::PROJECTIVE_QUASI_STATIC,		//Integration Method
 		// FEM::IntegrationMethod::PROJECTIVE_DYNAMICS,		//Integration Method
-		1.0/120.0,										//time_step
+		1.0/500.0,										//time_step
 		50, 											//max_iteration	
 		0.999											//damping_coeff
 		);
@@ -45,10 +45,10 @@ Initialize()
 	MakeMuscles("../vmcon2D/export/muscle_parameter.xml",mMusculoSkeletalSystem);
 
 	mRigidWorld->addSkeleton(mMusculoSkeletalSystem->GetSkeleton());
-	for(int i =0;i<1;i++)
+	for(int i =0;i<3;i++)
 	{
 		mBalls.push_back(Skeleton::create("Ball_"+std::to_string(i)));
-		MakeBall(mBalls.back(),0.076,0.13);	
+		MakeBall(mBalls.back(),0.036,0.13);	
 		auto pos = mBalls.back()->getPositions();
 		// std::cout<<pos.transpose()<<std::endl;
 		pos.tail(3) = Eigen::Vector3d(i*0.1,-0.3,0);
@@ -176,6 +176,10 @@ Display()
 	}
 	if(mIsDrag)
 		DrawConstraint(mDragConstraint,x);
+	
+	for(auto& muscle :mMusculoSkeletalSystem->GetMuscles())
+		DrawMuscle(muscle,x);
+
 	DrawSkeleton(mMusculoSkeletalSystem->GetSkeleton());
 	if(mIsPlay)
 	{
@@ -186,10 +190,18 @@ Display()
 		mMusculoSkeletalSystem->GetSkeleton()->setPositions(cur_pos);
 		mMusculoSkeletalSystem->GetSkeleton()->computeForwardKinematics(true,false,false);
 	}
+	int ball_index = 0;
 	for(auto& ball : mBalls)
+	{
+		if(ball_index%3==0)
+		DrawSkeleton(ball,Eigen::Vector3d(0.8,0.4,0.4));
+		else if(ball_index%3==1)
 		DrawSkeleton(ball,Eigen::Vector3d(0.4,0.8,0.4));
-	for(auto& muscle :mMusculoSkeletalSystem->GetMuscles())
-		DrawMuscle(muscle,x);
+		else if(ball_index%3==2)
+		DrawSkeleton(ball,Eigen::Vector3d(0.4,0.4,0.8));
+		ball_index++;
+	}
+
 	glEnable(GL_DEPTH_TEST);
 
 	glutSwapBuffers();
@@ -276,11 +288,10 @@ Mouse(int button, int state, int x, int y)
 				if(min_distance>distance)
 				{
 					target_bn = bn;
-					min_distance = distance;	
+					min_distance = distance;
 				}
 			}
 			
-			mController->SetTargetPositions(mController->SolveIK(Eigen::Vector3d(mouse_world[0],mouse_world[1],0),mDragAnchorPoint));
 		}
 	}
 	else

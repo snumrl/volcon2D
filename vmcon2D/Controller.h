@@ -17,30 +17,14 @@ class MuscleOptimization;
 class MusculoSkeletalSystem;
 class Machine;
 class IKOptimization;
+class BallInfo;
 typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;
 
 
-class BallInfo
-{
-public:
-	dart::dynamics::SkeletonPtr 				skeleton;
-	dart::constraint::WeldJointConstraintPtr 	constraint;
 
-	bool 										isReleased;
 
-	Eigen::Vector3d								releasedPoint;
-	Eigen::Vector3d								releasedVelocity;
-	Eigen::Vector6d								releasedImpulse;
-	int 										releaseFrameCount;
-public:
-	BallInfo(const dart::constraint::WeldJointConstraintPtr& cons,const dart::dynamics::SkeletonPtr& skel);
 
-	void ComputeFallingPosition(double h,Eigen::Vector3d& fp);
-	void Release(const dart::simulation::WorldPtr& world);
-	void GetPosition(Eigen::Vector3d& p);
-	void Attach(const dart::simulation::WorldPtr& world,dart::dynamics::BodyNode* bn);
-	void TimeStepping();
-};
+
 class Controller
 {
 private:
@@ -49,25 +33,21 @@ private:
 	dart::simulation::WorldPtr  				mRigidWorld;
 	MusculoSkeletalSystem*						mMusculoSkeletalSystem;
 	std::vector<BallInfo*>						mBalls;
-	Eigen::VectorXd								mTargetPositions;
 
+	Eigen::VectorXd								mTargetPositions;
+	Eigen::VectorXd								mTargetVelocities;
 	Eigen::VectorXd 							mKp,mKv;
 
-	Eigen::VectorXd								mRestPose;
-	Eigen::VectorXd								mPreviousPose;
 	Ipopt::SmartPtr<Ipopt::TNLP> 			 	mMuscleOptimization;
 	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mMuscleOptimizationSolver;
 
-	Ipopt::SmartPtr<Ipopt::TNLP>			 	mIKOptimization;
-	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mIKSolver;
 public:
 	Controller();
 	void Initialize(FEM::World* soft_world,const dart::simulation::WorldPtr& rigid_world,MusculoSkeletalSystem* musculo_skeletal_system,const std::vector<dart::dynamics::SkeletonPtr>& balls);
-	const Eigen::VectorXd& GetTargetPositions();
-	void SetTargetPositions(const Eigen::VectorXd& tp);
 	Eigen::VectorXd Compute();
 	Eigen::VectorXd ComputePDForces();
-	Eigen::VectorXd SolveIK(const Eigen::Vector3d& target_position,AnchorPoint ap);
+	const Eigen::VectorXd& GetTargetPositions(){return mTargetPositions;};
+	// Eigen::VectorXd SolveIK(const Eigen::Vector3d& target_position,AnchorPoint ap);
 
 	Machine* GetMachine();
 };

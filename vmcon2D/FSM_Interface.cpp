@@ -1,5 +1,6 @@
 #include "FSM_Interface.h"
 #include "FSM.h"
+#include "BezierCurve.h"
 #include "GUI/GL_function.h"
 #include <tinyxml.h>
 #include "GL/glut.h"
@@ -48,12 +49,14 @@ DrawMachine(Machine* machine,double x,double y,std::map<State*,Eigen::Vector2d> 
 
             DrawSphere(T,radius,Eigen::Vector3d(0.9,0.5,0.5));    
             DrawStringOnScreen(x+state_positions[state][0]-0.5*fontsize*state_pair.first.size(),y+state_positions[state][1]-0.5*fontsize,state_pair.first,false,Eigen::Vector3d(0,0,0));
+            DrawStringOnScreen(x+state_positions[state][0]-0.5*fontsize*state_pair.first.size(),y+state_positions[state][1]-2.5*fontsize,std::to_string(state_pair.second->GetTime()),false,Eigen::Vector3d(0,0,0));
 
         }
         else
         {
             DrawSphere(T,radius,Eigen::Vector3d(0.9,0.9,0.9));    
             DrawStringOnScreen(x+state_positions[state][0]-0.5*fontsize*state_pair.first.size(),y+state_positions[state][1]-0.5*fontsize,state_pair.first,false,Eigen::Vector3d(0,0,0));
+            DrawStringOnScreen(x+state_positions[state][0]-0.5*fontsize*state_pair.first.size(),y+state_positions[state][1]-2.5*fontsize,std::to_string(state_pair.second->GetTime()),false,Eigen::Vector3d(0,0,0));
         }
 
     	phi += 2*3.141592/(double)slice;
@@ -90,6 +93,31 @@ DrawMachine(Machine* machine,double x,double y,std::map<State*,Eigen::Vector2d> 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(oldMode);
+
+    for(auto& state_pair : states)
+    {
+        State* state = state_pair.second;
+        IKState* ik_state = dynamic_cast<IKState*>(state);
+        BezierCurveState* bc_state = dynamic_cast<BezierCurveState*>(state);
+        if( ik_state!= NULL)
+        {
+            glPointSize(10.0);
+            DrawPoint(ik_state->GetTarget(),Eigen::Vector3d(0,0,0));
+            glPointSize(1.0);
+        }
+        else if(bc_state!= NULL)
+        {
+            BezierCurve* bc = bc_state->GetCurve();
+            Eigen::Vector2d prev_pose = bc->GetPosition(0);
+            for(int i =0;i<11;i++)
+            {
+                auto curr_pose = bc->GetPosition((double)i/10.0*bc->GetT());
+                DrawLines(prev_pose,curr_pose,Eigen::Vector3d(0,0,0));
+                prev_pose = curr_pose;
+            }
+        }
+
+    }
 }
 
 void
