@@ -43,6 +43,7 @@ public:
 	int 								GetClosestNode(const Eigen::Vector2d& x);
 	double 								GetTimeStep();
 	double 								GetTime();
+	void								SetTime(double t);
 	int    								GetNumVertices();
 	const Eigen::VectorXd& 				GetPositions();
 	void 								SetPositions(const Eigen::VectorXd& p);

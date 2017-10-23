@@ -304,7 +304,12 @@ GetTime()
 {
 	return mTime;
 }
-
+void
+World::
+SetTime(double t)
+{
+	mTime = t;
+}
 int    								
 World::
 GetNumVertices()

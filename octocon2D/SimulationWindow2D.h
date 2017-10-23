@@ -2,7 +2,10 @@
 #define __SIMULATION_WINDOW_H__
 #include "GUI/Window2D.h"
 #include "fem2D/World.h"
+#include "fem2D/Mesh/MeshHeaders.h"
+#include "fem2D/Constraint/ConstraintHeaders.h"
 
+class Octopus;
 enum MOUSE_MODE
 {
 	CAMERA_CONTROL,
@@ -14,11 +17,15 @@ protected:
 	MOUSE_MODE					mMouseMode;
 	FEM::AttachmentConstraint* 	mDragConstraint;
 	FEM::World*					mSoftWorld;
+	Octopus* 					mOctopus;
 
 	bool 						mIsPlay;
 
 public:
-	SimulationWindow2D(FEM::World* soft_world);
+	SimulationWindow2D();
+	void Initialize();
+	void TimeStepping();
+	void PrintPosition();
 
 public:
 	void Display() override;
@@ -28,5 +35,7 @@ public:
 	void Reshape(int w, int h) override;
 	void Timer(int value) override;
 };
+
+
 
 #endif

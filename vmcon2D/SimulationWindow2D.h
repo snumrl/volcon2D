@@ -12,26 +12,20 @@
 #include <IpTNLP.hpp>
 #include <IpIpoptApplication.hpp>
 #include <vector>
+class Record;
 class Controller;
 class MuscleOptimization;
 class MusculoSkeletalSystem;
 class Machine;
 class State;
+class BallInfo;
 typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;
 enum MOUSE_MODE
 {
 	CAMERA_CONTROL,
 	CONSTRAINT_CONTROL
 };
-struct Record
-{
-	double			time;
-	std::vector<Eigen::VectorXd> rigid_body_positions;
-	Eigen::VectorXd soft_body_positions;
-	Eigen::VectorXd activation_levels;
-	std::vector<std::pair<Eigen::Vector2d,Eigen::Vector2d>> muscle_forces;
-	State*	state;
-};
+
 class SimulationWindow2D : public Window2D
 {
 protected:

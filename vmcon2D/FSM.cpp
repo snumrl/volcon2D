@@ -1,11 +1,13 @@
 #include "FSM.h"
+#include "Record.h"
 #include "BezierCurve.h"
 #include "IKOptimization.h"
 #include "MusculoSkeletalSystem.h"
+#include "Controller.h"
 #include <iostream>
 #include <fstream>
 #include <string>
-
+#include <tuple>
 using namespace dart::dynamics;
 using namespace dart::simulation;
 using namespace Ipopt;
@@ -103,14 +105,18 @@ TimeStepping()
 
 
 State::
-State(const WorldPtr& rigid_world,
-	const SkeletonPtr& skeleton,
-	BodyNode* bn,
-	const std::vector<BallInfo*>& ball_info,
+State(const dart::simulation::WorldPtr& rigid_world,
+				FEM::World* soft_world,
+				MusculoSkeletalSystem* musculo_skeletal_system,
+				Controller* controller,
+				BodyNode* bn,
+				const std::vector<BallInfo*>& ball_info,
 				const Ipopt::SmartPtr<Ipopt::TNLP>& ik_optimization,
 				const Ipopt::SmartPtr<Ipopt::IpoptApplication>& ik_solver)
-	:mWorld(rigid_world),
-	mSkeleton(skeleton),
+	:mRigidWorld(rigid_world),
+	mSoftWorld(soft_world),
+	mMusculoSkeletalSystem(musculo_skeletal_system),
+	mController(controller),
 	mAnchorPoint(std::make_pair(bn,Eigen::Vector3d(0,0,0))),
 	mBallInfo(ball_info),
 	mBallIndex(-1),mV(0),
@@ -179,13 +185,15 @@ Solve()
 	}
 }
 IKState::
-IKState(const WorldPtr& rigid_world,
-	const SkeletonPtr& skeleton,
+IKState(const dart::simulation::WorldPtr& rigid_world,
+				FEM::World* soft_world,
+				MusculoSkeletalSystem* musculo_skeletal_system,
+				Controller* controller,
 	BodyNode* bn,
 			const std::vector<BallInfo*>& ball_info,
 			const Ipopt::SmartPtr<Ipopt::TNLP>& ik_optimization,
 			const Ipopt::SmartPtr<Ipopt::IpoptApplication>& ik_solver)
-	:State(rigid_world,skeleton,bn,ball_info,ik_optimization,ik_solver)
+	:State(rigid_world,soft_world,musculo_skeletal_system,controller,bn,ball_info,ik_optimization,ik_solver)
 {
 
 }
@@ -196,7 +204,7 @@ Initialize(int ball_index,int V)
 {
 	
 	mBallIndex = ball_index;
-	std::cout<<"Catch "<<mBallIndex<<std::endl;
+	// std::cout<<"Catch "<<mBallIndex<<std::endl;
 	mV = V;
 	Solve();
 	IKOptimization* ik = static_cast<IKOptimization*>(GetRawPtr(mIKOptimization));
@@ -219,8 +227,8 @@ GetMotion(Eigen::VectorXd& p,Eigen::VectorXd& v)
 	Eigen::Vector3d ball_COM;
 	mBallInfo[mBallIndex]->GetPosition(ball_COM);
 	if((body_COM-ball_COM).norm()<5E-2){
-		std::cout<<"Attach "<<mBallIndex<<std::endl;
-		mBallInfo[mBallIndex]->Attach(mWorld,mAnchorPoint.first);
+		// std::cout<<"Attach "<<mBallIndex<<std::endl;
+		mBallInfo[mBallIndex]->Attach(mRigidWorld,mAnchorPoint.first);
 		event = "catch";
 	}
 
@@ -242,30 +250,41 @@ GetTarget()
 	}
 	return Eigen::Vector2d(0,0);
 }
+
+void
 BezierCurveState::
-BezierCurveState(const WorldPtr& rigid_world,
-	const SkeletonPtr& skeleton,
-	BodyNode* bn,
-	const std::vector<BallInfo*>& ball_info,
-			const Ipopt::SmartPtr<Ipopt::TNLP>& ik_optimization,
-			const Ipopt::SmartPtr<Ipopt::IpoptApplication>& ik_solver,
-			double D,double T,
-			int num_curve_sample)
-	:State(rigid_world,skeleton,bn,ball_info,ik_optimization,ik_solver),mCurve(new BezierCurve())
-	,mD(D),mT(T),mNumCurveSample(num_curve_sample)
+GenerateMotions(BezierCurve* bc,std::vector<std::pair<Eigen::VectorXd,double>>& motions)
 {
+	motions.clear();
+
+	IKOptimization* ik = static_cast<IKOptimization*>(GetRawPtr(mIKOptimization));
+	Eigen::VectorXd save_positions = ik->GetSolution();
+
+	auto save_target = ik->GetTargets();
+	for(int i =0;i<mNumCurveSample+4;i++)
+	{
+		double tt = ((double)i)/((double)mNumCurveSample) * mD*mT;
+		
+		Eigen::Vector2d p_ee = bc->GetPosition(tt);
+		Eigen::Vector3d p_ee_3d(p_ee[0],p_ee[1],0);
+
+		ik->AddTargetPositions(mAnchorPoint,p_ee_3d);
+		mIKSolver->ReOptimizeTNLP(mIKOptimization);
+		Eigen::VectorXd sol = ik->GetSolution();
+		motions.push_back(std::make_pair(sol,tt));
+	}
+
+	for(auto& target : save_target)
+		ik->AddTargetPositions(target.first,target.second);
+
+	ik->SetSolution(save_positions);
 }
-
-void 
+void
 BezierCurveState::
-Initialize(int ball_index,int V)
+OptimizeBezierCurvePoint(int num_samples)
 {
-	mBallIndex = ball_index;
-	std::cout<<"Swing "<<mBallIndex<<std::endl;
-	mV = V;
-	mMotions.clear();
+	double t = ((double)mV-2*mD+0.3)*mT;
 
-	double t = ((double)mV-2*mD)*mT;
 	Eigen::Vector3d p_3d;
 	Eigen::Vector2d p0,p1,p2,v2;
 
@@ -274,51 +293,298 @@ Initialize(int ball_index,int V)
 	if(mAnchorPoint.first->getName().find("L")!=std::string::npos)
 		isleft = true;
 
-	
-	// p0[0] = mAnchorPoint.first->getCOM()[0];
-	// p0[1] = mAnchorPoint.first->getCOM()[1];
-	// p0[1] = 0.2;
-	// if(isleft)
-	// 	p0[0] = -0.4;
-	// else
-	// 	p0[0] = 0.4;
-
-	
-	p0[1] = 0.2;
 	if(isleft)
-		p2[0] = -0.2;
+		p2[0] = -0.3;
 	else
-		p2[0] = 0.2;
+		p2[0] = 0.3;
 	p2[1] = 0.2;
+
 	v2[0] = -2.0*p2[0]/t;
 	// v2[0] = 0;
 	v2[1] = 0.5*9.81*t;
+
+	std::cout<<"Target Velocity : "<<v2.transpose()<<std::endl;
+
+	p0[1] = 0.2;
+	//Free parameter Optimization
 	p0[0] = p2[0] - mD*mT*v2[0];
 	p1[0] = p2[0] - 0.5*mD*mT*v2[0];
 	p1[1] = p2[1] - 0.5*mD*mT*v2[1];
-	mTargetVelocity.setZero();
-	mTargetVelocity[0] = v2[0];
-	mTargetVelocity[1] = v2[1];
-	std::cout<<"Target Velocity : "<<v2.transpose()<<std::endl;
-	mCurve->Initialize(p0,p1,p2,mD*mT);
 
-	IKOptimization* ik = static_cast<IKOptimization*>(GetRawPtr(mIKOptimization));
-	auto save_target = ik->GetTargets();
-	for(int i =0;i<mNumCurveSample+2;i++)
+	std::cout<<"LOOK AHEAD start"<<std::endl;
+
+	double vel_diff_norm = 1E6;
+	int sample_check = -1;
+	int result_release_count = -1;
+	Eigen::Vector2d result_velocity;
+	Eigen::Vector2d rp0,rp1;
+
+	for(int j=0;j<3;j++)
 	{
-		double tt = ((double)i)/((double)mNumCurveSample) * mD*mT;
-		
-		Eigen::Vector2d p_ee = mCurve->GetPosition(tt);
-		Eigen::Vector3d p_ee_3d(p_ee[0],p_ee[1],0);
+		std::vector<std::pair<Eigen::Vector4d,Eigen::Vector3d>> samples;
+		for(int i =0;i<num_samples;i++)
+		{
+			std::cout<<"\n\tSample "<<i<<std::endl;
+			Eigen::Vector2d new_p0,new_p1;
+			new_p0 = p0;
+			new_p1 = p1;
+			double deltax0 = dart::math::random(-0.03,0.03);
+			double deltay0 = dart::math::random(-0.07,0.07);
+			double deltax1 = dart::math::random(-0.1,0.1);
+			double deltay1 = dart::math::random(-0.15,0.15);
 
-		ik->AddTargetPositions(mAnchorPoint,p_ee_3d);
-		mIKSolver->ReOptimizeTNLP(mIKOptimization);
-		Eigen::VectorXd sol = ik->GetSolution();
-		mMotions.push_back(std::make_pair(sol,tt));
+			for(int k=0;k<j;k++)
+			{
+				deltax0 *=0.5;
+				deltay0 *=0.5;
+				deltax1 *=0.5;
+				deltay1 *=0.5;
+			}
+
+			new_p0[0] += deltax0;
+			new_p0[1] += deltay0;
+			new_p1[0] += deltax1;
+			new_p1[1] += deltay1;
+
+			Eigen::Vector2d v_result;
+			int release_count = -1;
+			
+			std::cout<<"\tp : "<<new_p0.transpose()<<"\t"<<new_p1.transpose()<<std::endl;
+			GenerateSample(new_p0,new_p1,p2,v2,v_result,release_count);
+
+			std::pair<Eigen::Vector4d,Eigen::Vector3d> sample_pair;
+			sample_pair.first.block<2,1>(0,0) = new_p0;
+			sample_pair.first.block<2,1>(2,0) = new_p1;
+			sample_pair.second.block<2,1>(0,0) = v_result;
+			sample_pair.second[2] = release_count;
+			samples.push_back(sample_pair);
+			if((v2-v_result).norm()<vel_diff_norm)
+			{
+				vel_diff_norm = (v2-v_result).norm();
+				
+				result_velocity = v_result;
+				result_release_count = release_count;
+				rp0 = new_p0;
+				rp1 = new_p1;
+				sample_check = i;
+			}
+		}
+
+		//Linear Regression
+		for(int i =0;i<num_samples;i++)
+			std::cout<<samples[i].first.transpose()<<"\t"<<samples[i].second.transpose()<<std::endl;
+
+		Eigen::MatrixXd xxt(4,4),yxt(3,4);
+		Eigen::VectorXd x_sum(4),y_sum(3);
+		xxt.setZero();
+		yxt.setZero();
+		x_sum.setZero();
+		y_sum.setZero();
+		for(int i =0;i<num_samples;i++)
+		{
+			xxt += samples[i].first*samples[i].first.transpose();
+			yxt += samples[i].second*samples[i].first.transpose();
+			x_sum += samples[i].first;
+			y_sum += samples[i].second;
+		}
+		Eigen::MatrixXd J(3,4);
+		Eigen::VectorXd b(3);
+		J = yxt*xxt.inverse();
+		b = y_sum-J*x_sum;
+
+		for(int i =0;i<num_samples;i++)
+			std::cout<<(J*samples[i].first+b).transpose()<<std::endl;
+		
+
+		Eigen::Vector3d reg_target;
+		Eigen::Vector4d reg_p;
+		reg_target.block<2,1>(0,0) = v2;
+		reg_target[2] = y_sum[2]/(double)num_samples;
+
+		reg_p = J.transpose()*((J*J.transpose()).inverse())*(reg_target-b);
+		std::cout<<"regresion result : "<<reg_p.transpose()<<std::endl;
+		// p0 = rp0;
+		// p1 = rp1;
+		p0 = (0.3*reg_p.block<2,1>(0,0)+0.7*rp0);
+		p1 = (0.3*reg_p.block<2,1>(2,0)+0.7*rp1);
+
+		std::cout<<"\n\tNew initial Point : : "<<p0.transpose()<<"\t"<<p1.transpose()<<std::endl;
+		std::cout<<"Sample "<<sample_check<<" is choosed."<<std::endl;
+		std::cout<<"Residual : "<<vel_diff_norm<<std::endl;
+		std::cout<<"velocity : "<<result_velocity.transpose()<<std::endl;
+		std::cout<<std::endl;
 	}
-	for(auto& target : save_target)
-		ik->AddTargetPositions(target.first,target.second);
-	mTimeElapsed=0.0;
+
+	
+	std::cout<<"LOOK AHEAD end"<<std::endl;
+	std::cout<<"Sample "<<sample_check<<" is choosed."<<std::endl;
+	
+	mReleaseCount = result_release_count;
+	mCurve->Initialize(rp0,rp1,p2,mD*mT);
+	
+	std::cout<<"Residual : "<<vel_diff_norm<<std::endl;
+	std::cout<<"velocity : "<<result_velocity.transpose()<<std::endl;
+	std::cout<<"target velocity : "<<v2.transpose()<<std::endl;
+	std::cout<<"Release count : "<<mReleaseCount<<std::endl;
+	
+}
+void
+BezierCurveState::
+GenerateSample(const Eigen::Vector2d& p0,const Eigen::Vector2d& p1,const Eigen::Vector2d& p2, const Eigen::Vector2d& v_target,
+				Eigen::Vector2d& v_result,int& release_count)
+{
+	mCount = 0;
+	mReleaseCount = 10000;
+	mTimeElapsed = 0.0;
+
+	mCurve->Initialize(p0,p1,p2,mD*mT);
+	GenerateMotions(mCurve,mMotions);
+	Record*	current_record = new Record();
+	current_record->Set(mRigidWorld,mSoftWorld,mMusculoSkeletalSystem,mController);
+
+	
+
+
+	int closest_velocity_count = 0;
+	double vel_diff_norm = 1E6;
+	Eigen::Vector2d vel_closest;
+	while(true)
+	{
+		//Simulation START
+		bool is_fem_updated = false;
+		if(mSoftWorld->GetTime()<=mRigidWorld->getTime())
+		{
+			is_fem_updated =true;
+			mMusculoSkeletalSystem->SetActivationLevel(mController->Compute());	
+		}
+
+		mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
+
+		if(is_fem_updated)
+		{
+			mMusculoSkeletalSystem->TransformAttachmentPoints();
+			mSoftWorld->TimeStepping();
+		}
+		mRigidWorld->step();
+		//Simulation END
+
+		if(is_fem_updated)
+		{
+			Eigen::Vector3d velocity;
+			mBallInfo[mBallIndex]->GetVelocity(velocity);
+			// std::cout<<"\t\t"<<mCount<<"\t"<<velocity.block<2,1>(0,0).transpose()<<std::endl;
+			if( (v_target-velocity.block<2,1>(0,0)).norm()<vel_diff_norm)
+			{
+				vel_diff_norm = (v_target-velocity.block<2,1>(0,0)).norm();
+				closest_velocity_count = mCount;
+				vel_closest = velocity.block<2,1>(0,0);
+				// std::cout<<mCount<<std::endl;
+			}
+		}
+		if(mTimeElapsed>mMotions[mMotions.size()-2].second)
+			break;
+	}
+
+	
+	std::cout<<"\tClosest count : "<<closest_velocity_count<<std::endl;
+	std::cout<<"\tres : "<<vel_diff_norm<<std::endl;
+	std::cout<<"\tvelocity : "<<vel_closest.transpose()<<std::endl;
+	
+
+	current_record->Get(mRigidWorld,mSoftWorld,mMusculoSkeletalSystem,mController);
+
+	mTimeElapsed = 0.0;
+	mCount = 0;
+
+	release_count = closest_velocity_count;
+	v_result = vel_closest;
+}
+
+
+
+BezierCurveState::
+BezierCurveState(const dart::simulation::WorldPtr& rigid_world,
+				FEM::World* soft_world,
+				MusculoSkeletalSystem* musculo_skeletal_system,
+				Controller* controller,
+	BodyNode* bn,
+	const std::vector<BallInfo*>& ball_info,
+			const Ipopt::SmartPtr<Ipopt::TNLP>& ik_optimization,
+			const Ipopt::SmartPtr<Ipopt::IpoptApplication>& ik_solver,
+			double D,double T,
+			int num_curve_sample)
+	:State(rigid_world,soft_world,musculo_skeletal_system,controller,bn,ball_info,ik_optimization,ik_solver),mCurve(new BezierCurve())
+	,mD(D),mT(T),mNumCurveSample(num_curve_sample)
+{
+}
+
+void 
+BezierCurveState::
+Initialize(int ball_index,int V)
+{
+	// mCount = 0;
+	// mReleaseCount = 10000;
+	mBallIndex = ball_index;
+	mV = V;
+	// std::cout<<"Swing "<<mBallIndex<<std::endl;
+
+	OptimizeBezierCurvePoint(5);		//This optimize bezier mCurve control point.
+
+	GenerateMotions(mCurve,mMotions);
+
+	// mTimeElapsed=0.0;
+	//Look Ahead step
+	// Record*	current_record = new Record();
+	// current_record->Set(mRigidWorld,mSoftWorld,mMusculoSkeletalSystem,mController);
+	// std::cout<<"LOOK AHEAD start"<<std::endl;
+
+
+	// int closest_velocity_count = 0;
+	// double vel_diff_norm = 1E6;
+	// while(true)
+	// {
+	// 	//Simulation START
+	// 	bool is_fem_updated = false;
+	// 	if(mSoftWorld->GetTime()<=mRigidWorld->getTime())
+	// 	{
+	// 		is_fem_updated =true;
+	// 		mMusculoSkeletalSystem->SetActivationLevel(mController->Compute());	
+	// 	}
+
+	// 	mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
+
+	// 	if(is_fem_updated)
+	// 	{
+	// 		mMusculoSkeletalSystem->TransformAttachmentPoints();
+	// 		mSoftWorld->TimeStepping();
+	// 	}
+	// 	mRigidWorld->step();
+	// 	//Simulation END
+
+	// 	Eigen::Vector3d velocity;
+	// 	mBallInfo[mBallIndex]->GetVelocity(velocity);
+	// 	if( (mTargetVelocity-velocity).norm()<vel_diff_norm)
+	// 	{
+	// 		vel_diff_norm = (mTargetVelocity-velocity).norm();
+	// 		closest_velocity_count = mCount;
+	// 	}
+	// 	if(mTimeElapsed>mMotions[mMotions.size()-2].second)
+	// 		break;
+	// }
+
+	
+	// std::cout<<"LOOK AHEAD end"<<std::endl;
+	// std::cout<<"result : \n";
+	// std::cout<<"Closest count : "<<closest_velocity_count<<std::endl;
+	// std::cout<<"difference : "<<vel_diff_norm<<std::endl;
+
+
+
+	// current_record->Get(mRigidWorld,mSoftWorld,mMusculoSkeletalSystem,mController);
+
+	// mReleaseCount = closest_velocity_count;
+	// mTimeElapsed = 0.0;
+	// mCount = 0;
 }
 std::string 
 BezierCurveState::
@@ -331,21 +597,17 @@ GetMotion(Eigen::VectorXd& p,Eigen::VectorXd& v)
 			k=i;
 	}
 
-	// if(k>=mMotions.size()-2)
-	// {
-	// 	mBallInfo[mBallIndex]->Release(mWorld);
-	// }
-	Eigen::Vector3d vv;
+	
+/*	Eigen::Vector3d vv;
 	mBallInfo[mBallIndex]->GetVelocity(vv);
 	
-	std::cout<<"Current Velocity : "<<vv.transpose()<<std::endl;
-	if(k==mMotions.size()-1)// || ((mTargetVelocity-vv).norm()<5E-1)&&k>5){
+	std::cout<<mCount<<" Current Velocity : "<<vv.transpose()<<std::endl;
+	std::cout<<mCount<<"\t"<<mReleaseCount<<std::endl;*/
+	if(mCount == mReleaseCount-1)// || ((mTargetVelocity-vv).norm()<5E-1)&&k>5){
 	{
-		std::cout<<"Release "<<mBallIndex<<std::endl;
-		mBallInfo[mBallIndex]->Release(mWorld);
-		// mBallInfo[mBallIndex]->skeleton->resetAccelerations();
-		// mBallInfo[mBallIndex]->skeleton->setVelocities(Eigen::compose(Eigen::Vector3d(0,0,0),mTargetVelocity));
-		// std::cout<<mBallInfo[mBallIndex]->skeleton->getBodyNode(0)->getCOMLinearVelocity()<<std::endl;
+		// std::cout<<"Release "<<mBallIndex<<std::endl;
+		mBallInfo[mBallIndex]->Release(mRigidWorld);
+
 		return std::string("end");
 	}
 
@@ -360,7 +622,7 @@ GetMotion(Eigen::VectorXd& p,Eigen::VectorXd& v)
 	auto pdp =(1.0-t)*(mMotions[k].first) + (t)*(mMotions[k1].first);
 
 	v = (pdp-p)/0.01;
-
+	mCount++;
 	return std::string("no_event");
 }
 
@@ -478,10 +740,13 @@ InitializeJugglingState(const std::vector<int>& V)
 }
 Machine::
 Machine(const WorldPtr& rigid_world,
+	FEM::World* soft_world,
 	MusculoSkeletalSystem* musculo_skeletal_system,
-	const std::vector<BallInfo*>& balls,const double& dt)
-	:mCurrentState(nullptr),mRigidWorld(rigid_world),mMusculoSkeletalSystem(musculo_skeletal_system),mBallInfo(balls),mdt(dt)
+	const std::vector<BallInfo*>& balls,
+	Controller* controller,const double& dt)
+	:mCurrentState(nullptr),mRigidWorld(rigid_world),mSoftWorld(soft_world),mMusculoSkeletalSystem(musculo_skeletal_system),mBallInfo(balls),mController(controller),mdt(dt)
 {
+	dart::math::seedRand();
 	mIKOptimization = new IKOptimization(mMusculoSkeletalSystem->GetSkeleton());
 
 	mIKSolver = new IpoptApplication();
@@ -506,8 +771,10 @@ Machine(const WorldPtr& rigid_world,
 
 
 	// std::vector<int> V_list{5,3,1,5,3,1,5,3,1,5,3,1,5,3,1};
-	std::vector<int> V_list{3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
-	// std::vector<int> V_list{5,5,5,5,5,5,5,5,5};
+	// std::vector<int> V_list{3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
+	// std::vector<int> V_list{4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4};
+	// std::vector<int> V_list{4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4};
+	std::vector<int> V_list{5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5};
 	// std::vector<int> V_list{7,7,7,7,7,7,7,7,7};
 	InitializeJugglingState(V_list);
 }
@@ -527,7 +794,9 @@ AddState(const std::string& name)
 	mStates.insert(std::make_pair(name,
 		new IKState(
 			mRigidWorld,
-			mMusculoSkeletalSystem->GetSkeleton(),
+			mSoftWorld,
+			mMusculoSkeletalSystem,
+			mController,
 			mMusculoSkeletalSystem->GetSkeleton()->getBodyNode((is_left?"HandL":"HandR")),
 			mBallInfo,
 			mIKOptimization,
@@ -536,7 +805,9 @@ AddState(const std::string& name)
 	mStates.insert(std::make_pair(name,
 		new BezierCurveState(
 			mRigidWorld,
-			mMusculoSkeletalSystem->GetSkeleton(),
+			mSoftWorld,
+			mMusculoSkeletalSystem,
+			mController,
 			mMusculoSkeletalSystem->GetSkeleton()->getBodyNode((is_left?"HandL":"HandR")),
 			mBallInfo,
 			mIKOptimization,
@@ -579,12 +850,12 @@ Trigger(const std::string& name)
 	if(!name.compare("end"))
 	{
 		bool isPreviousLeft = mJugglingStates[mJugglingFrame].isLeftHand;
-		std::cout<<"isPreviousLeft : "<<isPreviousLeft<<std::endl;
+		// std::cout<<"isPreviousLeft : "<<isPreviousLeft<<std::endl;
 		for(int i = mJugglingFrame+1;i<mJugglingStates.size();i++)
 		{
-			std::cout<<"\nFrame : "<<i<<std::endl;
-			std::cout<<"isLeft : "<<mJugglingStates[i].isLeftHand<<std::endl;
-			std::cout<<"Ball index "<<mJugglingStates[i].ball_index<<std::endl;
+			// std::cout<<"\nFrame : "<<i<<std::endl;
+			// std::cout<<"isLeft : "<<mJugglingStates[i].isLeftHand<<std::endl;
+			// std::cout<<"Ball index "<<mJugglingStates[i].ball_index<<std::endl;
 			if(isPreviousLeft == mJugglingStates[i].isLeftHand)
 			{
 				if(mBallInfo[mJugglingStates[i].ball_index]->isReleased)
@@ -617,7 +888,35 @@ void
 Machine::
 GetMotion(Eigen::VectorXd& p,Eigen::VectorXd& v)
 {
+	if(dynamic_cast<BezierCurveState*>(mCurrentState)!=nullptr)
+	{
+		if(dynamic_cast<BezierCurveState*>(mCurrentState)->mReleaseCount != 10000)
+		{
+
+
+		bool isCurrentLeft = mJugglingStates[mJugglingFrame].isLeftHand;
+		for(int i = mJugglingFrame+1;i<mJugglingStates.size();i++)
+		{
+			bool isLeft = mJugglingStates[i].isLeftHand;
+			if(isCurrentLeft == !isLeft)
+			{
+				IKState* ikstate = dynamic_cast<IKState*>(mCurrentState->GetNextState("end"));
+
+				Eigen::Vector3d body_COM = ikstate->mAnchorPoint.first->getCOM();
+				Eigen::Vector3d ball_COM;
+				mBallInfo[mJugglingStates[i].ball_index]->GetPosition(ball_COM);
+				// std::cout<<"\t\t\t"<<ball_COM.transpose()<<std::endl;
+				// std::cout<<"\t\t\t"<<body_COM.transpose()<<std::endl;
+				if((body_COM-ball_COM).norm()<5E-2){
+					mBallInfo[mJugglingStates[i].ball_index]->Attach(mRigidWorld,ikstate->mAnchorPoint.first);
+				}
+				break;
+			}
+		}
+		}
+	}
 	mCurrentState->TimeStepping(mdt);
 	std::string event = mCurrentState->GetMotion(p,v);	
 	Trigger(event);
+
 }

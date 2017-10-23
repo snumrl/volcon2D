@@ -6,6 +6,7 @@
 #include "DART_Interface.h"
 #include "FSM_Interface.h"
 #include "FSM.h"
+#include "Record.h"
 #include "MuscleOptimization.h"
 #include "fem2D/Constraint/ConstraintHeaders.h"
 #include "Controller.h"
@@ -19,11 +20,10 @@ SimulationWindow2D()
 	:mMouseMode(MOUSE_MODE::CONSTRAINT_CONTROL),
 	mDragConstraint(new FEM::AttachmentConstraint(50000.0,0,Eigen::Vector2d(0,0))),
 	mMusculoSkeletalSystem(new MusculoSkeletalSystem()),mController(new Controller()),
-	mIsPlay(false),mIsReplay(false),mIsPaused(false),mTime(0.0),mSimTime(0.0),mRecordFrame(0)
+	mIsPlay(false),mIsReplay(false),mIsPaused(false),mSimTime(0.0),mRecordFrame(0)
 {
 	Initialize();
 	mDisplayTimeout = mSoftWorld->GetTimeStep()*1000;
-	mTimeStep = mRigidWorld->getTimeStep();
 }
 
 void
@@ -37,7 +37,7 @@ Initialize()
 		// FEM::IntegrationMethod::QUASI_STATIC,		//Integration Method
 		FEM::IntegrationMethod::PROJECTIVE_QUASI_STATIC,		//Integration Method
 		// FEM::IntegrationMethod::PROJECTIVE_DYNAMICS,		//Integration Method
-		1.0/500.0,										//time_step
+		1.0/200.0,										//time_step
 		50, 											//max_iteration	
 		0.999											//damping_coeff
 		);
@@ -45,7 +45,7 @@ Initialize()
 	MakeMuscles("../vmcon2D/export/muscle_parameter.xml",mMusculoSkeletalSystem);
 
 	mRigidWorld->addSkeleton(mMusculoSkeletalSystem->GetSkeleton());
-	for(int i =0;i<3;i++)
+	for(int i =0;i<5;i++)
 	{
 		mBalls.push_back(Skeleton::create("Ball_"+std::to_string(i)));
 		MakeBall(mBalls.back(),0.036,0.13);	
@@ -67,12 +67,12 @@ bool
 SimulationWindow2D::
 TimeStepping()
 {
-	//Compute Optimal Activation Level
-	// Compute desired Torque : PD control
 	bool is_fem_updated = false;
 	auto& skel =mMusculoSkeletalSystem->GetSkeleton();
 
-	if(mSoftWorld->GetTime()<=mTime)
+
+	//Simulation Loop
+	if(mSoftWorld->GetTime()<=mRigidWorld->getTime())
 	{
 		is_fem_updated =true;
 		mMusculoSkeletalSystem->SetActivationLevel(mController->Compute());	
@@ -90,19 +90,24 @@ TimeStepping()
 	mRigidWorld->step();
 
 		
-
+	//Record Loop
 	mRecords.push_back(new Record());
 	auto rec = mRecords.back();
-	rec->time = mTime;
-	for(int i =0;i<mRigidWorld->getNumSkeletons();i++)
-		rec->rigid_body_positions.push_back(mRigidWorld->getSkeleton(i)->getPositions());
-	rec->soft_body_positions = mSoftWorld->GetPositions();
-	rec->activation_levels = mMusculoSkeletalSystem->GetActivationLevel();
-	for(auto& muscle : mMusculoSkeletalSystem->GetMuscles())
-		rec->muscle_forces.push_back(std::make_pair(muscle->force_origin,muscle->force_insertion));
+	rec->Set(mRigidWorld,mSoftWorld,mMusculoSkeletalSystem,mController);
+	// rec->time = mTime;
+	// for(int i =0;i<mRigidWorld->getNumSkeletons();i++)
+	// 	rec->rigid_body_positions.push_back(mRigidWorld->getSkeleton(i)->getPositions());
 
-	rec->state = mController->GetMachine()->GetCurrentState();
-	mTime+=mTimeStep;
+	// for(int i =0;i<mRigidWorld->getNumSkeletons();i++)
+	// 	rec->rigid_body_velocities.push_back(mRigidWorld->getSkeleton(i)->getVelocities());
+
+	// rec->soft_body_positions = mSoftWorld->GetPositions();
+	// rec->activation_levels = mMusculoSkeletalSystem->GetActivationLevel();
+	// for(auto& muscle : mMusculoSkeletalSystem->GetMuscles())
+	// 	rec->muscle_forces.push_back(std::make_pair(muscle->force_origin,muscle->force_insertion));
+
+	// rec->state = mController->GetMachine()->GetCurrentState();
+	
 	// std::cout<<std::endl<<std::endl;
 	return is_fem_updated;
 }
@@ -110,24 +115,27 @@ void
 SimulationWindow2D::
 SetRecord(Record* rec)
 {
-	mTime = rec->time;
-	for(int i =0;i<mRigidWorld->getNumSkeletons();i++)
-		mRigidWorld->getSkeleton(i)->setPositions(rec->rigid_body_positions[i]);
+	rec->Get(mRigidWorld,mSoftWorld,mMusculoSkeletalSystem,mController);
+	
+	// for(int i =0;i<mRigidWorld->getNumSkeletons();i++)
+	// 	mRigidWorld->getSkeleton(i)->setPositions(rec->rigid_body_positions[i]);
+	// for(int i =0;i<mRigidWorld->getNumSkeletons();i++)
+	// 	mRigidWorld->getSkeleton(i)->setVelocities(rec->rigid_body_velocities[i]);
 
-	mSoftWorld->SetPositions(rec->soft_body_positions);
-	int count = 0;
-    for(auto& muscle : mMusculoSkeletalSystem->GetMuscles())
-    {
-        muscle->activationLevel = rec->activation_levels[count];
-        for(auto& mc : muscle->muscleConstraints)
-            mc->SetActivationLevel(muscle->activationLevel);
-        muscle->force_origin = rec->muscle_forces[count].first;
-        muscle->force_insertion = rec->muscle_forces[count].second;
-        muscle->origin->GetP() = GetPoint(muscle->originWayPoints[0]);
-        muscle->insertion->GetP() = GetPoint(muscle->insertionWayPoints[0]);
-        count++;
-    }
-    mController->GetMachine()->SetCurrentState(rec->state);
+	// mSoftWorld->SetPositions(rec->soft_body_positions);
+	// int count = 0;
+ //    for(auto& muscle : mMusculoSkeletalSystem->GetMuscles())
+ //    {
+ //        muscle->activationLevel = rec->activation_levels[count];
+ //        for(auto& mc : muscle->muscleConstraints)
+ //            mc->SetActivationLevel(muscle->activationLevel);
+ //        muscle->force_origin = rec->muscle_forces[count].first;
+ //        muscle->force_insertion = rec->muscle_forces[count].second;
+ //        muscle->origin->GetP() = GetPoint(muscle->originWayPoints[0]);
+ //        muscle->insertion->GetP() = GetPoint(muscle->insertionWayPoints[0]);
+ //        count++;
+ //    }
+ //    mController->GetMachine()->SetCurrentState(rec->state);
 }
 
 
@@ -165,7 +173,7 @@ Display()
 	glEnd();
 
 	glColor3f(0,0,0);
-    DrawStringOnScreen(0.8,0.2,std::to_string(mTime),true);
+    DrawStringOnScreen(0.8,0.2,std::to_string(mRigidWorld->getTime()),true);
 	glLineWidth(1.0);
 
 	const auto& x = mSoftWorld->GetPositions();
@@ -193,12 +201,16 @@ Display()
 	int ball_index = 0;
 	for(auto& ball : mBalls)
 	{
-		if(ball_index%3==0)
+		if(ball_index==0)
 		DrawSkeleton(ball,Eigen::Vector3d(0.8,0.4,0.4));
-		else if(ball_index%3==1)
+		else if(ball_index==1)
 		DrawSkeleton(ball,Eigen::Vector3d(0.4,0.8,0.4));
-		else if(ball_index%3==2)
+		else if(ball_index==2)
 		DrawSkeleton(ball,Eigen::Vector3d(0.4,0.4,0.8));
+		else if(ball_index==3)
+		DrawSkeleton(ball,Eigen::Vector3d(0.4,0.8,0.8));
+		else if(ball_index==4)
+		DrawSkeleton(ball,Eigen::Vector3d(0.8,0.4,0.8));
 		ball_index++;
 	}
 
@@ -230,7 +242,7 @@ Keyboard(unsigned char key,int x,int y)
 		case 'p' : 
 			if(!mIsReplay)
 			{
-				mIsReplay = true; mIsPlay = false; mIsPaused = true; mSimTime = mTime;
+				mIsReplay = true; mIsPlay = false; mIsPaused = true; mSimTime = mRigidWorld->getTime();
 			}
 			else if(mIsPaused)
 				mIsPaused = false;

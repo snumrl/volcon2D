@@ -4,10 +4,11 @@
 #include "dart/gui/gui.hpp"
 #include "dart/math/math.hpp"
 #include "dart/simulation/simulation.hpp"
+#include "fem2D/World.h"
+#include "fem2D/Mesh/MeshHeaders.h"
+#include "fem2D/Constraint/ConstraintHeaders.h"
 #include <IpTNLP.hpp>
 #include <IpIpoptApplication.hpp>
-
-
 #include <vector>
 #include <string>
 #include <map>
@@ -17,6 +18,8 @@
 class BezierCurve;
 class IKOptimization;
 class MusculoSkeletalSystem;
+class Record;
+class Controller;
 typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;
 class BallInfo
 {
@@ -53,9 +56,13 @@ struct JugglingState
 
 class State
 {
-protected:
-	dart::simulation::WorldPtr							mWorld;
-	dart::dynamics::SkeletonPtr							mSkeleton;
+public:
+	
+	dart::simulation::WorldPtr							mRigidWorld;
+	FEM::World*											mSoftWorld;
+	MusculoSkeletalSystem*								mMusculoSkeletalSystem;
+	Controller*											mController;
+
 	AnchorPoint 										mAnchorPoint;
 
 	std::vector<BallInfo*>								mBallInfo;
@@ -70,7 +77,9 @@ protected:
 
 public:
 	State(		const dart::simulation::WorldPtr& rigid_world,
-				const dart::dynamics::SkeletonPtr& skeleton,
+				FEM::World* soft_world,
+				MusculoSkeletalSystem* musculo_skeletal_system,
+				Controller* controller,
 				dart::dynamics::BodyNode* bn,
 				const std::vector<BallInfo*>& ball_info,
 				const Ipopt::SmartPtr<Ipopt::TNLP>& ik_optimization,
@@ -93,7 +102,9 @@ protected:
 	void Solve();
 public:
 	IKState(	const dart::simulation::WorldPtr& rigid_world,
-			const dart::dynamics::SkeletonPtr& skeleton,
+				FEM::World* soft_world,
+				MusculoSkeletalSystem* musculo_skeletal_system,
+				Controller* controller,
 				dart::dynamics::BodyNode* bn,
 				const std::vector<BallInfo*>& ball_info,
 				const Ipopt::SmartPtr<Ipopt::TNLP>& ik_optimization,
@@ -107,15 +118,27 @@ public:
 
 class BezierCurveState : public State
 {
-protected:
+public:
+
 	BezierCurve* mCurve;
-	Eigen::Vector3d								   mTargetVelocity;
+	// Eigen::Vector3d								   mTargetVelocity;
 	std::vector<std::pair<Eigen::VectorXd,double>> mMotions;
 	double mD,mT;
 	int mNumCurveSample;
+	int mReleaseCount;
+	int mCount;
+
+	
+	void GenerateMotions(BezierCurve* bc,std::vector<std::pair<Eigen::VectorXd,double>>& motions);
+	void OptimizeBezierCurvePoint(int num_samples);
+	void GenerateSample(
+		const Eigen::Vector2d& p0,const Eigen::Vector2d& p1,const Eigen::Vector2d& p2, const Eigen::Vector2d& v_target,
+		Eigen::Vector2d& v_result,int& release_count);
 public:
 	BezierCurveState(const dart::simulation::WorldPtr& rigid_world,
-		const dart::dynamics::SkeletonPtr& skeleton,
+				FEM::World* soft_world,
+				MusculoSkeletalSystem* musculo_skeletal_system,
+				Controller* controller,
 				dart::dynamics::BodyNode* bn,
 				const std::vector<BallInfo*>& ball_info,
 				const Ipopt::SmartPtr<Ipopt::TNLP>& ik_optimization,
@@ -141,8 +164,11 @@ private:
 	std::map<std::string,State*>				mStates;
 
 	dart::simulation::WorldPtr  				mRigidWorld;
+	FEM::World*									mSoftWorld;
 	MusculoSkeletalSystem*						mMusculoSkeletalSystem;
+	
 	std::vector<BallInfo*>						mBallInfo;
+	Controller*									mController;
 
 	Ipopt::SmartPtr<Ipopt::TNLP>			 	mIKOptimization;
 	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mIKSolver;
@@ -153,7 +179,12 @@ private:
 	double										mdt;
 	void InitializeJugglingState(const std::vector<int>& V);
 public:
-	Machine(const dart::simulation::WorldPtr& rigid_world,MusculoSkeletalSystem* musculo_skeletal_system,const std::vector<BallInfo*>& balls,const double& dt);
+	Machine(
+		const dart::simulation::WorldPtr& rigid_world,
+		FEM::World* soft_world,
+		MusculoSkeletalSystem* musculo_skeletal_system,
+		const std::vector<BallInfo*>& balls,
+		Controller* controller,const double& dt);
 	
 	State* 	AddState(const std::string& name);
 	void 	AddEvent(State* state_from,State* state_to,const std::string& name);

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.6)
 project(volumetric)
 add_compile_options(-std=gnu++11)
+#add_compile_options(-mavx)
+#add_compile_options(-mfma)
 add_compile_options(-Wdeprecated-declarations)
 
 SET(CMAKE_BUILD_TYPE Release CACHE STRING
@@ -9,7 +11,6 @@ SET(CMAKE_BUILD_TYPE Release CACHE STRING
 	)
 SET( ENABLE_VMCON2D ON CACHE BOOL "Enable Vmcon2D" )
 SET( ENABLE_OCTOCON2D ON CACHE BOOL "Enable Octocon2D" )
-SET( ENABLE_PLUSH2D ON CACHE BOOL "Enable Plush2D" )
 
 
 add_subdirectory( fem2D )
@@ -37,7 +38,6 @@ link_directories(./GUI/)
 
 file(GLOB vmcon2d_srcs "vmcon2D/*.h" "vmcon2D/*.cpp")
 file(GLOB octocon2d_srcs "octocon2D/*.h" "octocon2D/*.cpp")
-file(GLOB plush2d_srcs "plush2D/*.h" "plush2D/*.cpp")
 
 if (ENABLE_VMCON2D)
 	project(vmcon2D)
@@ -52,14 +52,12 @@ endif()
 if (ENABLE_OCTOCON2D)
 	project(octocon2D)
 
+	    find_library(TINYXML_LIBRARIES
+      NAMES tinyxml
+    )
+
 	add_executable(octocon2D ${octocon2d_srcs})
-	target_link_libraries(octocon2D ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} fem2D GUI)
+	target_link_libraries(octocon2D ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${TINYXML_LIBRARIES} fem2D GUI)
 endif()
 
-if (ENABLE_PLUSH2D)
-	project(plush2D)
-
-	add_executable(plush2D ${plush2d_srcs})
-	target_link_libraries(plush2D ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} fem2D GUI)
-endif()
 

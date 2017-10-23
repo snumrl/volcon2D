@@ -48,6 +48,12 @@ GetSolution()
 {
 	return mSolution;
 }
+void
+IKOptimization::
+SetSolution(Eigen::VectorXd& sol)
+{
+	mSolution = sol;
+}
 IKOptimization::
 ~IKOptimization()
 {

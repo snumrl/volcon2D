@@ -128,8 +128,16 @@ DrawSkeleton(const dart::dynamics::SkeletonPtr& skel,const Eigen::Vector3d& colo
             }
             
         }
-        glPopMatrix();
 
+    }
+    for(int j =0;j<skel->getNumBodyNodes();j++)
+    {
+        auto bn = skel->getBodyNode(j);
+        auto T = bn->getTransform();
+        Eigen::Vector3d p = T.translation();
+        Eigen::Vector3d v = bn->getCOMLinearVelocity();
+        v*= 0.05;
+        DrawArrow(p.block<2,1>(0,0),v.block<2,1>(0,0),Eigen::Vector3d(0,0,1));
     }
     glEnable(GL_DEPTH_TEST);
 }

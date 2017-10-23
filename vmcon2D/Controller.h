@@ -21,10 +21,6 @@ class BallInfo;
 typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;
 
 
-
-
-
-
 class Controller
 {
 private:
@@ -47,7 +43,6 @@ public:
 	Eigen::VectorXd Compute();
 	Eigen::VectorXd ComputePDForces();
 	const Eigen::VectorXd& GetTargetPositions(){return mTargetPositions;};
-	// Eigen::VectorXd SolveIK(const Eigen::Vector3d& target_position,AnchorPoint ap);
 
 	Machine* GetMachine();
 };

@@ -1,0 +1,58 @@
+<Muscles>
+    <leg>
+		<fiber>
+			<start num="0" idx1="0" idx2="1" idx3="25"/>
+			<end num="47" idx1="601" idx2="600" idx3="576"/>
+		</fiber>	
+		<fiber>
+			<start num="0" idx1="3" idx2="4" idx3="28"/>
+			<end num="47" idx1="604" idx2="603" idx3="579"/>
+		</fiber>
+	</leg>
+
+	<leg>
+		<fiber>
+			<start num="0" idx1="5" idx2="6" idx3="30"/>
+			<end num="47" idx1="606" idx2="605" idx3="581"/>
+		</fiber>	
+		<fiber>
+			<start num="0" idx1="8" idx2="9" idx3="33"/>
+			<end num="47" idx1="609" idx2="608" idx3="584"/>
+		</fiber>
+	</leg>
+
+	<leg>
+		<fiber>
+			<start num="0" idx1="10" idx2="11" idx3="35"/>
+			<end num="47" idx1="611" idx2="610" idx3="586"/>
+		</fiber>	
+		<fiber>
+			<start num="0" idx1="13" idx2="14" idx3="38"/>
+			<end num="47" idx1="614" idx2="613" idx3="589"/>
+		</fiber>
+	</leg>
+
+	<leg>
+		<fiber>
+			<start num="0" idx1="15" idx2="16" idx3="40"/>
+			<end num="47" idx1="616" idx2="615" idx3="591"/>
+		</fiber>	
+		<fiber>
+			<start num="0" idx1="18" idx2="19" idx3="43"/>
+			<end num="47" idx1="619" idx2="618" idx3="594"/>
+		</fiber>
+	</leg>
+
+	<leg>
+		<fiber>
+			<start num="0" idx1="20" idx2="21" idx3="45"/>
+			<end num="47" idx1="621" idx2="620" idx3="596"/>
+		</fiber>	
+		<fiber>
+			<start num="0" idx1="23" idx2="24" idx3="48"/>
+			<end num="47" idx1="624" idx2="623" idx3="599"/>
+		</fiber>
+	</leg>
+
+</Muscles>
+

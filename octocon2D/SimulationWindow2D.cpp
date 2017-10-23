@@ -1,17 +1,50 @@
 #include "SimulationWindow2D.h"
+#include "Octopus.h"
 #include "GUI/Camera2D.h"
 #include "GUI/GL_function.h"
 #include "FEM2D_Interface.h"
 #include "fem2D/Constraint/ConstraintHeaders.h"
 #include "GL/glut.h"
+#include <fstream>
+
 using namespace FEM;
+
 SimulationWindow2D::
-SimulationWindow2D(FEM::World* soft_world)
-	:mSoftWorld(soft_world),mMouseMode(MOUSE_MODE::CAMERA_CONTROL),
+SimulationWindow2D()
+	:mMouseMode(MOUSE_MODE::CAMERA_CONTROL),
 	mDragConstraint(new AttachmentConstraint(50000.0,0,Eigen::Vector2d(0,0))),
+	mOctopus(new Octopus()),
 	mIsPlay(false)
 {
-	mDisplayTimeout = soft_world->GetTimeStep()*1000;
+	Initialize();
+	mDisplayTimeout = mSoftWorld->GetTimeStep()*1000;
+}
+
+void
+SimulationWindow2D::
+Initialize()
+{
+	mSoftWorld = new FEM::World(
+		// FEM::IntegrationMethod::IMPLICIT_NEWTON_METHOD,		//Integration Method
+		// FEM::IntegrationMethod::QUASI_STATIC,		//Integration Method
+		// FEM::IntegrationMethod::PROJECTIVE_QUASI_STATIC,		//Integration Method
+		FEM::IntegrationMethod::PROJECTIVE_DYNAMICS,		//Integration Method
+		1.0/500.0,										//time_step
+		50, 											//max_iteration	
+		0.999											//damping_coeff
+		);
+
+	MakeMuscles("../octocon2D/export/muscle.xml",mOctopus);
+	mOctopus->Initialize(mSoftWorld);
+	mSoftWorld->Initialize();
+}
+
+void
+SimulationWindow2D::
+PrintPosition() {
+	std::cout << "Print Target" << std::endl;
+	auto target = mSoftWorld->GetPositions();
+	
 }
 
 void
@@ -66,7 +99,7 @@ void
 SimulationWindow2D::
 Keyboard(unsigned char key,int x,int y)
 {
-	// auto& act = mSimulator->mMusculoSkeletalSystem->GetActivationLevel();
+	auto act = mOctopus->GetActivationLevel();
 	switch(key)
 	{
 		case 't' : 
@@ -80,59 +113,74 @@ Keyboard(unsigned char key,int x,int y)
 			std::cout<<"CAMERA_CONTROL mode"<<std::endl;
 		}
 		break;
-	// 	break;
-	// 	case 'a' : mSimulator->PrintTimer();break;
-		case ' ' : mIsPlay = !mIsPlay; break;
-	// 	case 'p' : mSimulator->SetPlay(false);
-	// 			   mIsReplay = true;
-	// 			    break;
-	// 	case 'r' : act.setZero();break;
-	// 	case '1' : act[1] += 0.1;break;
-	// 	case '2' : act[2] += 0.1;break;
-	// 	case '3' : act[3] += 0.1;break;
-	// 	case '4' : act[4] += 0.1;break;
-	// 	case '5' : act[5] += 0.1;break;
-	// 	case '6' : act[6] += 0.1;break;
-	// 	case '7' : act[7] += 0.1;break;
-	// 	case '8' : act[8] += 0.1;break;
-	// 	case '9' : act[9] += 0.1;break;
-	// 	case '0' : act[0] += 0.1;break;
+	
+		case ' ' : mIsPlay = !mIsPlay; break;	
+		case 'r' : act.setZero();break;
+		case '1' : act[0] += 0.05;break;
+		case '2' : act[1] += 0.05;break;
+		case '3' : act[2] += 0.05;break;
+		case '4' : act[3] += 0.05;break;
+		case '5' : act[4] += 0.05;break;
+		case '6' : act[5] += 0.05;break;
+		case '7' : act[6] += 0.05;break;
+		case '8' : act[7] += 0.05;break;
+		case '9' : act[8] += 0.05;break;
+		case '0' : act[9] += 0.05;break;
+	
+		case 'p' : PrintPosition();break;
+
 		case 27: exit(0);break;
 		default : break;
 	}
 
-	// for(int i=0;i<act.rows();i++)
-	// 	if(act[i]>1.0)
-	// 		act[i] =1.0;
-	// mSimulator->mMusculoSkeletalSystem->SetActivationLevel(act);
+	for(int i=0;i<act.rows();i++)
+		if(act[i]>1.0)
+			act[i] =1.0;
+	mOctopus->SetActivationLevel(act);
 	glutPostRedisplay();
 }
+
+Target target;
 void
 SimulationWindow2D::
 Mouse(int button, int state, int x, int y)
 {
+	
 	if (state == GLUT_DOWN)
-	{
+	{	
 		auto mouse_world = mCamera->GetWorldPosition(x,y);
 		mIsDrag = true;
 		mMouseType = button;
 		mPrevX = x;
 		mPrevY = y;
 
+		target.idx = mSoftWorld->GetClosestNode(mouse_world);
+		// std::cout << "DOWN: " << target.idx << std::endl;
+
 		if(mMouseMode==CONSTRAINT_CONTROL)
 		{
-			int closest_node = mSoftWorld->GetClosestNode(mouse_world);
-			if(closest_node>=0)
-			{
-				mDragConstraint->GetI0() = closest_node;
-				mDragConstraint->GetP() = mouse_world;
-				mSoftWorld->AddConstraint(mDragConstraint);
-				std::cout<<closest_node<<std::endl;
-			}	
+			/* Simulation */
+			// int closest_node = mSoftWorld->GetClosestNode(mouse_world);
+			// if(closest_node>=0)
+			// 
+				// mDragConstraint->GetI0() = closest_node;
+				// mDragConstraint->GetP() = mouse_world;
+				// mSoftWorld->AddConstraint(mDragConstraint);
+				// std::cout<<closest_node<<std::endl;
+			// }	
 		}
 	}
 	else
 	{
+		if(mMouseMode==CONSTRAINT_CONTROL) {
+			auto mouse_world = mCamera->GetWorldPosition(x,y);
+			
+			target.coord = mouse_world;
+			// std::cout << "UP: " << target.idx << std::endl;
+			mOctopus->AddTarget(target);
+			mOctopus->SolveSoftIK(mSoftWorld);
+		}
+
 		mIsDrag = false;
 		mMouseType = 0;
 		mSoftWorld->RemoveConstraint(mDragConstraint);
@@ -182,3 +230,4 @@ Timer(int value)
 	glutPostRedisplay();
 	glutTimerFunc(mDisplayTimeout, TimerEvent,1);
 }
+
