@@ -16,8 +16,6 @@ class Record;
 class Controller;
 class MuscleOptimization;
 class MusculoSkeletalSystem;
-class Machine;
-class State;
 class BallInfo;
 typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;
 enum MOUSE_MODE

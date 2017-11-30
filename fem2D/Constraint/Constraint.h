@@ -27,7 +27,8 @@ public:
     virtual void EvalGradient(const Eigen::VectorXd& x, Eigen::VectorXd& gradient) = 0;
     virtual void EvalHessian(const Eigen::VectorXd& x, const Eigen::VectorXd& dx, Eigen::VectorXd& dg) = 0;
 
-    virtual void EvaluateDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d) = 0;
+    virtual void GetDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d) = 0;
+    virtual void EvaluateDVector(const Eigen::VectorXd& x) = 0;
     virtual void EvaluateJMatrix(int index, std::vector<Eigen::Triplet<double>>& J_triplets) = 0;
     virtual void EvaluateLMatrix(std::vector<Eigen::Triplet<double>>& L_triplets) = 0;
 

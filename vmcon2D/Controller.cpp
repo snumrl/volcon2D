@@ -1,8 +1,7 @@
 #include "Controller.h"
+#include "BallInfo.h"
 #include "MusculoSkeletalSystem.h"
 #include "IKOptimization.h"
-#include "FSM_Interface.h"
-#include "FSM.h"
 #include "MuscleOptimization.h"
 #include "fem2D/Constraint/ConstraintHeaders.h"
 #include "GL/glut.h"
@@ -14,7 +13,6 @@ using namespace Ipopt;
 
 Controller::
 Controller()
-	:mFSM(nullptr)
 {
 	
 }
@@ -61,15 +59,14 @@ Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSys
 	mMuscleOptimizationSolver->Options()->SetIntegerValue("max_iter", 100);
 	mMuscleOptimizationSolver->Options()->SetNumericValue("tol", 1e-4);
 
-	double kp = 4000.0;
+	double kp = 300.0;
 	double kv = 2*sqrt(kp);
 	int n = mMusculoSkeletalSystem->GetSkeleton()->getNumDofs();
 	mKp = Eigen::VectorXd::Constant(n,kp);
 	mKv = Eigen::VectorXd::Constant(n,kv);
 
-	mFSM = new Machine(mRigidWorld,mSoftWorld,mMusculoSkeletalSystem,mBalls,this,mSoftWorld->GetTimeStep());
-	MakeMachine("../vmcon2D/export/juggling.xml",mFSM);
-	mFSM->Trigger("start");
+	mTargetPositions = Eigen::VectorXd::Constant(n,0.0);
+	mTargetVelocities = Eigen::VectorXd::Constant(n,0.0);
 }
 
 Eigen::VectorXd
@@ -80,12 +77,6 @@ Compute()
 	Eigen::VectorXd qdd_desired = ComputePDForces();
 
 	static_cast<MuscleOptimization*>(GetRawPtr(mMuscleOptimization))->Update(qdd_desired);
-
-	for(auto& ball : mBalls)
-		ball->TimeStepping();
-
-
-
 
 	if(mSoftWorld->GetTime() == 0.0){
 		mMuscleOptimizationSolver->Initialize();
@@ -106,9 +97,6 @@ ComputePDForces()
 {
 	auto& skel =mMusculoSkeletalSystem->GetSkeleton();
 
-	mFSM->GetMotion(mTargetPositions,mTargetVelocities);
-
-
 	Eigen::VectorXd pos_m = mTargetPositions;
 	Eigen::VectorXd vel_m = mTargetVelocities;
 
@@ -127,14 +115,5 @@ ComputePDForces()
 				(vel_m - vel).cwiseProduct(mKv);
 
 	return qdd_desired;
-}
-
-
-
-Machine*
-Controller::
-GetMachine()
-{
-	return mFSM;
 }
 

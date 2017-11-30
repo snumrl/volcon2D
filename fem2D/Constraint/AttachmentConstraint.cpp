@@ -34,11 +34,18 @@ EvalHessian(const Eigen::VectorXd& x, const Eigen::VectorXd& dx, Eigen::VectorXd
 	dg.block<2,1>(mi0*2,0) += mStiffness*dx.block<2,1>(mi0*2,0);
 }
 
+
 void
 AttachmentConstraint::
-EvaluateDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d)
+GetDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d)
 {
-	d.block<2,1>(2*index,0) = mp;
+	d.block<2,1>(2*index,0) = md;
+}
+void
+AttachmentConstraint::
+EvaluateDVector(const Eigen::VectorXd& x)
+{
+	md = mp;
 }
 void
 AttachmentConstraint::

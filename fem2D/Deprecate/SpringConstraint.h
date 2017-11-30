@@ -14,7 +14,8 @@ public:
 	void EvalGradient(const Eigen::VectorXd& x, Eigen::VectorXd& gradient) override;
 	void EvalHessian(const Eigen::VectorXd& x, const Eigen::VectorXd& dx, Eigen::VectorXd& dg) override;
 
-	void EvaluateDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d) override;
+	void GetDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d) override;
+    void EvaluateDVector(const Eigen::VectorXd& x) override;
     void EvaluateJMatrix(int index, std::vector<Eigen::Triplet<double>>& J_triplets) override;
     void EvaluateLMatrix(std::vector<Eigen::Triplet<double>>& L_triplets) override;
 

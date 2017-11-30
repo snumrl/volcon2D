@@ -192,10 +192,15 @@ EvalHessian(const Eigen::VectorXd& x, const Eigen::VectorXd& dx, Eigen::VectorXd
 	dg.block<2,1>(mi1*2,0) += dP.block<2,1>(0,0);
 	dg.block<2,1>(mi2*2,0) += dP.block<2,1>(0,1);
 }
-
 void
 CorotateFEMConstraint::
-EvaluateDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d)
+GetDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d)
+{
+	d.block<4,1>(2*index,0) = md;
+}
+void
+CorotateFEMConstraint::
+EvaluateDVector(const Eigen::VectorXd& x)
 {
 	ComputeDeformationGradient(x);
 	double a1,a2,d1,d2;
@@ -217,13 +222,9 @@ EvaluateDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d)
 
 	}
 
-
 	auto R_star = (0.1*mCacheR + 0.9*mCacheU*(D+mCacheD)*(mCacheV.transpose()));
-	// auto R_star = mCacheR;
-	d.block<2,1>(2*index,0) = R_star.block<2,1>(0,0);
-	d.block<2,1>(2*index+2,0) = R_star.block<2,1>(0,1);
-
-
+	md.block<2,1>(0,0) = R_star.block<2,1>(0,0);
+	md.block<2,1>(2,0) = R_star.block<2,1>(0,1);
 }
 void
 CorotateFEMConstraint::

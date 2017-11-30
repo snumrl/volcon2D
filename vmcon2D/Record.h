@@ -6,7 +6,6 @@
 #include "dart/simulation/simulation.hpp"
 #include <Eigen/Core>
 #include <Eigen/StdVector>
-class State;
 class MusculoSkeletalSystem;
 class Controller;
 namespace FEM
@@ -31,7 +30,6 @@ public:
 	Eigen::VectorXd soft_body_positions;
 	Eigen::VectorXd activation_levels;
 	std::vector<std::pair<Eigen::Vector2d,Eigen::Vector2d>> muscle_forces;
-	State*	state;
 };
 
 #endif

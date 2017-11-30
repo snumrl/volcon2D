@@ -4,8 +4,6 @@
 #include "GUI/GL_function.h"
 #include "FEM2D_Interface.h"
 #include "DART_Interface.h"
-#include "FSM_Interface.h"
-#include "FSM.h"
 #include "Record.h"
 #include "MuscleOptimization.h"
 #include "fem2D/Constraint/ConstraintHeaders.h"
@@ -148,7 +146,6 @@ Display()
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_DEPTH_TEST);
 	mCamera->Apply();
-	DrawMachine(mController->GetMachine(),0.2,0.8);
 	glColor3f(0,0,0);
 	glLineWidth(1.0);
 	glBegin(GL_LINES);

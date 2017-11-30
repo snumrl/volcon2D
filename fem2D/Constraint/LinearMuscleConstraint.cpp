@@ -57,16 +57,19 @@ EvalHessian(const Eigen::VectorXd& x, const Eigen::VectorXd& dx, Eigen::VectorXd
 	dg.block<2,1>(mi1*2,0) += dP.block<2,1>(0,0);
 	dg.block<2,1>(mi2*2,0) += dP.block<2,1>(0,1);
 }
-
 void
 LinearMuscleConstraint::
-EvaluateDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d)
+GetDVector(int index, const Eigen::VectorXd& x,Eigen::VectorXd& d)
+{
+	d.block<2,1>(2*index,0) = md;
+}
+void
+LinearMuscleConstraint::
+EvaluateDVector(const Eigen::VectorXd& x)
 {
 	ComputeDeformationGradient(x);
-	auto p = (1.0-mActivationLevel)*mCacheF*mFiberDirection;
-	// auto p = mCacheF*mFiberDirection;
-	d.block<2,1>(2*index,0) = p;
-};
+	md = (1.0-mActivationLevel)*mCacheF*mFiberDirection;
+}
 void
 LinearMuscleConstraint::
 EvaluateJMatrix(int index, std::vector<Eigen::Triplet<double>>& J_triplets)

@@ -3,7 +3,6 @@
 #include "fem2D/Constraint/ConstraintHeaders.h"
 #include "MusculoSkeletalSystem.h"
 #include "Controller.h"
-#include "FSM.h"
 #include "Record.h"
 
 using namespace dart::dynamics;
@@ -28,8 +27,6 @@ Set(const dart::simulation::WorldPtr& rigid_world,
 	activation_levels = musculo_skeletal_system->GetActivationLevel();
 	for(auto& muscle : musculo_skeletal_system->GetMuscles())
 		muscle_forces.push_back(std::make_pair(muscle->force_origin,muscle->force_insertion));
-	if(controller!=nullptr)
-		state = controller->GetMachine()->GetCurrentState();
 }
 
 void
@@ -59,7 +56,5 @@ Get(const dart::simulation::WorldPtr& rigid_world,
         muscle->insertion->GetP() = GetPoint(muscle->insertionWayPoints[0]);
         count++;
     }
-    if(controller!=nullptr)
-    	controller->GetMachine()->SetCurrentState(state);
 }
 

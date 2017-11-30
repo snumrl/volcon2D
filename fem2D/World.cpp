@@ -704,10 +704,15 @@ EvaluateDVector(const Eigen::VectorXd& x,Eigen::VectorXd& d)
 	d.resize(2*mConstraintDofs);
 
 	int index = 0;
-	
+#pragma omp parallel for
+	for(int i=0;i<mConstraints.size();i++)
+	{
+		mConstraints[i]->EvaluateDVector(x);
+	}
+
 	for(int i =0;i<mConstraints.size();i++)
 	{
-		mConstraints[i]->EvaluateDVector(index,x,d);
+		mConstraints[i]->GetDVector(index,x,d);
 		index+=mConstraints[i]->GetDof();
 	}
 }

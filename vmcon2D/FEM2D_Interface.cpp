@@ -12,11 +12,11 @@ DrawConstraint(Constraint* c,const Eigen::VectorXd& X)
 		auto* cc = static_cast<AttachmentConstraint*>(c);
 		DrawLines(cc->GetP(),X.block<2,1>(cc->GetI0()*2,0),Eigen::Vector3d(1,0,0));
 	}
-	else if(type == ConstraintType::SPRING)
-	{
-		auto* cc = static_cast<SpringConstraint*>(c);
-		DrawLines(X.block<2,1>(cc->GetI0()*2,0),X.block<2,1>(cc->GetI1()*2,0),Eigen::Vector3d(0,0,0));
-	}
+	// else if(type == ConstraintType::SPRING)
+	// {
+	// 	auto* cc = static_cast<SpringConstraint*>(c);
+	// 	DrawLines(X.block<2,1>(cc->GetI0()*2,0),X.block<2,1>(cc->GetI1()*2,0),Eigen::Vector3d(0,0,0));
+	// }
 	else if(type == ConstraintType::COROTATE)
 	{
 		auto* cc = static_cast<CorotateFEMConstraint*>(c);

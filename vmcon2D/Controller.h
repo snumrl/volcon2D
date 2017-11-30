@@ -15,16 +15,13 @@
 class Controller;
 class MuscleOptimization;
 class MusculoSkeletalSystem;
-class Machine;
 class IKOptimization;
 class BallInfo;
 typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;
 
-
 class Controller
 {
 private:
-	Machine*									mFSM;
 	FEM::World*									mSoftWorld;
 	dart::simulation::WorldPtr  				mRigidWorld;
 	MusculoSkeletalSystem*						mMusculoSkeletalSystem;
@@ -43,8 +40,6 @@ public:
 	Eigen::VectorXd Compute();
 	Eigen::VectorXd ComputePDForces();
 	const Eigen::VectorXd& GetTargetPositions(){return mTargetPositions;};
-
-	Machine* GetMachine();
 };
 
 #endif
