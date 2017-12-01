@@ -46,7 +46,7 @@ TransferForce(Eigen::Vector2d& f_origin,Eigen::Vector2d& f_insertion)
 
 MusculoSkeletalSystem::
 MusculoSkeletalSystem()
-	:mTendonStiffness(1E5),mMuscleStiffness(1E6),mYoungsModulus(1E6),mPoissonRatio(0.3)
+	:mTendonStiffness(1E5),mMuscleStiffness(1E5),mYoungsModulus(5E5),mPoissonRatio(0.3)
 {
 
 }
@@ -294,68 +294,75 @@ MakeSkeleton(MusculoSkeletalSystem* ms)
 {
 	ms->GetSkeleton() = Skeleton::create("human");
 	auto& skel = ms->GetSkeleton();
-	MakeRootBody(skel,"Torso",Eigen::Vector3d(0.05,0.6,0.0),Eigen::Vector3d(0,-0.3,0),10);
+	MakeRootBody(skel,"Torso",Eigen::Vector3d(0.05,0.6,0.0),Eigen::Vector3d(0,-0.3,0),5);
+
 	MakeBody(skel,skel->getBodyNode("Torso"),"NeckR",
 		Eigen::Vector3d(0.3,0.05,0.0),
 		Eigen::Vector3d(0.0,0.3,0),
-		Eigen::Vector3d(-0.15,0.0,0),5);
+		Eigen::Vector3d(-0.15,0.0,0),2);
 
-	MakeBody(skel,skel->getBodyNode("Torso"),"NeckL",
-		Eigen::Vector3d(0.3,0.05,0.0),
-		Eigen::Vector3d(0.0,0.3,0),
-		Eigen::Vector3d(0.15,0.0,0),5);
+	// MakeBody(skel,skel->getBodyNode("Torso"),"NeckL",
+	// 	Eigen::Vector3d(0.3,0.05,0.0),
+	// 	Eigen::Vector3d(0.0,0.3,0),
+	// 	Eigen::Vector3d(0.15,0.0,0),5);
 
 	MakeBody(skel,skel->getBodyNode("NeckR"),"ShoulderR",
 		Eigen::Vector3d(0.3,0.05,0.0),
 		Eigen::Vector3d(0.15,0.0,0),
-		Eigen::Vector3d(-0.15,0.0,0),5);
+		Eigen::Vector3d(-0.15,0.0,0),1);
 
-	MakeBody(skel,skel->getBodyNode("NeckL"),"ShoulderL",
-		Eigen::Vector3d(0.3,0.05,0.0),
-		Eigen::Vector3d(-0.15,0.0,0),
-		Eigen::Vector3d(0.15,0.0,0),5);
+	// MakeBody(skel,skel->getBodyNode("NeckL"),"ShoulderL",
+	// 	Eigen::Vector3d(0.3,0.05,0.0),
+	// 	Eigen::Vector3d(-0.15,0.0,0),
+	// 	Eigen::Vector3d(0.15,0.0,0),5);
 
 	MakeBody(skel,skel->getBodyNode("ShoulderR"),"ElbowR",
 		Eigen::Vector3d(0.3,0.05,0.0),
 		Eigen::Vector3d(0.15,0.0,0),
-		Eigen::Vector3d(-0.15,0.0,0),5);
+		Eigen::Vector3d(-0.15,0.0,0),1);
 
-	MakeBody(skel,skel->getBodyNode("ShoulderL"),"ElbowL",
-		Eigen::Vector3d(0.3,0.05,0.0),
-		Eigen::Vector3d(-0.15,0.0,0),
-		Eigen::Vector3d(0.15,0.0,0),5);
+	// MakeBody(skel,skel->getBodyNode("ShoulderL"),"ElbowL",
+	// 	Eigen::Vector3d(0.3,0.05,0.0),
+	// 	Eigen::Vector3d(-0.15,0.0,0),
+	// 	Eigen::Vector3d(0.15,0.0,0),5);
 
 	MakeWeldBody(skel,skel->getBodyNode("Torso"),"Head",
 		0.07,
 		Eigen::Vector3d(0,0.40,0),
 		Eigen::Vector3d(0,0,0),
-		10);
+		1);
 
 	MakeWeldBody(skel,skel->getBodyNode("ElbowR"),"HandR",
 		0.02,
 		Eigen::Vector3d(0.17,0,0),
 		Eigen::Vector3d(0,0,0),
-		3);
+		0.5);
 
-	MakeWeldBody(skel,skel->getBodyNode("ElbowL"),"HandL",
-		0.02,
-		Eigen::Vector3d(-0.17,0.0,0),
-		Eigen::Vector3d(0,0,0),
-		3);
+	// MakeWeldBody(skel,skel->getBodyNode("ElbowL"),"HandL",
+	// 	0.02,
+	// 	Eigen::Vector3d(-0.17,0.0,0),
+	// 	Eigen::Vector3d(0,0,0),
+	// 	3);
 
 
 
 	auto pos = skel->getPositions();
-	pos[0] = 0.0;
+	// pos[0] = 0.0;
 
-	pos[1] = 0.1;
-	pos[2] = -0.1;
+	pos[0] = 0.1;
 
-	pos[3] = -1.0;
-	pos[4] = 1.0;
+	pos[1] = -1.0;
 
-	pos[5] = -1.0;
-	pos[6] = 1.0;
+	pos[2] = -1.0;
+
+	// 	pos[1] = 0.1;
+	// pos[2] = -0.1;
+
+	// pos[3] = -1.0;
+	// pos[4] = 1.0;
+
+	// pos[5] = -1.0;
+	// pos[6] = 1.0;
 
 	
 	skel->setPositions(pos);
@@ -366,9 +373,9 @@ MakeSkeleton(MusculoSkeletalSystem* ms)
 	// skel->getDof(3)->setPositionLimits(0.0,0.0);
 	// skel->getDof(4)->setPositionLimits(0.0,0.0);
 
-	skel->getDof(0)->setPositionLimits(-0.1,0.1);
-	skel->getDof(1)->setPositionLimits(-0.4,0.2);
-	skel->getDof(2)->setPositionLimits(-0.2,0.4);
+	// skel->getDof(0)->setPositionLimits(-0.1,0.1);
+	// skel->getDof(1)->setPositionLimits(-0.4,0.2);
+	// skel->getDof(2)->setPositionLimits(-0.2,0.4);
 	// skel->getDof(3)->setPositionLimits(-1.57,0.0);
 	// skel->getDof(4)->setPositionLimits(0.0,1.57);
 

@@ -36,7 +36,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 link_directories(./fem2D/)
 link_directories(./GUI/)
 
-file(GLOB vmcon2d_srcs "vmcon2D/*.h" "vmcon2D/*.cpp")
+file(GLOB vmcon2d_srcs "vmcon2D/*.h" "vmcon2D/*.cpp" "vmcon2D/DDP/*.h" "vmcon2D/DDP/*.cpp")
 file(GLOB octocon2d_srcs "octocon2D/*.h" "octocon2D/*.cpp")
 
 if (ENABLE_VMCON2D)

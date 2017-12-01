@@ -37,8 +37,11 @@ Init(const Eigen::VectorXd& x0,const std::vector<Eigen::VectorXd>& u0,const Eige
 	mu_lower = u_lower;
 	mu_upper = u_upper;
 
-	for(int t = 0;t <mN-1;t++)
+
+	for(int t = 0;t <mN-1;t++){
 		Evalf(mx[t],mu[t],t,mx[t+1]);
+
+	}
 }
 void
 DDP::
@@ -49,6 +52,7 @@ ComputeDerivative()
 	{
 		double c;
 
+
 		Evalfx(mx[t],mu[t],t,mfx[t]);
 		Evalfu(mx[t],mu[t],t,mfu[t]);
 
@@ -58,10 +62,13 @@ ComputeDerivative()
 		EvalCxx(mx[t],mu[t],t, mCxx[t]);
 		EvalCxu(mx[t],mu[t],t, mCxu[t]);
 		EvalCuu(mx[t],mu[t],t, mCuu[t]);
-
 		mCost+=c;
 	}
 
+	// for(int t =0;t<mN-1;t++)
+	// {
+	// 	std::cout<<mfx[t].transpose()<<std::endl<<std::endl;
+	// }
 	double cf;
 	EvalCf(mx[mN-1],cf);
 	mCost +=cf;
@@ -70,6 +77,7 @@ ComputeDerivative()
 
 	EvalCfx(mx[mN-1],mVx[mN-1]);
 	EvalCfxx(mx[mN-1],mVxx[mN-1]);
+
 }
 bool
 DDP::
@@ -96,12 +104,20 @@ BackwardPass()
 		Qux_reg = Qxu_reg.transpose();
 		Quu_reg = mCuu[t] + mfu[t].transpose()*(mVxx[t+1]+muI)*mfu[t];
 
-		if(!CheckPSD(Quu_reg))
+		if(!CheckPSD(Quu_reg)){
+			std::cout << "no PSD at "<< t<< std::endl;
 			return false;
+		}
 
+		//For large dim
+		// Eigen::LLT<Eigen::MatrixXd> llt(Quu_reg);
+	
+		// mK[t] = -llt.solve(Qux);
+		// mK[t] = -llt.solve(Qu);
+
+		//For small dim
 		Quu_inv = Quu_reg.inverse();
 
-		
 		mK[t] = -Quu_inv*Qux;
 		mk[t] = -Quu_inv*Qu;
 		
@@ -123,15 +139,17 @@ ForwardPass()
 	x_new.resize(mN,Eigen::VectorXd::Zero(mSx));
 	u_new.resize(mN-1,Eigen::VectorXd::Zero(mSu));
 	x_new[0] = mx[0];
+	if(mAlpha<1E-3)
+		mAlpha =0.0;
+
 	for(int t = 0;t<mN-1;t++)
 	{
 		u_new[t] = mu[t] + mAlpha*mk[t] + mK[t]*(x_new[t]-mx[t]);
 
-		for(int i =0;i<u_new[t].rows();i++)
-		{
-			u_new[t] = u_new[t].cwiseMax(mu_lower);
-			u_new[t] = u_new[t].cwiseMin(mu_upper);
-		}
+		u_new[t] = u_new[t].cwiseMax(mu_lower);
+		u_new[t] = u_new[t].cwiseMin(mu_upper);
+
+		std::cout<<(mu[t].transpose()-u_new[t].transpose()).norm()<<std::endl;
 
 		Evalf(x_new[t],u_new[t],t,x_new[t+1]);
 	}
@@ -148,6 +166,7 @@ ForwardPass()
 	EvalCf(mx[mN-1],c);
 	cost_new += c;
 
+	std::cout<<"alpha : "<<mAlpha<<" "<<cost_new<<std::endl;
 	return cost_new;
 }
 
@@ -182,7 +201,7 @@ Solve()
 		double dcost;
 		if(mBackwardPassDone)
 		{
-			for(int k =0;k<10;k++)
+			for(int k =0;k<20;k++)
 			{
 				mx = xtemp;	
 				mu = utemp;	
@@ -216,6 +235,7 @@ Solve()
 		}
 		else
 		{
+			std::cout<<"Forward Pass Fail."<<std::endl;
 			mLambda = std::max(mLambda*mLambda_0,mLambda_0);
 			mMu = std::max(mMu*mLambda,mMu_min);
 
@@ -241,7 +261,7 @@ CheckPSD(const Eigen::MatrixXd& A)
     {
         if (singular_values[i].real() < 0.0)
         {
-            std::cout << "no PSD" << std::endl;
+            
             return false;
         }
     }

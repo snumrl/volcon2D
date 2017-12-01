@@ -9,7 +9,7 @@
 class DDP
 {
 public:
-	DDP(int sx,int su,int n = 50,int max_iteration = 200);
+	DDP(int sx,int su,int n,int max_iteration);
 
 	void Init(
 		const Eigen::VectorXd& x0,const std::vector<Eigen::VectorXd>& u0,

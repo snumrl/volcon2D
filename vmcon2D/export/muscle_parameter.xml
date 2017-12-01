@@ -203,7 +203,7 @@
 
 
 	<!--LEFT-->
-	<unit>
+	<!-- <unit>
 		<mesh type="Rectangle" nx="3" ny="1" ratio="0.5"/>
 		<origin>
 			<anchor body="Torso" x="-0.05" y="-0.16"/>
@@ -396,6 +396,6 @@
 			<anchor body="ElbowL" x="-0.0973513" y="0.0707829"/>
 			<anchor body="ElbowL" x="-0.150075" y="0.0401847"/>
 		</insertion>
-	</unit>
+	</unit> -->
 </Muscles>
 
