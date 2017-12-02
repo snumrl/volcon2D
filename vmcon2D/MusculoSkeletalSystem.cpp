@@ -195,6 +195,7 @@ ApplyForcesToSkeletons(FEM::World* world)
 	Eigen::VectorXd X = world->GetPositions();
 	Eigen::VectorXd force_origin(X.rows()),force_insertion(X.rows());
 	Eigen::Vector2d fo,fi;
+	
 	for(auto& muscle : mMuscles)
 	{
 		auto& origin_way_points = muscle->originWayPoints;

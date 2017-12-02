@@ -23,6 +23,7 @@ void
 MusculoSkeletalDDP::
 SetControl(const Eigen::VectorXd& u)
 {
+	mMusculoSkeletalSystem->GetSkeleton()->clearExternalForces();
 	mMusculoSkeletalSystem->SetActivationLevel(u);
 }
 void
@@ -40,9 +41,8 @@ Step(bool fem_update)
 	if(fem_update)
 	{
 		mMusculoSkeletalSystem->TransformAttachmentPoints();
-		mSoftWorld->TimeStepping(false);	
+		mSoftWorld->TimeStepping(false);
 	}
-	
 
 	double nn = mSoftWorld->GetTimeStep() / mRigidWorld->getTimeStep();
 	for(int i =0; i<nn;i++)

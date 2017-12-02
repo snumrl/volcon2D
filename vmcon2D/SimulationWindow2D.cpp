@@ -96,7 +96,7 @@ Initialize()
 	mDDPMusculoSkeletalSystem->Initialize(mDDPSoftWorld);
 	mDDPSoftWorld->Initialize();
 
-	mDDP = new VelocityControlDDP(mDDPRigidWorld,mDDPSoftWorld,mDDPMusculoSkeletalSystem,100,10);
+	mDDP = new VelocityControlDDP(mDDPRigidWorld,mDDPSoftWorld,mDDPMusculoSkeletalSystem,10,10);
 	mU = mDDP->Solve();
 }
 bool

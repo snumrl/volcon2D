@@ -48,6 +48,52 @@ DDP::
 ComputeDerivative()
 {
 	mCost = 0;
+	std::vector<Eigen::VectorXd> x_new;
+	x_new.resize(mN,Eigen::VectorXd::Zero(mSx));
+	x_new[0] = mx[0];
+
+	for(int t = 0;t<mN-1;t++)
+	{
+		std::cout<<(mx[t]-x_new[t]).transpose()<<std::endl;
+		Evalf(x_new[t],mu[t],t,x_new[t+1]);
+	}
+
+	x_new[0] = mx[0];
+
+	for(int t = 0;t<mN-1;t++)
+	{
+		std::cout<<(mx[t]-x_new[t]).transpose()<<std::endl;
+		Evalf(x_new[t],mu[t],t,x_new[t+1]);
+	}
+
+	x_new[0] = mx[0];
+
+	for(int t = 0;t<mN-1;t++)
+	{
+		std::cout<<(mx[t]-x_new[t]).transpose()<<std::endl;
+		Evalf(x_new[t],mu[t],t,x_new[t+1]);
+	}
+
+	x_new[0] = mx[0];
+
+	for(int t = 0;t<mN-1;t++)
+	{
+		std::cout<<(mx[t]-x_new[t]).transpose()<<std::endl;
+		Evalf(x_new[t],mu[t],t,x_new[t+1]);
+	}
+
+	x_new[0] = mx[0];
+
+	for(int t = 0;t<mN-1;t++)
+	{
+		std::cout<<(mx[t]-x_new[t]).transpose()<<std::endl;
+		Evalf(x_new[t],mu[t],t,x_new[t+1]);
+	}
+
+	exit(0);
+
+
+
 	for(int t =0;t<mN-1;t++)
 	{
 		double c;
@@ -139,8 +185,6 @@ ForwardPass()
 	x_new.resize(mN,Eigen::VectorXd::Zero(mSx));
 	u_new.resize(mN-1,Eigen::VectorXd::Zero(mSu));
 	x_new[0] = mx[0];
-	if(mAlpha<1E-3)
-		mAlpha =0.0;
 
 	for(int t = 0;t<mN-1;t++)
 	{
@@ -149,10 +193,10 @@ ForwardPass()
 		u_new[t] = u_new[t].cwiseMax(mu_lower);
 		u_new[t] = u_new[t].cwiseMin(mu_upper);
 
-		std::cout<<(mu[t].transpose()-u_new[t].transpose()).norm()<<std::endl;
-
 		Evalf(x_new[t],u_new[t],t,x_new[t+1]);
 	}
+
+	// std::cout<<(mu[t].transpose()-u_new[t].transpose()).norm()<<std::endl;
 
 	mx = x_new;
 	mu = u_new;
