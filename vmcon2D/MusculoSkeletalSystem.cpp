@@ -46,7 +46,7 @@ TransferForce(Eigen::Vector2d& f_origin,Eigen::Vector2d& f_insertion)
 
 MusculoSkeletalSystem::
 MusculoSkeletalSystem()
-	:mTendonStiffness(1E5),mMuscleStiffness(1E5),mYoungsModulus(5E5),mPoissonRatio(0.3)
+	:mTendonStiffness(1E5),mMuscleStiffness(1E6),mYoungsModulus(1E6),mPoissonRatio(0.3)
 {
 
 }
@@ -356,9 +356,9 @@ MakeSkeleton(MusculoSkeletalSystem* ms)
 
 	pos[0] = -0.1;
 
-	pos[1] = -0.4;
+	pos[1] = -1.0;
 
-	pos[2] = -0.4;
+	pos[2] = -1.0;
 
 	// 	pos[1] = 0.1;
 	// pos[2] = -0.1;

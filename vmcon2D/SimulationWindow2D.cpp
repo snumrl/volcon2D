@@ -37,8 +37,8 @@ Initialize()
 		// FEM::IntegrationMethod::QUASI_STATIC,		//Integration Method
 		FEM::IntegrationMethod::PROJECTIVE_QUASI_STATIC,		//Integration Method
 		// FEM::IntegrationMethod::PROJECTIVE_DYNAMICS,		//Integration Method
-		1.0/500.0,										//time_step
-		50, 											//max_iteration	
+		1.0/250.0,										//time_step
+		100, 											//max_iteration	
 		0.999											//damping_coeff
 		);
 	MakeSkeleton(mMusculoSkeletalSystem);

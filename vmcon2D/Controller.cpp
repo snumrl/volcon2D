@@ -1,4 +1,5 @@
 #include "Controller.h"
+#include "BezierCurve.h"
 #include "BallInfo.h"
 #include "DART_Interface.h"
 #include "MusculoSkeletalSystem.h"
@@ -61,7 +62,7 @@ Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSys
 	mMuscleOptimizationSolver->Options()->SetIntegerValue("max_iter", 100);
 	mMuscleOptimizationSolver->Options()->SetNumericValue("tol", 1e-4);
 
-	double kp = 200.0;
+	double kp = 500.0;
 	double kv = 2*sqrt(kp);
 	int n = mMusculoSkeletalSystem->GetSkeleton()->getNumDofs();
 	mKp = Eigen::VectorXd::Constant(n,kp);
@@ -82,8 +83,8 @@ Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSys
 		// FEM::IntegrationMethod::QUASI_STATIC,		//Integration Method
 		FEM::IntegrationMethod::PROJECTIVE_QUASI_STATIC,		//Integration Method
 		// FEM::IntegrationMethod::PROJECTIVE_DYNAMICS,		//Integration Method
-		1.0/500.0,										//time_step
-		50, 											//max_iteration	
+		1.0/250.0,										//time_step
+		100, 											//max_iteration	
 		0.999											//damping_coeff
 		);
 	MakeSkeleton(mDDPMusculoSkeletalSystem);
@@ -148,42 +149,88 @@ Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSys
 	mDDPMusculoSkeletalSystem->GetSkeleton()->setVelocities(mDDPMusculoSkeletalSystem->GetSkeleton()->getVelocities().setZero());
 	mDDPSoftWorld->SetPositions(X_soft);
 
-	mDDP = new VelocityControlDDP(mDDPRigidWorld,mDDPSoftWorld,mDDPMusculoSkeletalSystem,mDDPBalls[0],u0,u0.size(),40);
-	mU = mDDP->Solve();
+	// mDDP = new VelocityControlDDP(mDDPRigidWorld,mDDPSoftWorld,mDDPMusculoSkeletalSystem,mDDPBalls[0],u0,u0.size(),40);
+	// mU = mDDP->Solve();
+	mU = u0;
 }
 void
 Controller::
 ComputeInitialU0(std::vector<Eigen::VectorXd>& u0)
 {
-	int n = 100;
-	u0.resize(n,Eigen::VectorXd::Zero(mDDPMusculoSkeletalSystem->GetNumMuscles()));
+	int n = 50;
 
-	
-	// while(u0.size() != n)
-	// {
-	// 	bool is_fem_updated = false;
-	// 	auto& skel =mDDPMusculoSkeletalSystem->GetSkeleton();
+	double t = mDDPSoftWorld->GetTimeStep()*n;
+	Eigen::Vector2d p0,p1,p2,v2;
+	v2 = Eigen::Vector2d(0,2.0);
+	p0 = mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOM().block<2,1>(0,0);
+	p2 = mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOM().block<2,1>(0,0);
+	p2[1] +=0.2;
+	p1 = p2-v2*t;
+	std::cout<<p0.transpose()<<std::endl;
+	std::cout<<p1.transpose()<<std::endl;
+	std::cout<<p2.transpose()<<std::endl;
+	mBezierCurve = new BezierCurve(p0,p1,p2,t);
 
+	mIKOptimization = new IKOptimization(mDDPMusculoSkeletalSystem->GetSkeleton());
 
-	// 	//Simulation Loop
-	// 	if(mDDPSoftWorld->GetTime()<=mDDPRigidWorld->getTime())
-	// 	{
-	// 		is_fem_updated =true;
+	mIKSolver = new IpoptApplication();
+	mIKSolver->Options()->SetStringValue("mu_strategy", "adaptive");
+	mIKSolver->Options()->SetStringValue("jac_c_constant", "yes");
+	mIKSolver->Options()->SetStringValue("hessian_constant", "yes");
+	mIKSolver->Options()->SetStringValue("mehrotra_algorithm", "yes");
+	mIKSolver->Options()->SetIntegerValue("print_level", 2);
+	mIKSolver->Options()->SetIntegerValue("max_iter", 1000);
+	mIKSolver->Options()->SetNumericValue("tol", 1e-4);
 
-	// 		auto ui = Compute(false);
-	// 		mDDPMusculoSkeletalSystem->SetActivationLevel(ui);
-	// 		u0.push_back(ui);
-	// 	}		
+	mIKSolver->Initialize();
+	IKOptimization* ik = static_cast<IKOptimization*>(GetRawPtr(mIKOptimization));
+
+	Eigen::Vector3d r_loc = mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOM();
+
+	ik->AddTargetPositions(std::make_pair(mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR"),Eigen::Vector3d::Zero()),r_loc);
+
+	mIKSolver->OptimizeTNLP(mIKOptimization);
+	std::vector<Eigen::Vector3d> mInitialMotions;
+	AnchorPoint ap = std::make_pair(mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR"),Eigen::Vector3d(0,0,0));
+	for(int i =0;i<n+1;i++)
+	{
+		Eigen::Vector2d p_ee = mBezierCurve->GetPosition(mDDPSoftWorld->GetTimeStep()*i);
+		Eigen::Vector3d p_ee_3d(p_ee[0],p_ee[1],0);
+
+		ik->AddTargetPositions(ap,p_ee_3d);
+		mIKSolver->ReOptimizeTNLP(mIKOptimization);
+
+		mInitialMotions.push_back(ik->GetSolution());
+	}
+	std::cout<<"IK finished"<<std::endl;
+
+	while(u0.size() != n)
+	{
+		int index = u0.size();
+		bool is_fem_updated = false;
+		auto& skel =mDDPMusculoSkeletalSystem->GetSkeleton();
+
+		//Simulation Loop
+		if(mDDPSoftWorld->GetTime()<=mDDPRigidWorld->getTime())
+		{
+			is_fem_updated =true;
+			mTargetPositions = mInitialMotions[index];
+			mTargetVelocities = (mInitialMotions[index+1] - mInitialMotions[index])/mDDPSoftWorld->GetTimeStep();
+			auto ui = Compute(false);
+			mDDPMusculoSkeletalSystem->SetActivationLevel(ui);
+			u0.push_back(ui);
+		}		
 		
-	// 	if(is_fem_updated)
-	// 	{
-	// 		mDDPMusculoSkeletalSystem->TransformAttachmentPoints();
-	// 		mDDPSoftWorld->TimeStepping();
-	// 	}
-	// 	mDDPMusculoSkeletalSystem->ApplyForcesToSkeletons(mDDPSoftWorld);
+		if(is_fem_updated)
+		{
+			mDDPMusculoSkeletalSystem->TransformAttachmentPoints();
+			mDDPSoftWorld->TimeStepping();
+		}
+		mDDPMusculoSkeletalSystem->ApplyForcesToSkeletons(mDDPSoftWorld);
 
-	// 	mDDPRigidWorld->step();
-	// }
+		mDDPRigidWorld->step();
+	}
+	std::cout<<"Initial Guess finished"<<std::endl;
 }
 Eigen::VectorXd
 Controller::

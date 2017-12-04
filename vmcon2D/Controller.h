@@ -18,6 +18,7 @@ class MusculoSkeletalSystem;
 class VelocityControlDDP;
 class IKOptimization;
 class BallInfo;
+class BezierCurve;
 typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;
 
 class Controller
@@ -36,6 +37,9 @@ private:
 	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mMuscleOptimizationSolver;
 
 
+	Ipopt::SmartPtr<Ipopt::TNLP> 			 	mIKOptimization;
+	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mIKSolver;
+
 	FEM::World*					mDDPSoftWorld;
 	dart::simulation::WorldPtr  mDDPRigidWorld;
 	MusculoSkeletalSystem*		mDDPMusculoSkeletalSystem;
@@ -46,6 +50,7 @@ private:
 	std::vector<Eigen::VectorXd> mU;
 	int u_index;
 
+	BezierCurve* mBezierCurve;
 	Ipopt::SmartPtr<Ipopt::TNLP> 			 	mDDPMuscleOptimization;
 	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mDDPMuscleOptimizationSolver;
 public:
