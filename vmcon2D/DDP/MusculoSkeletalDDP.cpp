@@ -17,7 +17,7 @@ SetState(const Eigen::VectorXd& x)
 {
 	mMusculoSkeletalSystem->GetSkeleton()->setPositions(x.head(mDofs));
 	mMusculoSkeletalSystem->GetSkeleton()->setVelocities(x.tail(mDofs));
-	mMusculoSkeletalSystem->GetSkeleton()->computeForwardKinematics(true,false,false);
+	mMusculoSkeletalSystem->GetSkeleton()->computeForwardKinematics(true,true,false);
 }
 void
 MusculoSkeletalDDP::

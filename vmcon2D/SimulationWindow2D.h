@@ -37,15 +37,10 @@ protected:
 	MusculoSkeletalSystem*		mMusculoSkeletalSystem;
 	std::vector<dart::dynamics::SkeletonPtr> mBalls;
 
-	FEM::World*					mDDPSoftWorld;
-	dart::simulation::WorldPtr  mDDPRigidWorld;
-	MusculoSkeletalSystem*		mDDPMusculoSkeletalSystem;
-	std::vector<dart::dynamics::SkeletonPtr> mDDPBalls;
-
+	
+	
 	Controller*					mController;
-	VelocityControlDDP*			mDDP;
-	std::vector<Eigen::VectorXd> mU;
-	int u_index;
+	
 	bool 						mIsPlay;
 	bool 						mIsReplay;
 	bool 						mIsPaused;

@@ -196,6 +196,7 @@ ApplyForcesToSkeletons(FEM::World* world)
 	Eigen::VectorXd force_origin(X.rows()),force_insertion(X.rows());
 	Eigen::Vector2d fo,fi;
 	
+
 	for(auto& muscle : mMuscles)
 	{
 		auto& origin_way_points = muscle->originWayPoints;
@@ -209,9 +210,12 @@ ApplyForcesToSkeletons(FEM::World* world)
 		muscle->origin->EvalGradient(X,force_origin);
 		muscle->insertion->EvalGradient(X,force_insertion);
 		
+		auto po = muscle->origin->GetP();
+		auto pi = muscle->insertion->GetP();
 		fo = force_origin.block<2,1>(muscle->origin->GetI0()*2,0);
 		fi = force_insertion.block<2,1>(muscle->insertion->GetI0()*2,0);
-		
+		// fo = 10000*mActivationLevel[mi]*((pi-po).normalized());
+		// fi = -10000*mActivationLevel[mi]*((pi-po).normalized());
 		muscle->TransferForce(fo,fi);
 
 		Eigen::Vector3d f_origin_3D(fo[0],fo[1],0.0);
@@ -350,11 +354,11 @@ MakeSkeleton(MusculoSkeletalSystem* ms)
 	auto pos = skel->getPositions();
 	// pos[0] = 0.0;
 
-	pos[0] = 0.1;
+	pos[0] = -0.1;
 
-	pos[1] = -1.0;
+	pos[1] = -0.4;
 
-	pos[2] = -1.0;
+	pos[2] = -0.4;
 
 	// 	pos[1] = 0.1;
 	// pos[2] = -0.1;
@@ -368,6 +372,14 @@ MakeSkeleton(MusculoSkeletalSystem* ms)
 	
 	skel->setPositions(pos);
 	skel->computeForwardKinematics(true,false,false);
+
+	skel->getDof(0)->setPositionLimits(-0.5,0.5);
+	// skel->getDof(1)->setPositionLimits(-0.4,0.2);
+	// skel->getDof(2)->setPositionLimits(-0.2,0.4);
+	skel->getDof(1)->setPositionLimits(-1.57,0.5);
+	skel->getDof(2)->setPositionLimits(-1.57,1.57);
+
+
 	// skel->getDof(0)->setPositionLimits(-0.0,0.0);
 	// skel->getDof(1)->setPositionLimits(0.0,0.0);
 	// skel->getDof(2)->setPositionLimits(-0.0,0.0);
@@ -384,12 +396,12 @@ MakeSkeleton(MusculoSkeletalSystem* ms)
 	// skel->getDof(6)->setPositionLimits(-2.0,2.0);
 	
 	// skel->getDof(0)->setPositionLimits(0.0,0.0);
-	// skel->getDof(1)->setPositionLimits(-0.1,0.2);
-	// // skel->getDof(2)->setPositionLimits(-0.2,0.0);
+	// skel->getDof(0)->setPositionLimits(-0.1,0.2);
+	// skel->getDof(2)->setPositionLimits(-0.2,0.0);
+	// skel->getDof(1)->setPositionLimits(-1.0,-1.0);
+	// skel->getDof(4)->setPositionLimits(0.0,1.57);
 	// skel->getDof(2)->setPositionLimits(-1.0,-1.0);
-	// // skel->getDof(4)->setPositionLimits(0.0,1.57);
-	// skel->getDof(3)->setPositionLimits(-1.0,-1.0);
-	// // skel->getDof(6)->setPositionLimits(-2.0,2.0);
+	// skel->getDof(6)->setPositionLimits(-2.0,2.0);
 	
 	for(int i =0;i<skel->getNumDofs();i++)
 		skel->getDof(i)->getJoint()->setPositionLimitEnforced(true);

@@ -1,7 +1,6 @@
 #ifndef __VELOCITY_CONTROL_DDP_H__
 #define __VELOCITY_CONTROL_DDP_H__
 #include "MusculoSkeletalDDP.h"
-class BallInfo;
 
 class VelocityControlDDP : public MusculoSkeletalDDP
 {
@@ -9,9 +8,10 @@ public:
 	VelocityControlDDP(const dart::simulation::WorldPtr& rigid_world,
 		FEM::World* soft_world,
 		MusculoSkeletalSystem* mMusculoSkeletalSystem,
-		BallInfo* ball_info,
 		const std::vector<Eigen::VectorXd>& u0,
+		const Eigen::VectorXd& target,
 		int n,int max_iteration);
+
 public:
 	void EvalCf(const Eigen::VectorXd& x,double& cf) override;
 	void EvalCfx(const Eigen::VectorXd& x,Eigen::VectorXd& cfx) override;
@@ -29,12 +29,11 @@ public:
 	void Evalfu( const Eigen::VectorXd& x,const Eigen::VectorXd& u,int t,Eigen::MatrixXd& fu) override;
 
 protected:
-	BallInfo*	 mBallInfo;
-
-
-	Eigen::VectorXd mSoftX0;
-	double w_effort,w_tracking,w_dtracking;
-	double ball_offset;
+	double wa,wb,wc,wd,we;
+	Eigen::Vector3d x_desired;
+	Eigen::VectorXd q_target;
+	std::vector<Eigen::VectorXd> a_target;
+	Eigen::Vector3d x_ee_local;
 };
 
 #endif

@@ -37,90 +37,40 @@ Init(const Eigen::VectorXd& x0,const std::vector<Eigen::VectorXd>& u0,const Eige
 	mu_lower = u_lower;
 	mu_upper = u_upper;
 
-
+	mCost = 0;
+	double c,cf;
 	for(int t = 0;t <mN-1;t++){
 		Evalf(mx[t],mu[t],t,mx[t+1]);
-
+		EvalC(  mx[t],mu[t],t, c);
+		mCost += c;
 	}
+	EvalCf(mx[mN-1],cf);
+	mCost +=cf;
+
 }
 void
 DDP::
 ComputeDerivative()
 {
 	mCost = 0;
-	std::vector<Eigen::VectorXd> x_new;
-	x_new.resize(mN,Eigen::VectorXd::Zero(mSx));
-	x_new[0] = mx[0];
-
-	for(int t = 0;t<mN-1;t++)
-	{
-		std::cout<<(mx[t]-x_new[t]).transpose()<<std::endl;
-		Evalf(x_new[t],mu[t],t,x_new[t+1]);
-	}
-
-	x_new[0] = mx[0];
-
-	for(int t = 0;t<mN-1;t++)
-	{
-		std::cout<<(mx[t]-x_new[t]).transpose()<<std::endl;
-		Evalf(x_new[t],mu[t],t,x_new[t+1]);
-	}
-
-	x_new[0] = mx[0];
-
-	for(int t = 0;t<mN-1;t++)
-	{
-		std::cout<<(mx[t]-x_new[t]).transpose()<<std::endl;
-		Evalf(x_new[t],mu[t],t,x_new[t+1]);
-	}
-
-	x_new[0] = mx[0];
-
-	for(int t = 0;t<mN-1;t++)
-	{
-		std::cout<<(mx[t]-x_new[t]).transpose()<<std::endl;
-		Evalf(x_new[t],mu[t],t,x_new[t+1]);
-	}
-
-	x_new[0] = mx[0];
-
-	for(int t = 0;t<mN-1;t++)
-	{
-		std::cout<<(mx[t]-x_new[t]).transpose()<<std::endl;
-		Evalf(x_new[t],mu[t],t,x_new[t+1]);
-	}
-
-	exit(0);
-
-
-
+	double c,cf;
 	for(int t =0;t<mN-1;t++)
 	{
-		double c;
-
-
 		Evalfx(mx[t],mu[t],t,mfx[t]);
 		Evalfu(mx[t],mu[t],t,mfu[t]);
 
 		EvalC(  mx[t],mu[t],t, c);
+		mCost += c;
 		EvalCx( mx[t],mu[t],t, mCx[t]);
 		EvalCu( mx[t],mu[t],t, mCu[t]);
 		EvalCxx(mx[t],mu[t],t, mCxx[t]);
 		EvalCxu(mx[t],mu[t],t, mCxu[t]);
 		EvalCuu(mx[t],mu[t],t, mCuu[t]);
-		mCost+=c;
 	}
 
-	// for(int t =0;t<mN-1;t++)
-	// {
-	// 	std::cout<<mfx[t].transpose()<<std::endl<<std::endl;
-	// }
-	double cf;
 	EvalCf(mx[mN-1],cf);
 	mCost +=cf;
-
-	std::cout<<"Cost : "<<mCost<<std::endl;
-
+	std::cout<<"Cost : "<<mCost<<"(cf : "<<cf<<")"<<std::endl;
 	EvalCfx(mx[mN-1],mVx[mN-1]);
 	EvalCfxx(mx[mN-1],mVxx[mN-1]);
 
@@ -196,21 +146,20 @@ ForwardPass()
 		Evalf(x_new[t],u_new[t],t,x_new[t+1]);
 	}
 
-	// std::cout<<(mu[t].transpose()-u_new[t].transpose()).norm()<<std::endl;
-
 	mx = x_new;
 	mu = u_new;
 
 	double cost_new = 0;
 	double c = 0;
+	double cf = 0;
 	for(int t =0;t<mN-1;t++){
 		EvalC(mx[t],mu[t],t,c);
 		cost_new +=c;
 	}
-	EvalCf(mx[mN-1],c);
-	cost_new += c;
+	EvalCf(mx[mN-1],cf);
+	cost_new += cf;
 
-	std::cout<<"alpha : "<<mAlpha<<" "<<cost_new<<std::endl;
+	std::cout<<"alpha : "<<mAlpha<<" "<<cost_new<<"(cf : "<<cf<<")"<<std::endl;
 	return cost_new;
 }
 
@@ -245,7 +194,7 @@ Solve()
 		double dcost;
 		if(mBackwardPassDone)
 		{
-			for(int k =0;k<20;k++)
+			for(int k =0;k<10;k++)
 			{
 				mx = xtemp;	
 				mu = utemp;	

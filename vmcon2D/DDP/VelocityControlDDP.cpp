@@ -1,28 +1,30 @@
 #include "VelocityControlDDP.h"
+#include "../BallInfo.h"
+
 VelocityControlDDP::
 VelocityControlDDP(const dart::simulation::WorldPtr& rigid_world,
 		FEM::World* soft_world,
-		MusculoSkeletalSystem* mMusculoSkeletalSystem,int n,int max_iteration)
-		:MusculoSkeletalDDP(rigid_world,soft_world,mMusculoSkeletalSystem,n,max_iteration),
-		wa(1E3),wb(1E4),wc(1E3)
+		MusculoSkeletalSystem* mMusculoSkeletalSystem,
+		BallInfo* ball_info,
+		const std::vector<Eigen::VectorXd>& u0,
+		int n,int max_iteration)
+		:MusculoSkeletalDDP(rigid_world,soft_world,mMusculoSkeletalSystem,n,max_iteration),mBallInfo(ball_info),
+		w_effort(1E-2),w_tracking(1E4),w_dtracking(1E3)
 {
 	Eigen::VectorXd x0(mDofs*2);
 	GetState(x0);
-	std::vector<Eigen::VectorXd> u0(mN-1,Eigen::VectorXd::Zero(mSu));
+	mSoftX0 = mSoftWorld->GetPositions();
 	
-	dart::math::seedRand();	
-	for(int i =0;i<mN-1;i++)
-	{
-		u0[i] = dart::math::randomVectorXd(mSu,0,0.001);
-	}
 	Init(x0,u0,Eigen::VectorXd::Constant(mSu,0.0),Eigen::VectorXd::Constant(mSu,1.0));
-
-	x_desired.setZero();
-
-	x_desired[0] = 0.5;
-	x_desired[1] = 0.3;
-	x_ee_local = Eigen::Vector3d(0,0,0);
+	ball_offset = 0.5;
 }
+
+// SetState(x);
+
+// auto x_ee = mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getTransform()*x_ee_local;
+// cf = 0.5*wb*(x_ee-x_desired).squaredNorm();
+// cf += 0.5*wc*(mMusculoSkeletalSystem->GetSkeleton()->getVelocities()).squaredNorm();
+
 
 void
 VelocityControlDDP::
@@ -30,53 +32,120 @@ EvalCf(const Eigen::VectorXd& x,double& cf)
 {
 	SetState(x);
 
-	auto x_ee = mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getTransform()*x_ee_local;
-	cf = 0.5*wb*(x_ee-x_desired).squaredNorm();
-	cf += 0.5*wc*(mMusculoSkeletalSystem->GetSkeleton()->getVelocities()).squaredNorm();
+	cf = 0;
+	Eigen::Vector3d ball_p,ball_v;
+
+	ball_p = mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOM();
+	ball_v = mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOMLinearVelocity();
+
+	cf = 0.5*w_tracking*(ball_p[1] - ball_offset)*(ball_p[1] - ball_offset);
+	cf += 0.5*w_dtracking*(ball_v-Eigen::Vector3d(0,2.0,0)).squaredNorm();
+
 }
 void
 VelocityControlDDP::
 EvalCfx(const Eigen::VectorXd& x,Eigen::VectorXd& cfx)
 {
-	SetState(x);
-	
-	auto bn_ee = mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR");
-	auto x_ee = bn_ee->getTransform()*x_ee_local;
-	auto J = mMusculoSkeletalSystem->GetSkeleton()->getLinearJacobian(bn_ee,x_ee_local);
+	cfx.setZero();
 
-	cfx.block(0,0,mDofs,1) = wb*J.transpose()*(x_ee-x_desired);
-	cfx.block(mDofs,0,mDofs,1) = wc*(mMusculoSkeletalSystem->GetSkeleton()->getVelocities());
+	Eigen::VectorXd x_i;
+	double delta = 0.01;
+	double cf_minus,cf_plus;
+	for(int i = 0;i<mSx;i++)
+	{
+		x_i = x;
+
+		x_i[i] = x[i] + delta;
+		EvalCf(x_i,cf_plus);
+		x_i[i] = x[i] - delta;
+		EvalCf(x_i,cf_minus);
+
+		cfx[i] = (cf_plus - cf_minus)/(2*delta);
+	}
 }
 void
 VelocityControlDDP::
 EvalCfxx(const Eigen::VectorXd& x,Eigen::MatrixXd& cfxx)
 {
-	cfxx.block(0,0,mDofs,mDofs) = wb*Eigen::MatrixXd::Identity(mDofs,mDofs);
-	cfxx.block(mDofs,mDofs,mDofs,mDofs) = wc*Eigen::MatrixXd::Identity(mDofs,mDofs);
+	cfxx.resize(mSx,mSx);
+	cfxx.setZero();
+	Eigen::VectorXd x_i;
+	double delta = 0.01;
+	Eigen::VectorXd cfx_minus(mSx),cfx_plus(mSx);
+	for(int i = 0;i<mSx;i++)
+	{
+		x_i = x;
+		x_i[i] = x[i] + delta;
+		EvalCfx(x_i,cfx_plus);
+		x_i[i] = x[i] - delta;
+		EvalCfx(x_i,cfx_minus);
+
+		cfxx.col(i) = (cfx_plus - cfx_minus)/(2*delta);
+	}
 }
 void
 VelocityControlDDP::
 EvalC( const Eigen::VectorXd& x,const Eigen::VectorXd& u,int t,double& c)
 {
-	c = 0.5*wa*u.squaredNorm();
+	c = 0.5*w_effort*(u).squaredNorm();
+
+	SetState(x);
+
+	Eigen::Vector3d ball_p,ball_v;
+
+	ball_p = mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOM();
+	ball_v = mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOMLinearVelocity();
+
+	// c += 1E-4*(double)t/(double)mN*0.5*w_tracking*(ball_p[1] - ball_offset)*(ball_p[1] - ball_offset);
+	// c += 1E-4*(double)t/(double)mN*0.5*w_dtracking*(ball_v-Eigen::Vector3d(0,4.0,0)).squaredNorm();
 }
 void
 VelocityControlDDP::
 EvalCx( const Eigen::VectorXd& x,const Eigen::VectorXd& u,int t,Eigen::VectorXd& cx)
 {
 	cx.setZero();
+
+	Eigen::VectorXd x_i;
+	double delta = 0.01;
+	double c_minus,c_plus;
+	for(int i = 0;i<mSx;i++)
+	{
+		x_i = x;
+
+		x_i[i] = x[i] + delta;
+		EvalC(x_i,u,t,c_plus);
+		x_i[i] = x[i] - delta;
+		EvalC(x_i,u,t,c_minus);
+
+		cx[i] = (c_plus - c_minus)/(2*delta);
+	}
 }
 void
 VelocityControlDDP::
 EvalCu( const Eigen::VectorXd& x,const Eigen::VectorXd& u,int t,Eigen::VectorXd& cu)
 {
-	cu = wa*u;
+	cu = w_effort*u;
 }
 void
 VelocityControlDDP::
 EvalCxx(const Eigen::VectorXd& x,const Eigen::VectorXd& u,int t,Eigen::MatrixXd& cxx)
 {
+	cxx.resize(mSx,mSx);
 	cxx.setZero();
+	Eigen::VectorXd x_i;
+	double delta = 0.01;
+	Eigen::VectorXd cx_minus(mSx),cx_plus(mSx);
+	for(int i = 0;i<mSx;i++)
+	{
+		x_i = x;
+		x_i[i] = x[i] + delta;
+		EvalCx(x_i,u,t,cx_plus);
+		x_i[i] = x[i] - delta;
+		EvalCx(x_i,u,t,cx_minus);
+
+		cxx.col(i) = (cx_plus - cx_minus)/(2*delta);
+	}
+
 }
 void
 VelocityControlDDP::
@@ -88,12 +157,15 @@ void
 VelocityControlDDP::
 EvalCuu(const Eigen::VectorXd& x,const Eigen::VectorXd& u,int t,Eigen::MatrixXd& cuu)
 {
-	cuu = wa*Eigen::MatrixXd::Identity(u.rows(),u.rows());
+	cuu = w_effort*Eigen::MatrixXd::Identity(u.rows(),u.rows());
 }
 void
 VelocityControlDDP::
 Evalf(  const Eigen::VectorXd& x,const Eigen::VectorXd& u,int t,Eigen::VectorXd& f)
 {
+	if(t==0)
+		mSoftWorld->SetPositions(mSoftX0);
+
 	SetState(x);
 	SetControl(u);
 	Step();

@@ -18,9 +18,8 @@ SimulationWindow2D::
 SimulationWindow2D()
 	:mMouseMode(MOUSE_MODE::CONSTRAINT_CONTROL),
 	mDragConstraint(new FEM::AttachmentConstraint(50000.0,0,Eigen::Vector2d(0,0))),
-	mMusculoSkeletalSystem(new MusculoSkeletalSystem()),
-	mDDPMusculoSkeletalSystem(new MusculoSkeletalSystem()),mController(new Controller()),
-	mIsPlay(false),mIsReplay(false),mIsPaused(false),mSimTime(0.0),mRecordFrame(0),u_index(0)
+	mMusculoSkeletalSystem(new MusculoSkeletalSystem()),mController(new Controller()),
+	mIsPlay(false),mIsReplay(false),mIsPaused(false),mSimTime(0.0),mRecordFrame(0)
 {
 	Initialize();
 	mDisplayTimeout = mSoftWorld->GetTimeStep()*1000;
@@ -31,15 +30,15 @@ SimulationWindow2D::
 Initialize()
 {
 	mRigidWorld = std::make_shared<World>();
-	mRigidWorld->setTimeStep(1.0/2000.0);
+	mRigidWorld->setTimeStep(1.0/1000.0);
 	mRigidWorld->setGravity(Eigen::Vector3d(0,-9.81,0));
 	mSoftWorld = new FEM::World(
 		// FEM::IntegrationMethod::IMPLICIT_NEWTON_METHOD,		//Integration Method
 		// FEM::IntegrationMethod::QUASI_STATIC,		//Integration Method
 		FEM::IntegrationMethod::PROJECTIVE_QUASI_STATIC,		//Integration Method
 		// FEM::IntegrationMethod::PROJECTIVE_DYNAMICS,		//Integration Method
-		1.0/200.0,										//time_step
-		20, 											//max_iteration	
+		1.0/500.0,										//time_step
+		50, 											//max_iteration	
 		0.999											//damping_coeff
 		);
 	MakeSkeleton(mMusculoSkeletalSystem);
@@ -65,39 +64,6 @@ Initialize()
 
 
 
-
-	mDDPRigidWorld = std::make_shared<World>();
-	mDDPRigidWorld->setTimeStep(1.0/2000.0);
-	mDDPRigidWorld->setGravity(Eigen::Vector3d(0,-9.81,0));
-	mDDPSoftWorld = new FEM::World(
-		// FEM::IntegrationMethod::IMPLICIT_NEWTON_METHOD,		//Integration Method
-		// FEM::IntegrationMethod::QUASI_STATIC,		//Integration Method
-		FEM::IntegrationMethod::PROJECTIVE_QUASI_STATIC,		//Integration Method
-		// FEM::IntegrationMethod::PROJECTIVE_DYNAMICS,		//Integration Method
-		1.0/200.0,										//time_step
-		20, 											//max_iteration	
-		0.999											//damping_coeff
-		);
-	MakeSkeleton(mDDPMusculoSkeletalSystem);
-	MakeMuscles("../vmcon2D/export/muscle_parameter.xml",mDDPMusculoSkeletalSystem);
-
-	mDDPRigidWorld->addSkeleton(mDDPMusculoSkeletalSystem->GetSkeleton());
-	for(int i =0;i<1;i++)
-	{
-		mDDPBalls.push_back(Skeleton::create("Ball_"+std::to_string(i)));
-		MakeBall(mDDPBalls.back(),0.036,0.13);	
-		auto pos = mDDPBalls.back()->getPositions();
-		// std::cout<<pos.transpose()<<std::endl;
-		pos.tail(3) = Eigen::Vector3d(i*0.1,-0.3,0);
-		mDDPBalls.back()->setPositions(pos);
-	}
-	for(auto& ball : mDDPBalls)
-		mDDPRigidWorld->addSkeleton(ball);
-	mDDPMusculoSkeletalSystem->Initialize(mDDPSoftWorld);
-	mDDPSoftWorld->Initialize();
-
-	mDDP = new VelocityControlDDP(mDDPRigidWorld,mDDPSoftWorld,mDDPMusculoSkeletalSystem,10,10);
-	mU = mDDP->Solve();
 }
 bool
 SimulationWindow2D::
@@ -112,11 +78,13 @@ TimeStepping()
 	{
 		is_fem_updated =true;
 
-		// mMusculoSkeletalSystem->SetActivationLevel(mU[u_index++]);	
+		// if(u_index<mU.size())
+		// 	mMusculoSkeletalSystem->SetActivationLevel(mU[u_index++]);	
+		// else
+		// 	mMusculoSkeletalSystem->SetActivationLevel(mMusculoSkeletalSystem->GetActivationLevel().setZero());	
 		mMusculoSkeletalSystem->SetActivationLevel(mController->Compute());	
 	}
 
-	mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
 
 	
 	
@@ -125,6 +93,8 @@ TimeStepping()
 		mMusculoSkeletalSystem->TransformAttachmentPoints();
 		mSoftWorld->TimeStepping();
 	}
+	mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
+
 	mRigidWorld->step();
 
 		

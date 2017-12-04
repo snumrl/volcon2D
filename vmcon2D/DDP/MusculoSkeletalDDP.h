@@ -19,6 +19,7 @@ protected:
 	int mDofs;
 	dart::simulation::WorldPtr mRigidWorld;
 	FEM::World*					mSoftWorld;
+	Eigen::VectorXd				mSoftWorldPositions;
 	MusculoSkeletalSystem* mMusculoSkeletalSystem;
 };
 
