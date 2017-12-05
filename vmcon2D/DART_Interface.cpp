@@ -19,13 +19,13 @@ MakeRootBody(const SkeletonPtr& skel, const std::string& name,const Eigen::Vecto
     inertia.setMoment(shape->computeInertia(mass));
 
     // RevoluteJoint::Properties prop;
-    WeldJoint::Properties prop;
+    RevoluteJoint::Properties prop;
     prop.mName = name + "_joint";
-    // prop.mAxis = Eigen::Vector3d::UnitZ();
+    prop.mAxis = Eigen::Vector3d::UnitZ();
     prop.mT_ChildBodyToJoint.translation() = c_to_joint;
 
-    // BodyNodePtr bn = skel->createJointAndBodyNodePair<RevoluteJoint>(
-    BodyNodePtr bn = skel->createJointAndBodyNodePair<WeldJoint>(
+    BodyNodePtr bn = skel->createJointAndBodyNodePair<RevoluteJoint>(
+    // BodyNodePtr bn = skel->createJointAndBodyNodePair<WeldJoint>(
       nullptr,prop,BodyNode::AspectProperties(name)).second;
     auto sn = bn->createShapeNodeWith<VisualAspect, CollisionAspect, DynamicsAspect>(shape);
     bn->setInertia(inertia);

@@ -62,6 +62,9 @@ Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSys
 	mMuscleOptimizationSolver->Options()->SetIntegerValue("max_iter", 100);
 	mMuscleOptimizationSolver->Options()->SetNumericValue("tol", 1e-4);
 
+	mMuscleOptimizationSolver->Initialize();
+	mMuscleOptimizationSolver->OptimizeTNLP(mMuscleOptimization);	
+
 	double kp = 500.0;
 	double kv = 2*sqrt(kp);
 	int n = mMusculoSkeletalSystem->GetSkeleton()->getNumDofs();
@@ -118,7 +121,7 @@ Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSys
 		}
 		else
 		{
-			auto* abn =mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR");
+			auto* abn =mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR");
 			Eigen::Vector3d loc = abn->getTransform().translation();
 			mDDPBallSkeleletons[i]->setPositions(Eigen::compose(Eigen::Vector3d(0,0,0),loc));
 
@@ -128,18 +131,6 @@ Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSys
 	
 	}
 
-
-	mDDPMuscleOptimization = new MuscleOptimization(mDDPSoftWorld,mDDPRigidWorld,mDDPMusculoSkeletalSystem);
-	mDDPMuscleOptimizationSolver = new IpoptApplication();
-	mDDPMuscleOptimizationSolver->Options()->SetStringValue("mu_strategy", "adaptive");
-	mDDPMuscleOptimizationSolver->Options()->SetStringValue("jac_c_constant", "no");
-	mDDPMuscleOptimizationSolver->Options()->SetStringValue("hessian_constant", "yes");
-	mDDPMuscleOptimizationSolver->Options()->SetStringValue("mehrotra_algorithm", "yes");
-	mDDPMuscleOptimizationSolver->Options()->SetIntegerValue("print_level", 2);
-	mDDPMuscleOptimizationSolver->Options()->SetIntegerValue("max_iter", 100);
-	mDDPMuscleOptimizationSolver->Options()->SetNumericValue("tol", 1e-4);
-
-	u_index = 0;
 	std::vector<Eigen::VectorXd> u0;
 	auto X_rigid = mDDPMusculoSkeletalSystem->GetSkeleton()->getPositions();
 	auto X_soft = mDDPSoftWorld->GetPositions();
@@ -147,25 +138,29 @@ Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSys
 	ComputeInitialU0(u0);
 	mDDPMusculoSkeletalSystem->GetSkeleton()->setPositions(X_rigid);
 	mDDPMusculoSkeletalSystem->GetSkeleton()->setVelocities(mDDPMusculoSkeletalSystem->GetSkeleton()->getVelocities().setZero());
+	mDDPMusculoSkeletalSystem->GetSkeleton()->computeForwardKinematics(true,false,false);
 	mDDPSoftWorld->SetPositions(X_soft);
 
-	// mDDP = new VelocityControlDDP(mDDPRigidWorld,mDDPSoftWorld,mDDPMusculoSkeletalSystem,mDDPBalls[0],u0,u0.size(),40);
-	// mU = mDDP->Solve();
-	mU = u0;
+	mDDP = new VelocityControlDDP(mDDPRigidWorld,mDDPSoftWorld,mDDPMusculoSkeletalSystem,mDDPBalls[0],u0,u0.size()+1,200);
+	mU = mDDP->Solve();
+	u_index = 0;
+	// for(int i =0;i<u0.size();i++)
+	// 	std::cout<<u0[i].transpose()<<std::endl;
+	// mU = u0;
 }
 void
 Controller::
 ComputeInitialU0(std::vector<Eigen::VectorXd>& u0)
 {
-	int n = 50;
-
+	int n = 79;
+	// u0.resize(n);
 	double t = mDDPSoftWorld->GetTimeStep()*n;
 	Eigen::Vector2d p0,p1,p2,v2;
-	v2 = Eigen::Vector2d(0,2.0);
+	v2 = Eigen::Vector2d(0,3.0);
 	p0 = mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOM().block<2,1>(0,0);
 	p2 = mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOM().block<2,1>(0,0);
-	p2[1] +=0.2;
-	p1 = p2-v2*t;
+	p2[1] +=0.1;
+	p1 = p2-0.5*v2*t;
 	std::cout<<p0.transpose()<<std::endl;
 	std::cout<<p1.transpose()<<std::endl;
 	std::cout<<p2.transpose()<<std::endl;
@@ -185,116 +180,99 @@ ComputeInitialU0(std::vector<Eigen::VectorXd>& u0)
 	mIKSolver->Initialize();
 	IKOptimization* ik = static_cast<IKOptimization*>(GetRawPtr(mIKOptimization));
 
+	// Eigen::Vector3d l_loc = mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandL")->getCOM();
 	Eigen::Vector3d r_loc = mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOM();
 
+	// ik->AddTargetPositions(std::make_pair(mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandL"),Eigen::Vector3d::Zero()),l_loc);
 	ik->AddTargetPositions(std::make_pair(mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR"),Eigen::Vector3d::Zero()),r_loc);
 
 	mIKSolver->OptimizeTNLP(mIKOptimization);
-	std::vector<Eigen::Vector3d> mInitialMotions;
+	
 	AnchorPoint ap = std::make_pair(mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR"),Eigen::Vector3d(0,0,0));
-	for(int i =0;i<n+1;i++)
+	std::vector<std::pair<Eigen::VectorXd,double>> motions;
+	int num_samples = 10;
+	for(int i =0;i<num_samples+1;i++)
 	{
-		Eigen::Vector2d p_ee = mBezierCurve->GetPosition(mDDPSoftWorld->GetTimeStep()*i);
+		double cur_t = (double)i/(double)num_samples*t;
+		Eigen::Vector2d p_ee = mBezierCurve->GetPosition(cur_t);
 		Eigen::Vector3d p_ee_3d(p_ee[0],p_ee[1],0);
 
 		ik->AddTargetPositions(ap,p_ee_3d);
 		mIKSolver->ReOptimizeTNLP(mIKOptimization);
 
-		mInitialMotions.push_back(ik->GetSolution());
+		motions.push_back(std::make_pair(ik->GetSolution(),cur_t));
 	}
-	std::cout<<"IK finished"<<std::endl;
 
-	while(u0.size() != n)
+	for(int i=0;i<n;i++)
 	{
-		int index = u0.size();
-		bool is_fem_updated = false;
-		auto& skel =mDDPMusculoSkeletalSystem->GetSkeleton();
-
-		//Simulation Loop
-		if(mDDPSoftWorld->GetTime()<=mDDPRigidWorld->getTime())
+		double cur_t = mDDPSoftWorld->GetTimeStep()*i;
+		int k =0,k1 =0;
+		for(int i =0;i<motions.size();i++)
 		{
-			is_fem_updated =true;
-			mTargetPositions = mInitialMotions[index];
-			mTargetVelocities = (mInitialMotions[index+1] - mInitialMotions[index])/mDDPSoftWorld->GetTimeStep();
-			auto ui = Compute(false);
-			mDDPMusculoSkeletalSystem->SetActivationLevel(ui);
-			u0.push_back(ui);
-		}		
-		
-		if(is_fem_updated)
-		{
-			mDDPMusculoSkeletalSystem->TransformAttachmentPoints();
-			mDDPSoftWorld->TimeStepping();
+			if(motions[i].second<cur_t)
+				k=i;
 		}
-		mDDPMusculoSkeletalSystem->ApplyForcesToSkeletons(mDDPSoftWorld);
+		k1 = k+1;
+		double kt = cur_t - motions[k].second;
+		double dt = motions[k1].second - motions[k].second;
 
-		mDDPRigidWorld->step();
+		kt /= dt;
+
+		auto p = (1.0 - kt)*motions[k].first + kt*motions[k1].first;
+		double kt1 = kt + 0.01;
+		auto pdp = (1.0 - kt1)*motions[k].first + kt1*motions[k1].first;
+		mInitialPositions.push_back(p);
+		mInitialVelocities.push_back((pdp-p)/0.01);
+
 	}
-	std::cout<<"Initial Guess finished"<<std::endl;
+	for(int i =0;i<n;i++)
+	{
+		Eigen::VectorXd compose(mInitialPositions[i].rows() + mInitialVelocities[i].rows());
+		compose.head(mInitialPositions[i].rows()) = mInitialPositions[i];
+		compose.tail(mInitialVelocities[i].rows()) = mInitialVelocities[i];
+		u0.push_back(compose);
+	}
 }
 Eigen::VectorXd
 Controller::
-Compute(bool test)
-{
-	if(test)
-	{
-		if(u_index<mU.size())
-		{
-			return mU[u_index++];
-		}
-		else if(u_index==mU.size()){
-			mBalls[0]->Release(mRigidWorld);
-			Eigen::Vector3d vv;
-			mBalls[0]->GetVelocity(vv);
-			std::cout<<vv.transpose()<<std::endl;
-			u_index++;
-		}
-		
-		auto& skel =mMusculoSkeletalSystem->GetSkeleton();
-		Eigen::VectorXd qdd_desired = ComputePDForces();
-		static_cast<MuscleOptimization*>(GetRawPtr(mMuscleOptimization))->Update(qdd_desired);
+Compute()
+{	
+	auto& skel =mMusculoSkeletalSystem->GetSkeleton();
 
-		// if(mSoftWorld->GetTime() == 0.0){
-			mMuscleOptimizationSolver->Initialize();
-			mMuscleOptimizationSolver->OptimizeTNLP(mMuscleOptimization);	
-		// }
-		// else
-			// mMuscleOptimizationSolver->ReOptimizeTNLP(mMuscleOptimization);	
+	
+	Eigen::VectorXd qdd_desired = ComputePDForces();
+	static_cast<MuscleOptimization*>(GetRawPtr(mMuscleOptimization))->Update(qdd_desired);
 
-		Eigen::VectorXd solution =  static_cast<MuscleOptimization*>(GetRawPtr(mMuscleOptimization))->GetSolution();
-		Eigen::VectorXd qdd = solution.head(skel->getNumDofs());
-		Eigen::VectorXd activation = solution.tail(mMusculoSkeletalSystem->GetNumMuscles());
-		activation.setZero();
-		return activation;
-	}
-	else
-	{
-		auto& skel =mDDPMusculoSkeletalSystem->GetSkeleton();
-		Eigen::VectorXd qdd_desired = ComputePDForces(false);
-		static_cast<MuscleOptimization*>(GetRawPtr(mDDPMuscleOptimization))->Update(qdd_desired);
-		std::cout<<qdd_desired.norm()<<std::endl;
-		if(mSoftWorld->GetTime() == 0.0){
-			mDDPMuscleOptimizationSolver->Initialize();
-			mDDPMuscleOptimizationSolver->OptimizeTNLP(mDDPMuscleOptimization);	
-		}
-		else
-			mDDPMuscleOptimizationSolver->ReOptimizeTNLP(mDDPMuscleOptimization);	
+	mMuscleOptimizationSolver->ReOptimizeTNLP(mMuscleOptimization);	
 
-		Eigen::VectorXd solution =  static_cast<MuscleOptimization*>(GetRawPtr(mDDPMuscleOptimization))->GetSolution();
-		Eigen::VectorXd qdd = solution.head(skel->getNumDofs());
-		Eigen::VectorXd activation = solution.tail(mDDPMusculoSkeletalSystem->GetNumMuscles());
-
-		return activation;
-	}
+	Eigen::VectorXd solution =  static_cast<MuscleOptimization*>(GetRawPtr(mMuscleOptimization))->GetSolution();
+	Eigen::VectorXd qdd = solution.head(skel->getNumDofs());
+	Eigen::VectorXd activation = solution.tail(mMusculoSkeletalSystem->GetNumMuscles());
+	return activation;
 	
 }
 Eigen::VectorXd
 Controller::
-ComputePDForces(bool test)
+ComputePDForces()
 {
-	if(test)
+	auto& skel =mMusculoSkeletalSystem->GetSkeleton();
+	if(u_index == mU.size())
 	{
-		auto& skel =mMusculoSkeletalSystem->GetSkeleton();
+			Eigen::Vector3d vv;
+		mBalls[0]->GetVelocity(vv);
+		// std::cout<<"Release : "<<vv.transpose()<<std::endl;
+		std::cout<<"Release : "<<mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOMLinearVelocity().transpose()<<std::endl;
+		mBalls[0]->Release(mRigidWorld);
+		u_index++;
+	}
+
+	if(u_index<mU.size())
+	{
+		mTargetPositions = mU[u_index].head(skel->getNumDofs());
+		mTargetVelocities = mU[u_index].tail(skel->getNumDofs());
+		u_index++;	
+	}
+	
 
 	Eigen::VectorXd pos_m = mTargetPositions;
 	Eigen::VectorXd vel_m = mTargetVelocities;
@@ -313,29 +291,6 @@ ComputePDForces(bool test)
 				pos_diff.cwiseProduct(mKp)+
 				(vel_m - vel).cwiseProduct(mKv);
 	return qdd_desired;
-	
-	}
-	else
-	{
-		auto& skel =mDDPMusculoSkeletalSystem->GetSkeleton();
-		Eigen::VectorXd pos_m = mTargetPositions;
-		Eigen::VectorXd vel_m = mTargetVelocities;
-
-		Eigen::VectorXd pos = skel->getPositions();
-		Eigen::VectorXd vel = skel->getVelocities();
-
-
-		Eigen::VectorXd pos_diff(pos.rows());
-
-		pos_diff = skel->getPositionDifferences(pos_m,pos);
-		for(int i = 0;i<pos_diff.rows();i++)
-			pos_diff[i] = dart::math::wrapToPi(pos_diff[i]);
-
-		Eigen::VectorXd qdd_desired = 
-					pos_diff.cwiseProduct(mKp)+
-					(vel_m - vel).cwiseProduct(mKv);
-		return qdd_desired;
-	}
 	
 }
 

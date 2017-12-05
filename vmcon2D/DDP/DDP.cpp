@@ -44,9 +44,9 @@ Init(const Eigen::VectorXd& x0,const std::vector<Eigen::VectorXd>& u0,const Eige
 		EvalC(  mx[t],mu[t],t, c);
 		mCost += c;
 	}
+	cf = 123;
 	EvalCf(mx[mN-1],cf);
 	mCost +=cf;
-
 }
 void
 DDP::
@@ -67,7 +67,7 @@ ComputeDerivative()
 		EvalCxu(mx[t],mu[t],t, mCxu[t]);
 		EvalCuu(mx[t],mu[t],t, mCuu[t]);
 	}
-
+	cf = 123;
 	EvalCf(mx[mN-1],cf);
 	mCost +=cf;
 	std::cout<<"Cost : "<<mCost<<"(cf : "<<cf<<")"<<std::endl;
@@ -121,6 +121,7 @@ BackwardPass()
 		mdV[1] += 0.5*mk[t].transpose()*Quu*mk[t];
 		mVx[t] = Qx + mK[t].transpose()*Quu*mk[t] + mK[t].transpose()*Qu + Qxu*mk[t];
 		mVxx[t] = Qxx + mK[t].transpose()*Quu*mK[t] + mK[t].transpose()*Qux + Qxu*mK[t];
+		// std::cout<<mk[t].transpose()<<std::endl;
 	}
 
 	return true;
@@ -145,7 +146,10 @@ ForwardPass()
 
 		Evalf(x_new[t],u_new[t],t,x_new[t+1]);
 	}
-
+	// for(int t = 0 ;t<mN-1;t++)
+	// {
+	// 	std::cout<<u_new[t].transpose()<<std::endl;
+	// }
 	mx = x_new;
 	mu = u_new;
 
@@ -159,7 +163,7 @@ ForwardPass()
 	EvalCf(mx[mN-1],cf);
 	cost_new += cf;
 
-	std::cout<<"alpha : "<<mAlpha<<" "<<cost_new<<"(cf : "<<cf<<")"<<std::endl;
+	// std::cout<<"alpha : "<<mAlpha<<" "<<cost_new<<"(cf : "<<cf<<")"<<std::endl;
 	return cost_new;
 }
 
@@ -238,6 +242,7 @@ Solve()
 			if(mMu>mMu_max)
 				break;
 		}
+		
 	}	
 
 

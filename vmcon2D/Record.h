@@ -30,6 +30,9 @@ public:
 	Eigen::VectorXd soft_body_positions;
 	Eigen::VectorXd activation_levels;
 	std::vector<std::pair<Eigen::Vector2d,Eigen::Vector2d>> muscle_forces;
+
+	Eigen::VectorXd target_positions;
+	Eigen::VectorXd target_velocities;
 };
 
 #endif

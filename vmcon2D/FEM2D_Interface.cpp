@@ -111,7 +111,7 @@ DrawMuscle(Muscle* muscle,const Eigen::VectorXd& x)
         DrawLines(x.block<2,1>(muscle->origin->GetI0()*2,0),p[0],Eigen::Vector3d(0,0,1));
 
         if(muscle->force_origin.norm()>1E0)
-            DrawArrow(p.back(),0.001*muscle->force_origin,Eigen::Vector3d(0.7,0,0.5));
+            DrawArrow(p.back(),0.00001*muscle->force_origin,Eigen::Vector3d(0.7,0,0.5));
         glPointSize(2.0);
         for(auto& v : p)
             DrawPoint(v,Eigen::Vector3d(0,0,0));
@@ -128,7 +128,7 @@ DrawMuscle(Muscle* muscle,const Eigen::VectorXd& x)
         DrawLines(x.block<2,1>(muscle->insertion->GetI0()*2,0),p[0],Eigen::Vector3d(0,0,1));
         
         if(muscle->force_insertion.norm()>1E0)
-            DrawArrow(p.back(),0.001*muscle->force_insertion,Eigen::Vector3d(0.7,0,0.5));
+            DrawArrow(p.back(),0.00001*muscle->force_insertion,Eigen::Vector3d(0.7,0,0.5));
 
         glPointSize(2.0);
         for(auto& v : p)

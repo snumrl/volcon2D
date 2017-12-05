@@ -1,7 +1,8 @@
 #ifndef __MUSCULO_SKELETAL_DDP_H__
 #define __MUSCULO_SKELETAL_DDP_H__
 #include "DDP.h"
-
+#include <IpTNLP.hpp>
+#include <IpIpoptApplication.hpp>	
 #include "../MusculoSkeletalSystem.h"
 class MusculoSkeletalSystem;
 class MusculoSkeletalDDP : public DDP
@@ -15,12 +16,18 @@ protected:
 	void SetState(const Eigen::VectorXd& x);
 	void SetControl(const Eigen::VectorXd& u);
 	void GetState(Eigen::VectorXd& x);
-	void Step(bool fem_update = true);
-	int mDofs;
-	dart::simulation::WorldPtr mRigidWorld;
-	FEM::World*					mSoftWorld;
-	Eigen::VectorXd				mSoftWorldPositions;
-	MusculoSkeletalSystem* mMusculoSkeletalSystem;
+	void Step();
+	int 										mDofs;
+	dart::simulation::WorldPtr 					mRigidWorld;
+	FEM::World*									mSoftWorld;
+	Eigen::VectorXd								mSoftWorldPositions;
+	MusculoSkeletalSystem* 						mMusculoSkeletalSystem;
+
+	Eigen::VectorXd								mTargetPositions,mTargetVelocities;
+	Eigen::VectorXd 							mKp,mKv;
+	Ipopt::SmartPtr<Ipopt::TNLP> 			 	mMuscleOptimization;
+	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mMuscleOptimizationSolver;
+
 };
 
 #endif

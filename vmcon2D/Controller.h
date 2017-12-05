@@ -23,7 +23,7 @@ typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;
 
 class Controller
 {
-private:
+public:
 	FEM::World*									mSoftWorld;
 	dart::simulation::WorldPtr  				mRigidWorld;
 	MusculoSkeletalSystem*						mMusculoSkeletalSystem;
@@ -40,6 +40,11 @@ private:
 	Ipopt::SmartPtr<Ipopt::TNLP> 			 	mIKOptimization;
 	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mIKSolver;
 
+
+
+
+
+
 	FEM::World*					mDDPSoftWorld;
 	dart::simulation::WorldPtr  mDDPRigidWorld;
 	MusculoSkeletalSystem*		mDDPMusculoSkeletalSystem;
@@ -50,15 +55,15 @@ private:
 	std::vector<Eigen::VectorXd> mU;
 	int u_index;
 
+	std::vector<Eigen::VectorXd> mInitialPositions;
+	std::vector<Eigen::VectorXd> mInitialVelocities;
 	BezierCurve* mBezierCurve;
-	Ipopt::SmartPtr<Ipopt::TNLP> 			 	mDDPMuscleOptimization;
-	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mDDPMuscleOptimizationSolver;
 public:
 	Controller();
 	void Initialize(FEM::World* soft_world,const dart::simulation::WorldPtr& rigid_world,MusculoSkeletalSystem* musculo_skeletal_system,const std::vector<dart::dynamics::SkeletonPtr>& balls);
 	void ComputeInitialU0(std::vector<Eigen::VectorXd>& u0);
-	Eigen::VectorXd Compute(bool test = true);
-	Eigen::VectorXd ComputePDForces(bool test = true);
+	Eigen::VectorXd Compute();
+	Eigen::VectorXd ComputePDForces();
 	const Eigen::VectorXd& GetTargetPositions(){return mTargetPositions;};
 };
 

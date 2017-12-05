@@ -46,7 +46,7 @@ TransferForce(Eigen::Vector2d& f_origin,Eigen::Vector2d& f_insertion)
 
 MusculoSkeletalSystem::
 MusculoSkeletalSystem()
-	:mTendonStiffness(1E5),mMuscleStiffness(1E6),mYoungsModulus(1E6),mPoissonRatio(0.3)
+	:mTendonStiffness(1E5),mMuscleStiffness(1E5),mYoungsModulus(1E6),mPoissonRatio(0.3)
 {
 
 }
@@ -210,12 +210,9 @@ ApplyForcesToSkeletons(FEM::World* world)
 		muscle->origin->EvalGradient(X,force_origin);
 		muscle->insertion->EvalGradient(X,force_insertion);
 		
-		auto po = muscle->origin->GetP();
-		auto pi = muscle->insertion->GetP();
 		fo = force_origin.block<2,1>(muscle->origin->GetI0()*2,0);
 		fi = force_insertion.block<2,1>(muscle->insertion->GetI0()*2,0);
-		// fo = 10000*mActivationLevel[mi]*((pi-po).normalized());
-		// fi = -10000*mActivationLevel[mi]*((pi-po).normalized());
+
 		muscle->TransferForce(fo,fi);
 
 		Eigen::Vector3d f_origin_3D(fo[0],fo[1],0.0);
@@ -352,20 +349,20 @@ MakeSkeleton(MusculoSkeletalSystem* ms)
 
 
 	auto pos = skel->getPositions();
-	// pos[0] = 0.0;
+	
 
-	pos[0] = -0.1;
-
-	pos[1] = -1.0;
-
+	// One hand
+	pos[0] = 0.0;
+	pos[1] = -0.1;
 	pos[2] = -1.0;
+	pos[3] = -1.0;
 
-	// 	pos[1] = 0.1;
+	//Two Hand
+	// pos[0] = 0.0;
+	// pos[1] = 0.1;
 	// pos[2] = -0.1;
-
 	// pos[3] = -1.0;
 	// pos[4] = 1.0;
-
 	// pos[5] = -1.0;
 	// pos[6] = 1.0;
 
@@ -373,34 +370,18 @@ MakeSkeleton(MusculoSkeletalSystem* ms)
 	skel->setPositions(pos);
 	skel->computeForwardKinematics(true,false,false);
 
-	skel->getDof(0)->setPositionLimits(-0.5,0.5);
-	// skel->getDof(1)->setPositionLimits(-0.4,0.2);
-	// skel->getDof(2)->setPositionLimits(-0.2,0.4);
-	skel->getDof(1)->setPositionLimits(-1.57,0.5);
-	skel->getDof(2)->setPositionLimits(-1.57,1.57);
+	// One hand
+	skel->getDof(0)->setPositionLimits(-0.15,0.15);
+	skel->getDof(1)->setPositionLimits(-1.57,0.3);
+	skel->getDof(2)->setPositionLimits(-2.5,2.5);
 
-
-	// skel->getDof(0)->setPositionLimits(-0.0,0.0);
-	// skel->getDof(1)->setPositionLimits(0.0,0.0);
-	// skel->getDof(2)->setPositionLimits(-0.0,0.0);
-	// skel->getDof(3)->setPositionLimits(0.0,0.0);
-	// skel->getDof(4)->setPositionLimits(0.0,0.0);
-
+	// Two Hand
 	// skel->getDof(0)->setPositionLimits(-0.1,0.1);
 	// skel->getDof(1)->setPositionLimits(-0.4,0.2);
 	// skel->getDof(2)->setPositionLimits(-0.2,0.4);
 	// skel->getDof(3)->setPositionLimits(-1.57,0.0);
 	// skel->getDof(4)->setPositionLimits(0.0,1.57);
-
 	// skel->getDof(5)->setPositionLimits(-2.0,2.0);
-	// skel->getDof(6)->setPositionLimits(-2.0,2.0);
-	
-	// skel->getDof(0)->setPositionLimits(0.0,0.0);
-	// skel->getDof(0)->setPositionLimits(-0.1,0.2);
-	// skel->getDof(2)->setPositionLimits(-0.2,0.0);
-	// skel->getDof(1)->setPositionLimits(-1.0,-1.0);
-	// skel->getDof(4)->setPositionLimits(0.0,1.57);
-	// skel->getDof(2)->setPositionLimits(-1.0,-1.0);
 	// skel->getDof(6)->setPositionLimits(-2.0,2.0);
 	
 	for(int i =0;i<skel->getNumDofs();i++)

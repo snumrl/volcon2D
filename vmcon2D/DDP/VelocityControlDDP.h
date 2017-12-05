@@ -31,10 +31,10 @@ public:
 protected:
 	BallInfo*	 mBallInfo;
 
-
+	std::vector<Eigen::VectorXd> initial_targets;
 	Eigen::VectorXd mSoftX0;
-	double w_effort,w_tracking,w_dtracking;
-	double ball_offset;
+	double w_effort,w_smooth,w_tracking,w_dtracking;
+	Eigen::Vector3d ball_offset;
 };
 
 #endif

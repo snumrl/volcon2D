@@ -65,6 +65,8 @@ Initialize()
 
 
 }
+int count =0;
+Eigen::VectorXd temp_qdd;
 bool
 SimulationWindow2D::
 TimeStepping()
@@ -82,21 +84,39 @@ TimeStepping()
 		// 	mMusculoSkeletalSystem->SetActivationLevel(mU[u_index++]);	
 		// else
 		// 	mMusculoSkeletalSystem->SetActivationLevel(mMusculoSkeletalSystem->GetActivationLevel().setZero());	
-		mMusculoSkeletalSystem->SetActivationLevel(mController->Compute());	
+		// mMusculoSkeletalSystem->SetActivationLevel(mController->Compute());	
+		// std::cout<<"update"<<std::endl;
+		count++;
+		mSoftWorld->SetTime(mSoftWorld->GetTime()+mSoftWorld->GetTimeStep());
+
+		temp_qdd = mController->ComputePDForces();
+		// std::cout<<temp_qdd.transpose()<<std::endl;
+		
 	}
-
-
+	// std::cout<<"step"<<std::endl;
+	/*std::cout<<"pos : "<<skel->getPositions().transpose()<<std::endl;
+	std::cout<<"vel : "<<skel->getVelocities().transpose()<<std::endl;
+	std::cout<<"qdd"<<temp_qdd.transpose()<<std::endl;
+	std::cout<<"getMassMatrix : "<<skel->getMassMatrix()<<std::endl;
+	std::cout<<"getCoriolisAndGravityForces : "<<skel->getCoriolisAndGravityForces()<<std::endl;
+	std::cout<<"setForce"<<(skel->getMassMatrix()*temp_qdd+skel->getCoriolisAndGravityForces()).transpose()<<std::endl;*/
+	if(count==29){
+		// exit(0);
+		// Keyboard(' ',0,0);
+	}
+	skel->setForces(skel->getMassMatrix()* temp_qdd+ skel->getCoriolisAndGravityForces());	
 	
 	
-	if(is_fem_updated)
-	{
-		mMusculoSkeletalSystem->TransformAttachmentPoints();
-		mSoftWorld->TimeStepping();
-	}
-	mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
+	
+	// if(is_fem_updated)
+	// {
+	// 	mMusculoSkeletalSystem->TransformAttachmentPoints();
+	// 	mSoftWorld->TimeStepping();
+	// }
+	// mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
 
 	mRigidWorld->step();
-
+	// std::cout<<skel->getPositions().transpose()<<std::endl;
 		
 	//Record Loop
 	mRecords.push_back(new Record());
@@ -196,15 +216,15 @@ Display()
 		DrawMuscle(muscle,x);
 
 	DrawSkeleton(mMusculoSkeletalSystem->GetSkeleton());
-	if(mIsPlay)
-	{
+	// if(mIsPlay)
+	// {
 		auto cur_pos = mMusculoSkeletalSystem->GetSkeleton()->getPositions();
 		mMusculoSkeletalSystem->GetSkeleton()->setPositions(mController->GetTargetPositions());
 		mMusculoSkeletalSystem->GetSkeleton()->computeForwardKinematics(true,false,false);
 		DrawSkeleton(mMusculoSkeletalSystem->GetSkeleton(),Eigen::Vector3d(0.8,0.3,0.8));
 		mMusculoSkeletalSystem->GetSkeleton()->setPositions(cur_pos);
 		mMusculoSkeletalSystem->GetSkeleton()->computeForwardKinematics(true,false,false);
-	}
+	// }
 	int ball_index = 0;
 	for(auto& ball : mBalls)
 	{
