@@ -80,43 +80,31 @@ TimeStepping()
 	{
 		is_fem_updated =true;
 
-		// if(u_index<mU.size())
-		// 	mMusculoSkeletalSystem->SetActivationLevel(mU[u_index++]);	
-		// else
-		// 	mMusculoSkeletalSystem->SetActivationLevel(mMusculoSkeletalSystem->GetActivationLevel().setZero());	
-		// mMusculoSkeletalSystem->SetActivationLevel(mController->Compute());	
-		// std::cout<<"update"<<std::endl;
+		mMusculoSkeletalSystem->SetActivationLevel(mController->Compute());	
 		count++;
 
 		
 
-		mSoftWorld->SetTime(mSoftWorld->GetTime()+mSoftWorld->GetTimeStep());
+		// mSoftWorld->SetTime(mSoftWorld->GetTime()+mSoftWorld->GetTimeStep());
 
-		temp_qdd = mController->ComputePDForces();
+		// temp_qdd = mController->ComputePDForces();
 		// std::cout<<temp_qdd.transpose()<<std::endl;
 		
 	}
-	// std::cout<<"step"<<std::endl;
-	// std::cout<<"pos : "<<skel->getPositions().transpose()<<std::endl;
-	// std::cout<<"vel : "<<skel->getVelocities().transpose()<<std::endl;
-	// std::cout<<"qdd"<<temp_qdd.transpose()<<std::endl;
-	// std::cout<<"getMassMatrix : "<<skel->getMassMatrix()<<std::endl;
-	// std::cout<<"getCoriolisAndGravityForces : "<<skel->getCoriolisAndGravityForces()<<std::endl;
-	// std::cout<<"setForce"<<(skel->getMassMatrix()*temp_qdd+skel->getCoriolisAndGravityForces()).transpose()<<std::endl;
 	if(count==29){
 		// exit(0);
 		// Keyboard(' ',0,0);
 	}
-	skel->setForces(skel->getMassMatrix()* temp_qdd+ skel->getCoriolisAndGravityForces());	
+	// skel->setForces(skel->getMassMatrix()* temp_qdd+ skel->getCoriolisAndGravityForces());	
 	
 	
 	
-	// if(is_fem_updated)
-	// {
-	// 	mMusculoSkeletalSystem->TransformAttachmentPoints();
-	// 	mSoftWorld->TimeStepping();
-	// }
-	// mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
+	if(is_fem_updated)
+	{
+		mMusculoSkeletalSystem->TransformAttachmentPoints();
+		mSoftWorld->TimeStepping();
+	}
+	mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
 
 	mRigidWorld->step();
 	// std::cout<<skel->getPositions().transpose()<<std::endl;

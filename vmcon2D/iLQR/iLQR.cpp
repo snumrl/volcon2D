@@ -149,7 +149,7 @@ BackwardPass()
 			// std::cout<< (mVxx[t+1]+muI)<<std::endl<<std::endl;
 			// std::cout<< (Quu_reg)<<std::endl<<std::endl;
 			// exit(0);
-			// std::cout << "no PSD at "<< t<< std::endl;
+			std::cout << "no PSD at "<< t<< std::endl;
 			return false;
 		}
 

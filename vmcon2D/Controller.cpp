@@ -163,9 +163,9 @@ Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSys
 	// 	std::cout<<u0[i]<<" ";
 	// std::cout<<std::endl;
 	// mU = u0;
-	// for(int i =0;i<mU.size();i++)
-	// 	std::cout<<mU[i]<<" ";
-	// std::cout<<std::endl;
+	for(int i =0;i<mU.size();i++)
+		std::cout<<mU[i].transpose()<<std::endl;
+	std::cout<<std::endl;
 	// std::cout<<std::endl<<std::endl;
 }
 void
@@ -244,14 +244,16 @@ ComputeInitialU0(std::vector<Eigen::VectorXd>& u0,const Eigen::Vector3d& target_
 
 	for(int i =0;i<n;i++)
 	{
-		// Eigen::VectorXd compose(
-		// 	mInitialPositions[i].rows());
+		Eigen::VectorXd compose(
+			mInitialPositions[i].rows() + 1);
 		// compose.setZero();
-		// compose.head(mInitialPositions[i].rows()) = mInitialPositions[0];
+		compose.head(mInitialPositions[i].rows()) = mInitialPositions[i];
+		compose[mInitialPositions[i].rows()] = 1.0;
 		// // compose.head(mInitialPositions[i].rows()) = mInitialPositions[i];
 		// // compose.block(mInitialPositions[i].rows(),0,mInitialPositions[i].rows(),1) = mInitialVelocities[i];
 		// compose.tail(mInitialVelocities[i].rows()) = mKp;
-		u0.push_back(mInitialPositions[i]);
+		// u0.push_back(mInitialPositions[i]);
+		u0.push_back(compose);
 	}
 	
 
@@ -302,13 +304,17 @@ ComputePDForces()
 		// mTargetPositions = ik->GetSolution();
 		// std::cout<<new_target.transpose()<<std::endl;
 		// std::cout<<"mTargetPositions : "<<mTargetPositions.transpose()<<std::endl;
-		mTargetPositions = mU[u_index];
+		mTargetPositions = mU[u_index].head(skel->getNumDofs());
+		double kp = 1000.0*mU[u_index][skel->getNumDofs()];
+		double kv = 2.0*sqrt(kp);
+		mKp = Eigen::VectorXd::Constant(skel->getNumDofs(),kp);
+		mKv = Eigen::VectorXd::Constant(skel->getNumDofs(),kv);
 		mTargetPositions2 = mInitialPositions[u_index];
 
 		if(u_index == 0)
 			mTargetVelocities.setZero();
 		else
-			mTargetVelocities =  (mU[u_index]-mU[u_index-1])/mSoftWorld->GetTimeStep();
+			mTargetVelocities =  (mU[u_index]-mU[u_index-1]).head(skel->getNumDofs())/mSoftWorld->GetTimeStep();
 		// mTargetVelocities = mU[u_index].block(skel->getNumDofs(),0,skel->getNumDofs(),1);
 		// mKp = mU[u_index].tail(skel->getNumDofs());
 		// mKv = 2*mKp.cwiseSqrt();
@@ -316,7 +322,7 @@ ComputePDForces()
 	}
 	else
 	{
-		mTargetPositions = mU.back();
+		mTargetPositions = mU.back().head(skel->getNumDofs());
 		mTargetPositions2 = mInitialPositions.back();
 		mTargetVelocities.setZero();
 	}

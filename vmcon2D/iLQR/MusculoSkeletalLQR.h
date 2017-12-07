@@ -61,7 +61,7 @@ protected:
 	Eigen::VectorXd								mSoftWorldX0;
 	std::vector<Eigen::VectorXd>				mInitialGuess;
 
-	double 										w_regularization,w_pos_track,w_vel_track;
+	double 										w_regularization,w_compliance,w_pos_track,w_vel_track;
 	dart::dynamics::BodyNode* 					mEndEffector;
 	Eigen::Vector3d								mEndEffectorTargetPosition;
 	Eigen::Vector3d								mEndEffectorTargetVelocity;
