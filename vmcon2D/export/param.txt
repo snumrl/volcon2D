@@ -1,1 +1,4 @@
-1E-4 1E0 1E4 1E1
+1E1 1E4 1E3
+
+
+w_regularization w_pos_track w_vel_track

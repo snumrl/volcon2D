@@ -1,4 +1,5 @@
 #include "MusculoSkeletalDDP.h"
+#include "../IKOptimization.h"
 #include "../MuscleOptimization.h"
 #include "../BallInfo.h"
 using namespace Ipopt;
@@ -7,7 +8,7 @@ MusculoSkeletalDDP(	const dart::simulation::WorldPtr& rigid_world,
 					FEM::World* soft_world,
 					MusculoSkeletalSystem* musculo_skeletal_system,int n,int max_iteration)
 					:DDP(musculo_skeletal_system->GetSkeleton()->getNumDofs()*2,
-						musculo_skeletal_system->GetSkeleton()->getNumDofs()*2,n,max_iteration),
+						1,n,max_iteration),
 					mRigidWorld(rigid_world),mSoftWorld(soft_world),
 					mMusculoSkeletalSystem(musculo_skeletal_system),mDofs(musculo_skeletal_system->GetSkeleton()->getNumDofs())
 {
@@ -25,13 +26,31 @@ MusculoSkeletalDDP(	const dart::simulation::WorldPtr& rigid_world,
 	mMuscleOptimizationSolver->Initialize();
 	mMuscleOptimizationSolver->OptimizeTNLP(mMuscleOptimization);
 
-	double kp = 500.0;
-	double kv = 2*sqrt(kp);
+	mIKOptimization = new IKOptimization(mMusculoSkeletalSystem->GetSkeleton());
+	
+
+	mIKSolver = new IpoptApplication();
+	mIKSolver->Options()->SetStringValue("mu_strategy", "adaptive");
+	mIKSolver->Options()->SetStringValue("jac_c_constant", "yes");
+	mIKSolver->Options()->SetStringValue("hessian_constant", "yes");
+	mIKSolver->Options()->SetStringValue("mehrotra_algorithm", "yes");
+	mIKSolver->Options()->SetIntegerValue("print_level", 2);
+	mIKSolver->Options()->SetIntegerValue("max_iter", 10);
+	mIKSolver->Options()->SetNumericValue("tol", 1e-4);
+
+	mIKSolver->Initialize();
+	Eigen::Vector3d r_loc = mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOM();
+
+	IKOptimization* ik = static_cast<IKOptimization*>(GetRawPtr(mIKOptimization));
+	ik->AddTargetPositions(std::make_pair(mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR"),Eigen::Vector3d::Zero()),r_loc);
+	mIKSolver->OptimizeTNLP(mIKOptimization);
+	double kp = 2000.0;
+	double kv = 0.5*sqrt(kp);
 	int nn = mMusculoSkeletalSystem->GetSkeleton()->getNumDofs();
 	mKp = Eigen::VectorXd::Constant(nn,kp);
 	mKv = Eigen::VectorXd::Constant(nn,kv);
 	
-	mTargetPositions = Eigen::VectorXd::Constant(nn,0.0);
+	mTargetPositions = ik->GetSolution();
 	mTargetVelocities = Eigen::VectorXd::Constant(nn,0.0);
 }
 
@@ -47,8 +66,18 @@ void
 MusculoSkeletalDDP::
 SetControl(const Eigen::VectorXd& u)
 {
-	mTargetPositions = u.head(mDofs);
-	mTargetVelocities = u.tail(mDofs);
+	IKOptimization* ik = static_cast<IKOptimization*>(GetRawPtr(mIKOptimization));
+	Eigen::Vector3d new_target;
+	auto tar = ik->GetTargets();
+	new_target = tar[0].first.second;
+	new_target[0] = 0.338854;
+
+	new_target[1] = u[0];
+	ik->AddTargetPositions(std::make_pair(mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR"),Eigen::Vector3d::Zero()),new_target);
+	mIKSolver->ReOptimizeTNLP(mIKOptimization);
+	mTargetPositions = ik->GetSolution();
+	// std::cout<<new_target.transpose()<<std::endl;
+	// std::cout<<"mTargetPositions : "<<mTargetPositions.transpose()<<std::endl;
 }
 void
 MusculoSkeletalDDP::

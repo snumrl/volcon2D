@@ -32,6 +32,7 @@ public:
 	std::vector<std::pair<Eigen::Vector2d,Eigen::Vector2d>> muscle_forces;
 
 	Eigen::VectorXd target_positions;
+	Eigen::VectorXd target_positions2;
 	Eigen::VectorXd target_velocities;
 };
 

@@ -353,7 +353,7 @@ MakeSkeleton(MusculoSkeletalSystem* ms)
 
 	// One hand
 	pos[0] = 0.0;
-	pos[1] = -0.1;
+	pos[1] = 0.1;
 	pos[2] = -1.0;
 	pos[3] = -1.0;
 
@@ -371,9 +371,10 @@ MakeSkeleton(MusculoSkeletalSystem* ms)
 	skel->computeForwardKinematics(true,false,false);
 
 	// One hand
-	skel->getDof(0)->setPositionLimits(-0.15,0.15);
-	skel->getDof(1)->setPositionLimits(-1.57,0.3);
-	skel->getDof(2)->setPositionLimits(-2.5,2.5);
+	skel->getDof(0)->setPositionLimits(-0.1,0.1);
+	skel->getDof(1)->setPositionLimits(-0.1,0.1);
+	skel->getDof(2)->setPositionLimits(-1.57,0.3);
+	skel->getDof(3)->setPositionLimits(-2.0,2.0);
 
 	// Two Hand
 	// skel->getDof(0)->setPositionLimits(-0.1,0.1);

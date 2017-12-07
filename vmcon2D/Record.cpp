@@ -29,6 +29,7 @@ Set(const dart::simulation::WorldPtr& rigid_world,
 		muscle_forces.push_back(std::make_pair(muscle->force_origin,muscle->force_insertion));
 
 	target_positions = controller->mTargetPositions;
+	target_positions2 = controller->mTargetPositions2;
 	target_velocities = controller->mTargetVelocities;
 }
 
@@ -61,6 +62,7 @@ Get(const dart::simulation::WorldPtr& rigid_world,
     }
 
     controller->mTargetPositions = target_positions;
+    controller->mTargetPositions2 = target_positions2;
     controller->mTargetVelocities = target_velocities;
 }
 

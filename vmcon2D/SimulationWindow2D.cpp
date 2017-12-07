@@ -8,7 +8,7 @@
 #include "MuscleOptimization.h"
 #include "fem2D/Constraint/ConstraintHeaders.h"
 #include "Controller.h"
-#include "DDP/VelocityControlDDP.h"
+
 #include "GL/glut.h"
 using namespace dart::dynamics;
 using namespace dart::simulation;
@@ -19,7 +19,7 @@ SimulationWindow2D()
 	:mMouseMode(MOUSE_MODE::CONSTRAINT_CONTROL),
 	mDragConstraint(new FEM::AttachmentConstraint(50000.0,0,Eigen::Vector2d(0,0))),
 	mMusculoSkeletalSystem(new MusculoSkeletalSystem()),mController(new Controller()),
-	mIsPlay(false),mIsReplay(false),mIsPaused(false),mSimTime(0.0),mRecordFrame(0)
+	mIsPlay(false),mIsReplay(false),mIsPaused(false),mSimTime(0.0),mRecordFrame(0),mRenderTarget(true),mRenderTarget2(true)
 {
 	Initialize();
 	mDisplayTimeout = mSoftWorld->GetTimeStep()*1000;
@@ -87,6 +87,9 @@ TimeStepping()
 		// mMusculoSkeletalSystem->SetActivationLevel(mController->Compute());	
 		// std::cout<<"update"<<std::endl;
 		count++;
+
+		
+
 		mSoftWorld->SetTime(mSoftWorld->GetTime()+mSoftWorld->GetTimeStep());
 
 		temp_qdd = mController->ComputePDForces();
@@ -94,12 +97,12 @@ TimeStepping()
 		
 	}
 	// std::cout<<"step"<<std::endl;
-	/*std::cout<<"pos : "<<skel->getPositions().transpose()<<std::endl;
-	std::cout<<"vel : "<<skel->getVelocities().transpose()<<std::endl;
-	std::cout<<"qdd"<<temp_qdd.transpose()<<std::endl;
-	std::cout<<"getMassMatrix : "<<skel->getMassMatrix()<<std::endl;
-	std::cout<<"getCoriolisAndGravityForces : "<<skel->getCoriolisAndGravityForces()<<std::endl;
-	std::cout<<"setForce"<<(skel->getMassMatrix()*temp_qdd+skel->getCoriolisAndGravityForces()).transpose()<<std::endl;*/
+	// std::cout<<"pos : "<<skel->getPositions().transpose()<<std::endl;
+	// std::cout<<"vel : "<<skel->getVelocities().transpose()<<std::endl;
+	// std::cout<<"qdd"<<temp_qdd.transpose()<<std::endl;
+	// std::cout<<"getMassMatrix : "<<skel->getMassMatrix()<<std::endl;
+	// std::cout<<"getCoriolisAndGravityForces : "<<skel->getCoriolisAndGravityForces()<<std::endl;
+	// std::cout<<"setForce"<<(skel->getMassMatrix()*temp_qdd+skel->getCoriolisAndGravityForces()).transpose()<<std::endl;
 	if(count==29){
 		// exit(0);
 		// Keyboard(' ',0,0);
@@ -216,15 +219,24 @@ Display()
 		DrawMuscle(muscle,x);
 
 	DrawSkeleton(mMusculoSkeletalSystem->GetSkeleton());
-	// if(mIsPlay)
-	// {
+	if(mRenderTarget)
+	{
 		auto cur_pos = mMusculoSkeletalSystem->GetSkeleton()->getPositions();
-		mMusculoSkeletalSystem->GetSkeleton()->setPositions(mController->GetTargetPositions());
+		mMusculoSkeletalSystem->GetSkeleton()->setPositions(mController->mTargetPositions);
 		mMusculoSkeletalSystem->GetSkeleton()->computeForwardKinematics(true,false,false);
-		DrawSkeleton(mMusculoSkeletalSystem->GetSkeleton(),Eigen::Vector3d(0.8,0.3,0.8));
+		DrawSkeleton(mMusculoSkeletalSystem->GetSkeleton(),Eigen::Vector3d(0.8,0.3,0.3));
 		mMusculoSkeletalSystem->GetSkeleton()->setPositions(cur_pos);
 		mMusculoSkeletalSystem->GetSkeleton()->computeForwardKinematics(true,false,false);
-	// }
+	}
+	if(mRenderTarget2)
+	{
+		auto cur_pos = mMusculoSkeletalSystem->GetSkeleton()->getPositions();
+		mMusculoSkeletalSystem->GetSkeleton()->setPositions(mController->mTargetPositions2);
+		mMusculoSkeletalSystem->GetSkeleton()->computeForwardKinematics(true,false,false);
+		DrawSkeleton(mMusculoSkeletalSystem->GetSkeleton(),Eigen::Vector3d(0.3,0.3,0.8));
+		mMusculoSkeletalSystem->GetSkeleton()->setPositions(cur_pos);
+		mMusculoSkeletalSystem->GetSkeleton()->computeForwardKinematics(true,false,false);
+	}
 	int ball_index = 0;
 	for(auto& ball : mBalls)
 	{
@@ -264,6 +276,8 @@ Keyboard(unsigned char key,int x,int y)
 			std::cout<<"CAMERA_CONTROL mode"<<std::endl;
 		}
 		break;
+		case 'x' :mRenderTarget = !mRenderTarget;break;
+		case 'c' :mRenderTarget2 = !mRenderTarget2;break;
 	// 	break;
 	// 	case 'a' : mSimulator->PrintTimer();break;
 		case ' ' : mIsPlay = !mIsPlay; break;

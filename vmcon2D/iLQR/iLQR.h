@@ -5,13 +5,13 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <Eigen/LU>
-
-class DDP
+#include "BoxQP.h"
+class iLQR
 {
 public:
-	DDP(int sx,int su,int n,int max_iteration);
+	iLQR(int sx,int su,int n,int max_iteration);
 
-	void Init(
+	virtual void Init(
 		const Eigen::VectorXd& x0,const std::vector<Eigen::VectorXd>& u0,
 		const Eigen::VectorXd& u_lower,
 		const Eigen::VectorXd& u_upper);
@@ -64,6 +64,8 @@ protected:
 	double mdV[2];
 	std::vector<Eigen::VectorXd> mVx;		// dim : n 		size : w
 	std::vector<Eigen::MatrixXd> mVxx;		// dim : n*n 	size : w
+
+	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mQPSolver;
 
 	double mMu,mMu_min,mMu_max;
 	double mLambda,mLambda_0;

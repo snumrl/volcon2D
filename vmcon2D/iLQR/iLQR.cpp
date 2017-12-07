@@ -1,9 +1,10 @@
-#include "DDP.h"
+#include "iLQR.h"
+#include "BoxQP.h"
 #include <iostream>
 #include <fstream>
-
-DDP::
-DDP(int sx,int su,int n,int max_iteration)
+using namespace Ipopt;
+iLQR::
+iLQR(int sx,int su,int n,int max_iteration)
 	:mSx(sx),mSu(su),mN(n),mMaxIteration(max_iteration),
 	mMu(1.0),mMu_min(1E-6),mMu_max(1E10),mLambda(1.0),mLambda_0(2.0),mAlpha(1.0)
 {
@@ -27,9 +28,21 @@ DDP(int sx,int su,int n,int max_iteration)
 
 	mVx.resize(mN,Eigen::VectorXd::Zero(mSx));
 	mVxx.resize(mN,Eigen::MatrixXd::Zero(mSx,mSx));
+
+	mQPSolver = new IpoptApplication();
+	
+	mQPSolver->Options()->SetStringValue("mu_strategy", "adaptive");
+	mQPSolver->Options()->SetStringValue("jac_c_constant", "no");
+	mQPSolver->Options()->SetStringValue("hessian_constant", "yes");
+	mQPSolver->Options()->SetStringValue("mehrotra_algorithm", "yes");
+	mQPSolver->Options()->SetIntegerValue("print_level", 2);
+	mQPSolver->Options()->SetIntegerValue("max_iter", 10);
+	mQPSolver->Options()->SetNumericValue("tol", 1e-4);
+
+	mQPSolver->Initialize();
 }
 void
-DDP::
+iLQR::
 Init(const Eigen::VectorXd& x0,const std::vector<Eigen::VectorXd>& u0,const Eigen::VectorXd& u_lower,const Eigen::VectorXd& u_upper)
 {
 	mx[0] = x0;
@@ -44,16 +57,17 @@ Init(const Eigen::VectorXd& x0,const std::vector<Eigen::VectorXd>& u0,const Eige
 		EvalC(  mx[t],mu[t],t, c);
 		mCost += c;
 	}
-	cf = 123;
 	EvalCf(mx[mN-1],cf);
 	mCost +=cf;
+	std::cout<<"Cost : "<<mCost<<"(cf : "<<cf<<")"<<std::endl;
 }
 void
-DDP::
+iLQR::
 ComputeDerivative()
 {
 	mCost = 0;
 	double c,cf;
+	
 	for(int t =0;t<mN-1;t++)
 	{
 		Evalfx(mx[t],mu[t],t,mfx[t]);
@@ -66,8 +80,12 @@ ComputeDerivative()
 		EvalCxx(mx[t],mu[t],t, mCxx[t]);
 		EvalCxu(mx[t],mu[t],t, mCxu[t]);
 		EvalCuu(mx[t],mu[t],t, mCuu[t]);
+		// std::cout<<mfx[t]<<std::endl;
+		// std::cout<<mfu[t]<<std::endl;
+		// std::cout<<mCu[t]<<std::endl;
+		// std::cout<<mCuu[t]<<std::endl;
+		// exit(0);
 	}
-	cf = 123;
 	EvalCf(mx[mN-1],cf);
 	mCost +=cf;
 	std::cout<<"Cost : "<<mCost<<"(cf : "<<cf<<")"<<std::endl;
@@ -76,7 +94,7 @@ ComputeDerivative()
 
 }
 bool
-DDP::
+iLQR::
 BackwardPass()
 {
 	Eigen::VectorXd Qx(mSx),Qu(mSu);
@@ -88,6 +106,8 @@ BackwardPass()
 
 	for(int t = mN-2;t>=0;t--)
 	{
+		
+
 		Qx = mCx[t] + mfx[t].transpose()*mVx[t+1];
 		Qu = mCu[t] + mfu[t].transpose()*mVx[t+1];
 		
@@ -99,35 +119,82 @@ BackwardPass()
 		Qxu_reg = mCxu[t] + mfx[t].transpose()*(mVxx[t+1]+muI)*mfu[t];
 		Qux_reg = Qxu_reg.transpose();
 		Quu_reg = mCuu[t] + mfu[t].transpose()*(mVxx[t+1]+muI)*mfu[t];
+		// std::cout<<t<<std::endl;
+		// std::cout<<mMu<<std::endl;
+		// std::cout<<"mfu : \n"<<mfu[t]<<std::endl;
+		// std::cout<<"mfx : \n"<<mfx[t]<<std::endl;
+		// std::cout<<"mVxx : \n"<<mVxx[t+1]<<std::endl;
+		// std::cout<<"Qx : \n"<<Qx<<std::endl<<std::endl;
+		// std::cout<<"Qu : \n"<<Qu<<std::endl<<std::endl;
+		// std::cout<<"mCu : \n"<<mCu[t]<<std::endl<<std::endl;
+
+		// std::cout<<"Qxx : \n"<<Qxx<<std::endl<<std::endl;
+		// std::cout<<"Qxu : \n"<<Qxu<<std::endl<<std::endl;
+		// std::cout<<"Quu : \n"<<Quu<<std::endl<<std::endl;
+
+		// std::cout<<"Qxu_reg : \n"<<Qxu_reg<<std::endl<<std::endl;
+		// std::cout<<"Quu_reg : \n"<<Quu_reg<<std::endl<<std::endl;
 
 		if(!CheckPSD(Quu_reg)){
-			std::cout << "no PSD at "<< t<< std::endl;
+			// std::cout<< (mCuu[t]).eigenvalues()<<std::endl<<std::endl;
+			// std::cout<< (mfu[t].transpose()*(mVxx[t+1])*mfu[t]).eigenvalues()<<std::endl<<std::endl;
+			// std::cout<< (mfu[t].transpose()*(muI)*mfu[t]).eigenvalues()<<std::endl;
+			// std::cout<< (mfu[t].transpose()*(mVxx[t+1]+muI)*mfu[t]).eigenvalues()<<std::endl;
+			// std::cout<< (Quu_reg).eigenvalues()<<std::endl;
+			// std::cout<< (mCuu[t])<<std::endl<<std::endl<<std::endl;
+			// std::cout<< (mfu[t].transpose()*(mVxx[t+1])*mfu[t])<<std::endl<<std::endl<<std::endl;
+			// std::cout<< mfu[t]<<std::endl<<std::endl;
+			// std::cout<< (muI)<<std::endl<<std::endl;
+			// std::cout<< (mVxx[t+1])<<std::endl<<std::endl;
+			// std::cout<< (mVxx[t+1]+muI)<<std::endl<<std::endl;
+			// std::cout<< (Quu_reg)<<std::endl<<std::endl;
+			// exit(0);
+			// std::cout << "no PSD at "<< t<< std::endl;
 			return false;
 		}
 
 		//For large dim
 		// Eigen::LLT<Eigen::MatrixXd> llt(Quu_reg);
-	
-		// mK[t] = -llt.solve(Qux);
+		
+		// for(int i = 0;i<mK[t].cols();i++)
+		// 	mK[t].col(i) = -llt.solve(Qux.col(i));
+
 		// mK[t] = -llt.solve(Qu);
 
 		//For small dim
 		Quu_inv = Quu_reg.inverse();
 
-		mK[t] = -Quu_inv*Qux;
+
+		// Ipopt::SmartPtr<Ipopt::TNLP> QP;
+		
+
+		// Eigen::VectorXd lower(mSu),upper(mSu);
+		// lower = mu_lower-mu[t];
+		// upper = mu_upper-mu[t];
+		// QP = new BoxQP(Quu_reg,Qu,lower,upper);
+		// mQPSolver->OptimizeTNLP(QP);
+
 		mk[t] = -Quu_inv*Qu;
+		// std::cout<<Quu_inv<<std::endl;
+		// std::cout<<Qu<<std::endl;
+		// mk[t] = static_cast<BoxQP*>(GetRawPtr(QP))->GetSolution();
+		mK[t] = -Quu_inv*Qux;
+		
 		
 		mdV[0] += mk[t].transpose()*Qu;
 		mdV[1] += 0.5*mk[t].transpose()*Quu*mk[t];
 		mVx[t] = Qx + mK[t].transpose()*Quu*mk[t] + mK[t].transpose()*Qu + Qxu*mk[t];
 		mVxx[t] = Qxx + mK[t].transpose()*Quu*mK[t] + mK[t].transpose()*Qux + Qxu*mK[t];
-		// std::cout<<mk[t].transpose()<<std::endl;
+		// std::cout<<"mk : \n"<<mk[t].transpose()<<std::endl<<std::endl;
+		// std::cout<<"mK : \n"<<mK[t]<<std::endl<<std::endl;
+		// std::cout<<"mVx : \n"<<mVx[t]<<std::endl<<std::endl;
+		// std::cout<<"mVxx : \n"<<mVxx[t]<<std::endl<<std::endl;
 	}
 
 	return true;
 }
 double
-DDP::
+iLQR::
 ForwardPass()
 {
 	std::vector<Eigen::VectorXd> x_new;
@@ -140,16 +207,14 @@ ForwardPass()
 	for(int t = 0;t<mN-1;t++)
 	{
 		u_new[t] = mu[t] + mAlpha*mk[t] + mK[t]*(x_new[t]-mx[t]);
-
+		// std::cout<<u_new[t].transpose()<<std::endl;
 		u_new[t] = u_new[t].cwiseMax(mu_lower);
 		u_new[t] = u_new[t].cwiseMin(mu_upper);
 
 		Evalf(x_new[t],u_new[t],t,x_new[t+1]);
+
 	}
-	// for(int t = 0 ;t<mN-1;t++)
-	// {
-	// 	std::cout<<u_new[t].transpose()<<std::endl;
-	// }
+
 	mx = x_new;
 	mu = u_new;
 
@@ -168,7 +233,7 @@ ForwardPass()
 }
 
 const std::vector<Eigen::VectorXd>&
-DDP::
+iLQR::
 Solve()
 {
 	for(int i = 0;i<mMaxIteration;i++)
@@ -212,7 +277,6 @@ Solve()
 				else
 					z = (dcost>0? 1:-1);
 				if(z>0.0){
-
 					mForwardPassDone = true;
 					break;
 				}
@@ -250,16 +314,15 @@ Solve()
 }
 
 bool
-DDP::
+iLQR::
 CheckPSD(const Eigen::MatrixXd& A)
 {
-	Eigen::VectorXcd singular_values = A.eigenvalues();
+	Eigen::VectorXcd ev = A.eigenvalues();
 
     for(long i = 0; i < A.cols(); ++i)
     {
-        if (singular_values[i].real() < 0.0)
+        if (ev[i].real() < 0.0)
         {
-            
             return false;
         }
     }

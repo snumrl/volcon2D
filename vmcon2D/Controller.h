@@ -15,8 +15,8 @@
 class Controller;
 class MuscleOptimization;
 class MusculoSkeletalSystem;
-class VelocityControlDDP;
 class IKOptimization;
+class MusculoSkeletalLQR;
 class BallInfo;
 class BezierCurve;
 typedef std::pair<dart::dynamics::BodyNode*,Eigen::Vector3d> AnchorPoint;
@@ -30,6 +30,7 @@ public:
 	std::vector<BallInfo*>						mBalls;
 
 	Eigen::VectorXd								mTargetPositions;
+	Eigen::VectorXd								mTargetPositions2;
 	Eigen::VectorXd								mTargetVelocities;
 	Eigen::VectorXd 							mKp,mKv;
 
@@ -51,17 +52,16 @@ public:
 	std::vector<BallInfo*>						mDDPBalls;
 	std::vector<dart::dynamics::SkeletonPtr>	mDDPBallSkeleletons;
 
-	VelocityControlDDP*			mDDP;
+	MusculoSkeletalLQR*			mLQR;
 	std::vector<Eigen::VectorXd> mU;
 	int u_index;
 
 	std::vector<Eigen::VectorXd> mInitialPositions;
-	std::vector<Eigen::VectorXd> mInitialVelocities;
 	BezierCurve* mBezierCurve;
 public:
 	Controller();
 	void Initialize(FEM::World* soft_world,const dart::simulation::WorldPtr& rigid_world,MusculoSkeletalSystem* musculo_skeletal_system,const std::vector<dart::dynamics::SkeletonPtr>& balls);
-	void ComputeInitialU0(std::vector<Eigen::VectorXd>& u0);
+	void ComputeInitialU0(std::vector<Eigen::VectorXd>& u0,const Eigen::Vector3d& target_p,const Eigen::Vector3d& target_v);
 	Eigen::VectorXd Compute();
 	Eigen::VectorXd ComputePDForces();
 	const Eigen::VectorXd& GetTargetPositions(){return mTargetPositions;};

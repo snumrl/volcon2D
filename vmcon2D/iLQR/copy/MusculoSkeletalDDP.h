@@ -27,7 +27,8 @@ protected:
 	Eigen::VectorXd 							mKp,mKv;
 	Ipopt::SmartPtr<Ipopt::TNLP> 			 	mMuscleOptimization;
 	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mMuscleOptimizationSolver;
-
+	Ipopt::SmartPtr<Ipopt::TNLP> 			 	mIKOptimization;
+	Ipopt::SmartPtr<Ipopt::IpoptApplication> 	mIKSolver;
 };
 
 #endif

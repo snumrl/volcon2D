@@ -44,7 +44,9 @@ protected:
 	bool 						mIsPlay;
 	bool 						mIsReplay;
 	bool 						mIsPaused;
-	
+	bool 						mRenderTarget;
+	bool 						mRenderTarget2;
+
 	std::vector<Record*>		mRecords;
 	int 						mRecordFrame;
 	double						mTime,mTimeStep,mSimTime;

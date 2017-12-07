@@ -4,15 +4,14 @@
 #include "DART_Interface.h"
 #include "MusculoSkeletalSystem.h"
 #include "IKOptimization.h"
-#include "DDP/VelocityControlDDP.h"
+#include "iLQR/MusculoSkeletalLQR.h"
 #include "MuscleOptimization.h"
 #include "fem2D/Constraint/ConstraintHeaders.h"
+#include <fstream>
 #include "GL/glut.h"
 using namespace dart::dynamics;
 using namespace dart::simulation;
 using namespace Ipopt;
-
-
 
 Controller::
 Controller()
@@ -65,13 +64,14 @@ Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSys
 	mMuscleOptimizationSolver->Initialize();
 	mMuscleOptimizationSolver->OptimizeTNLP(mMuscleOptimization);	
 
-	double kp = 500.0;
-	double kv = 2*sqrt(kp);
+	double kp = 1000.0;
+	double kv = 2.0*sqrt(kp);
 	int n = mMusculoSkeletalSystem->GetSkeleton()->getNumDofs();
 	mKp = Eigen::VectorXd::Constant(n,kp);
 	mKv = Eigen::VectorXd::Constant(n,kv);
 
 	mTargetPositions = Eigen::VectorXd::Constant(n,0.0);
+	mTargetPositions2 = Eigen::VectorXd::Constant(n,0.0);
 	mTargetVelocities = Eigen::VectorXd::Constant(n,0.0);
 
 
@@ -132,40 +132,59 @@ Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSys
 	}
 
 	std::vector<Eigen::VectorXd> u0;
-	auto X_rigid = mDDPMusculoSkeletalSystem->GetSkeleton()->getPositions();
-	auto X_soft = mDDPSoftWorld->GetPositions();
+	Eigen::VectorXd X_rigid = mDDPMusculoSkeletalSystem->GetSkeleton()->getPositions();
+	Eigen::VectorXd X_soft = mDDPSoftWorld->GetPositions();
 
-	ComputeInitialU0(u0);
+	double xx,yy,zz,vx,vy,vz;
+	std::ifstream target("../vmcon2D/export/target.txt");
+	target>>xx>>yy>>zz>>vx>>vy>>vz;
+	target.close();
+	ComputeInitialU0(u0,Eigen::Vector3d(xx,yy,zz),Eigen::Vector3d(vx,vy,vz));
+	// for(int i=0;i<49;i++)
+	// 	u0.push_back(X_rigid);
 	mDDPMusculoSkeletalSystem->GetSkeleton()->setPositions(X_rigid);
 	mDDPMusculoSkeletalSystem->GetSkeleton()->setVelocities(mDDPMusculoSkeletalSystem->GetSkeleton()->getVelocities().setZero());
 	mDDPMusculoSkeletalSystem->GetSkeleton()->computeForwardKinematics(true,false,false);
-	mDDPSoftWorld->SetPositions(X_soft);
+	// mDDPSoftWorld->SetPositions(X_soft);
 
-	mDDP = new VelocityControlDDP(mDDPRigidWorld,mDDPSoftWorld,mDDPMusculoSkeletalSystem,mDDPBalls[0],u0,u0.size()+1,200);
-	mU = mDDP->Solve();
+	Eigen::VectorXd x0(mDDPMusculoSkeletalSystem->GetSkeleton()->getNumDofs()*2);
+	x0.head(mDDPMusculoSkeletalSystem->GetSkeleton()->getNumDofs()) = X_rigid;
+	x0.tail(mDDPMusculoSkeletalSystem->GetSkeleton()->getNumDofs()).setZero();
+
+
+	mLQR = new MusculoSkeletalLQR(Eigen::Vector3d(xx,yy,zz),Eigen::Vector3d(vx,vy,vz),mDDPRigidWorld,mDDPSoftWorld,mDDPMusculoSkeletalSystem,u0.size()+1,200);
+	mLQR->Initialze(x0,u0);
+	mU = mLQR->Solve();
 	u_index = 0;
-	// for(int i =0;i<u0.size();i++)
-	// 	std::cout<<u0[i].transpose()<<std::endl;
 	// mU = u0;
+	
+	
+	// for(int i =0;i<u0.size();i++)
+	// 	std::cout<<u0[i]<<" ";
+	// std::cout<<std::endl;
+	// mU = u0;
+	// for(int i =0;i<mU.size();i++)
+	// 	std::cout<<mU[i]<<" ";
+	// std::cout<<std::endl;
+	// std::cout<<std::endl<<std::endl;
 }
 void
 Controller::
-ComputeInitialU0(std::vector<Eigen::VectorXd>& u0)
+ComputeInitialU0(std::vector<Eigen::VectorXd>& u0,const Eigen::Vector3d& target_p,const Eigen::Vector3d& target_v)
 {
-	int n = 79;
+	int n = 49;
 	// u0.resize(n);
 	double t = mDDPSoftWorld->GetTimeStep()*n;
 	Eigen::Vector2d p0,p1,p2,v2;
-	v2 = Eigen::Vector2d(0,3.0);
+	v2 = Eigen::Vector2d(1,1.0);
 	p0 = mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOM().block<2,1>(0,0);
-	p2 = mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOM().block<2,1>(0,0);
-	p2[1] +=0.1;
-	p1 = p2-0.5*v2*t;
+	p2 = target_p.block<2,1>(0,0);
+	p1 = p2-0.5*target_v.block<2,1>(0,0)*t;
 	std::cout<<p0.transpose()<<std::endl;
 	std::cout<<p1.transpose()<<std::endl;
 	std::cout<<p2.transpose()<<std::endl;
 	mBezierCurve = new BezierCurve(p0,p1,p2,t);
-
+	// 
 	mIKOptimization = new IKOptimization(mDDPMusculoSkeletalSystem->GetSkeleton());
 
 	mIKSolver = new IpoptApplication();
@@ -180,10 +199,9 @@ ComputeInitialU0(std::vector<Eigen::VectorXd>& u0)
 	mIKSolver->Initialize();
 	IKOptimization* ik = static_cast<IKOptimization*>(GetRawPtr(mIKOptimization));
 
-	// Eigen::Vector3d l_loc = mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandL")->getCOM();
+	// // Eigen::Vector3d l_loc = mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandL")->getCOM();
 	Eigen::Vector3d r_loc = mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR")->getCOM();
-
-	// ik->AddTargetPositions(std::make_pair(mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandL"),Eigen::Vector3d::Zero()),l_loc);
+	// // ik->AddTargetPositions(std::make_pair(mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandL"),Eigen::Vector3d::Zero()),l_loc);
 	ik->AddTargetPositions(std::make_pair(mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR"),Eigen::Vector3d::Zero()),r_loc);
 
 	mIKSolver->OptimizeTNLP(mIKOptimization);
@@ -191,7 +209,7 @@ ComputeInitialU0(std::vector<Eigen::VectorXd>& u0)
 	AnchorPoint ap = std::make_pair(mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR"),Eigen::Vector3d(0,0,0));
 	std::vector<std::pair<Eigen::VectorXd,double>> motions;
 	int num_samples = 10;
-	for(int i =0;i<num_samples+1;i++)
+	for(int i =0;i<num_samples+3;i++)
 	{
 		double cur_t = (double)i/(double)num_samples*t;
 		Eigen::Vector2d p_ee = mBezierCurve->GetPosition(cur_t);
@@ -199,7 +217,6 @@ ComputeInitialU0(std::vector<Eigen::VectorXd>& u0)
 
 		ik->AddTargetPositions(ap,p_ee_3d);
 		mIKSolver->ReOptimizeTNLP(mIKOptimization);
-
 		motions.push_back(std::make_pair(ik->GetSolution(),cur_t));
 	}
 
@@ -222,16 +239,22 @@ ComputeInitialU0(std::vector<Eigen::VectorXd>& u0)
 		double kt1 = kt + 0.01;
 		auto pdp = (1.0 - kt1)*motions[k].first + kt1*motions[k1].first;
 		mInitialPositions.push_back(p);
-		mInitialVelocities.push_back((pdp-p)/0.01);
 
 	}
+
 	for(int i =0;i<n;i++)
 	{
-		Eigen::VectorXd compose(mInitialPositions[i].rows() + mInitialVelocities[i].rows());
-		compose.head(mInitialPositions[i].rows()) = mInitialPositions[i];
-		compose.tail(mInitialVelocities[i].rows()) = mInitialVelocities[i];
-		u0.push_back(compose);
+		// Eigen::VectorXd compose(
+		// 	mInitialPositions[i].rows());
+		// compose.setZero();
+		// compose.head(mInitialPositions[i].rows()) = mInitialPositions[0];
+		// // compose.head(mInitialPositions[i].rows()) = mInitialPositions[i];
+		// // compose.block(mInitialPositions[i].rows(),0,mInitialPositions[i].rows(),1) = mInitialVelocities[i];
+		// compose.tail(mInitialVelocities[i].rows()) = mKp;
+		u0.push_back(mInitialPositions[i]);
 	}
+	
+
 }
 Eigen::VectorXd
 Controller::
@@ -268,9 +291,34 @@ ComputePDForces()
 
 	if(u_index<mU.size())
 	{
-		mTargetPositions = mU[u_index].head(skel->getNumDofs());
-		mTargetVelocities = mU[u_index].tail(skel->getNumDofs());
-		u_index++;	
+		// IKOptimization* ik = static_cast<IKOptimization*>(GetRawPtr(mIKOptimization));
+		// Eigen::Vector3d new_target;
+		// auto tar = ik->GetTargets();
+		// new_target = tar[0].first.second;
+		// new_target[0] = 0.338854;
+		// new_target[1] = mU[u_index][0];
+		// ik->AddTargetPositions(std::make_pair(mDDPMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR"),Eigen::Vector3d::Zero()),new_target);
+		// mIKSolver->ReOptimizeTNLP(mIKOptimization);
+		// mTargetPositions = ik->GetSolution();
+		// std::cout<<new_target.transpose()<<std::endl;
+		// std::cout<<"mTargetPositions : "<<mTargetPositions.transpose()<<std::endl;
+		mTargetPositions = mU[u_index];
+		mTargetPositions2 = mInitialPositions[u_index];
+
+		if(u_index == 0)
+			mTargetVelocities.setZero();
+		else
+			mTargetVelocities =  (mU[u_index]-mU[u_index-1])/mSoftWorld->GetTimeStep();
+		// mTargetVelocities = mU[u_index].block(skel->getNumDofs(),0,skel->getNumDofs(),1);
+		// mKp = mU[u_index].tail(skel->getNumDofs());
+		// mKv = 2*mKp.cwiseSqrt();
+		u_index++;
+	}
+	else
+	{
+		mTargetPositions = mU.back();
+		mTargetPositions2 = mInitialPositions.back();
+		mTargetVelocities.setZero();
 	}
 	
 
