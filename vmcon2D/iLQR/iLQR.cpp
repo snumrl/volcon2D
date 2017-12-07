@@ -228,7 +228,7 @@ ForwardPass()
 	EvalCf(mx[mN-1],cf);
 	cost_new += cf;
 
-	// std::cout<<"alpha : "<<mAlpha<<" "<<cost_new<<"(cf : "<<cf<<")"<<std::endl;
+	std::cout<<"alpha : "<<mAlpha<<" "<<cost_new<<"(cf : "<<cf<<")"<<std::endl;
 	return cost_new;
 }
 
@@ -236,6 +236,7 @@ const std::vector<Eigen::VectorXd>&
 iLQR::
 Solve()
 {
+	int fail_count = 0;
 	for(int i = 0;i<mMaxIteration;i++)
 	{
 		ComputeDerivative();
@@ -278,6 +279,7 @@ Solve()
 					z = (dcost>0? 1:-1);
 				if(z>0.0){
 					mForwardPassDone = true;
+					fail_count = 0;
 					break;
 				}
 				mAlpha *= 0.5;
@@ -290,7 +292,9 @@ Solve()
 			mLambda = std::min(mLambda/mLambda_0,1.0/mLambda_0);
 			mMu = mMu*mLambda;
 			mMu = (mMu>mMu_min? mMu : 0.0);
-
+			fail_count++;
+			if(fail_count == 3)
+				break;
 			if(dcost<1E-4)
 				break;
 		}

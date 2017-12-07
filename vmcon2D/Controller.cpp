@@ -245,10 +245,10 @@ ComputeInitialU0(std::vector<Eigen::VectorXd>& u0,const Eigen::Vector3d& target_
 	for(int i =0;i<n;i++)
 	{
 		Eigen::VectorXd compose(
-			mInitialPositions[i].rows() + 1);
+			mInitialPositions[i].rows() );
 		// compose.setZero();
 		compose.head(mInitialPositions[i].rows()) = mInitialPositions[i];
-		compose[mInitialPositions[i].rows()] = 1.0;
+		// compose[mInitialPositions[i].rows()] = 1.0;
 		// // compose.head(mInitialPositions[i].rows()) = mInitialPositions[i];
 		// // compose.block(mInitialPositions[i].rows(),0,mInitialPositions[i].rows(),1) = mInitialVelocities[i];
 		// compose.tail(mInitialVelocities[i].rows()) = mKp;
@@ -305,10 +305,10 @@ ComputePDForces()
 		// std::cout<<new_target.transpose()<<std::endl;
 		// std::cout<<"mTargetPositions : "<<mTargetPositions.transpose()<<std::endl;
 		mTargetPositions = mU[u_index].head(skel->getNumDofs());
-		double kp = 1000.0*mU[u_index][skel->getNumDofs()];
-		double kv = 2.0*sqrt(kp);
-		mKp = Eigen::VectorXd::Constant(skel->getNumDofs(),kp);
-		mKv = Eigen::VectorXd::Constant(skel->getNumDofs(),kv);
+		// double kp = 1000.0*mU[u_index][skel->getNumDofs()];
+		// double kv = 2.0*sqrt(kp);
+		// mKp = Eigen::VectorXd::Constant(skel->getNumDofs(),kp);
+		// mKv = Eigen::VectorXd::Constant(skel->getNumDofs(),kv);
 		mTargetPositions2 = mInitialPositions[u_index];
 
 		if(u_index == 0)

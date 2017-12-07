@@ -12,7 +12,7 @@ MusculoSkeletalLQR(
 		FEM::World* soft_world,
 		MusculoSkeletalSystem* musculo_skeletal_system,int n,int max_iteration)
 		:iLQR(	musculo_skeletal_system->GetSkeleton()->getNumDofs()*2, 			//State
-				musculo_skeletal_system->GetSkeleton()->getNumDofs()+1,			//Signal
+				musculo_skeletal_system->GetSkeleton()->getNumDofs(),			//Signal
 				n,max_iteration),
 		mEndEffectorTargetPosition(pos_desired),
 		mEndEffectorTargetVelocity(vel_desired),
@@ -52,7 +52,6 @@ MusculoSkeletalLQR(
 	// mIKSolver->Initialize();
 
 	mEndEffector = mMusculoSkeletalSystem->GetSkeleton()->getBodyNode("HandR");
-	double x,y,z;
 	std::ifstream param("../vmcon2D/export/param.txt");
 	param>>w_regularization>>w_compliance>>w_pos_track>>w_vel_track;
 	param.close();
@@ -63,15 +62,15 @@ Initialze(
 	const Eigen::VectorXd& x0,const std::vector<Eigen::VectorXd>& u0)
 {
 	mInitialGuess = u0;
-	Eigen::VectorXd u_lower(mMusculoSkeletalSystem->GetSkeleton()->getNumDofs()+1);
-	Eigen::VectorXd u_upper(mMusculoSkeletalSystem->GetSkeleton()->getNumDofs()+1);
+	Eigen::VectorXd u_lower(mMusculoSkeletalSystem->GetSkeleton()->getNumDofs());
+	Eigen::VectorXd u_upper(mMusculoSkeletalSystem->GetSkeleton()->getNumDofs());
 	for(int i =0;i<mMusculoSkeletalSystem->GetSkeleton()->getNumDofs();i++)
 	{
 		u_lower[i] = mMusculoSkeletalSystem->GetSkeleton()->getDof(i)->getPositionLowerLimit();
 		u_upper[i] = mMusculoSkeletalSystem->GetSkeleton()->getDof(i)->getPositionUpperLimit();
 	}
-	u_lower[mDofs] = 0.5;
-	u_upper[mDofs] = 2.0;
+	// u_lower[mDofs] = 0.5;
+	// u_upper[mDofs] = 2.0;
 	Init(x0,u0,u_lower,u_upper);
 }
 void
@@ -118,7 +117,7 @@ EvalC( const Eigen::VectorXd& x,const Eigen::VectorXd& u,int t,double& c)
 		// c = 0.5*w_smooth*(u-mInitialGuess[0]).squaredNorm();
 	// else
 	c = 0.5*w_regularization*((u-mInitialGuess[t]).head(mDofs)).squaredNorm();
-	c += 0.5*w_compliance*(u[mDofs]*u[mDofs]);
+	// c += 0.5*w_compliance*(u[mDofs]*u[mDofs]);
 	// SetState(x);
 	
 	// Eigen::Vector3d ee_pos = mEndEffector->getTransform()*Eigen::Vector3d(0,0,0);
@@ -157,8 +156,8 @@ SetControl(const Eigen::VectorXd& u,double t)
 	else
 		mTargetVelocities = (u.head(mDofs)-mu[t-1].head(mDofs))/mSoftWorld->GetTimeStep();
 
-	mKp = Eigen::VectorXd::Constant(mDofs,1000.0*u[mDofs]);
-	mKv = Eigen::VectorXd::Constant(mDofs,2*sqrt(mKp[0]));
+	// mKp = Eigen::VectorXd::Constant(mDofs,1000.0*u[mDofs]);
+	// mKv = Eigen::VectorXd::Constant(mDofs,2*sqrt(mKp[0]));
 }
 void
 MusculoSkeletalLQR::
@@ -191,7 +190,7 @@ Step()
 		mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
 		// mMusculoSkeletalSystem->GetSkeleton()->setForces(
 		// 	mMusculoSkeletalSystem->GetSkeleton()->getMassMatrix()*qdd_desired+
-		// 	mMusculoSkeletalSystem->GetSkeleton()->getCoriolisAndGravityForces());
+			// mMusculoSkeletalSystem->GetSkeleton()->getCoriolisAndGravityForces());
 		mRigidWorld->step();
 	}
 }
