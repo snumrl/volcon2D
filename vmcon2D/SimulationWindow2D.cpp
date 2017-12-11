@@ -45,7 +45,7 @@ Initialize()
 	MakeMuscles("../vmcon2D/export/muscle_parameter.xml",mMusculoSkeletalSystem);
 
 	mRigidWorld->addSkeleton(mMusculoSkeletalSystem->GetSkeleton());
-	for(int i =0;i<5;i++)
+	for(int i =0;i<3;i++)
 	{
 		mBalls.push_back(Skeleton::create("Ball_"+std::to_string(i)));
 		MakeBall(mBalls.back(),0.036,0.13);	

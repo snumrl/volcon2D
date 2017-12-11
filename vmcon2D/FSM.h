@@ -15,6 +15,7 @@
 #include <utility>
 #include <Eigen/Core>
 
+class MusculoSkeletalLQR;
 class BezierCurve;
 class IKOptimization;
 class MusculoSkeletalSystem;
@@ -129,11 +130,12 @@ public:
 	int mCount;
 
 	
+	// MusculoSkeletalLQR* mLQR;
 	void GenerateMotions(BezierCurve* bc,std::vector<std::pair<Eigen::VectorXd,double>>& motions);
-	void OptimizeBezierCurvePoint(int num_samples);
-	void GenerateSample(
-		const Eigen::Vector2d& p0,const Eigen::Vector2d& p1,const Eigen::Vector2d& p2, const Eigen::Vector2d& v_target,
-		Eigen::Vector2d& v_result,int& release_count);
+	// void OptimizeBezierCurvePoint(int num_samples);
+	// void GenerateSample(
+	// 	const Eigen::Vector2d& p0,const Eigen::Vector2d& p1,const Eigen::Vector2d& p2, const Eigen::Vector2d& v_target,
+	// 	Eigen::Vector2d& v_result,int& release_count);
 public:
 	BezierCurveState(const dart::simulation::WorldPtr& rigid_world,
 				FEM::World* soft_world,

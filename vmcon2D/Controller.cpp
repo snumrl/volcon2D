@@ -61,7 +61,7 @@ Initialize(FEM::World* soft_world,const WorldPtr& rigid_world,MusculoSkeletalSys
 	mMuscleOptimizationSolver->Options()->SetIntegerValue("max_iter", 100);
 	mMuscleOptimizationSolver->Options()->SetNumericValue("tol", 1e-4);
 
-	double kp = 4000.0;
+	double kp = 2000.0;
 	double kv = 2*sqrt(kp);
 	int n = mMusculoSkeletalSystem->GetSkeleton()->getNumDofs();
 	mKp = Eigen::VectorXd::Constant(n,kp);

@@ -261,7 +261,7 @@ GenerateMotions(BezierCurve* bc,std::vector<std::pair<Eigen::VectorXd,double>>& 
 	Eigen::VectorXd save_positions = ik->GetSolution();
 
 	auto save_target = ik->GetTargets();
-	for(int i =0;i<mNumCurveSample+4;i++)
+	for(int i =0;i<mNumCurveSample+2;i++)
 	{
 		double tt = ((double)i)/((double)mNumCurveSample) * mD*mT;
 		
@@ -279,226 +279,226 @@ GenerateMotions(BezierCurve* bc,std::vector<std::pair<Eigen::VectorXd,double>>& 
 
 	ik->SetSolution(save_positions);
 }
-void
-BezierCurveState::
-OptimizeBezierCurvePoint(int num_samples)
-{
-	double t = ((double)mV-2*mD+0.3)*mT;
+// void
+// BezierCurveState::
+// OptimizeBezierCurvePoint(int num_samples)
+// {
+// 	double t = ((double)mV-2*mD+0.3)*mT;
 
-	Eigen::Vector3d p_3d;
-	Eigen::Vector2d p0,p1,p2,v2;
+// 	Eigen::Vector3d p_3d;
+// 	Eigen::Vector2d p0,p1,p2,v2;
 
-	mBallInfo[mBallIndex]->GetPosition(p_3d);
-	bool isleft = false;
-	if(mAnchorPoint.first->getName().find("L")!=std::string::npos)
-		isleft = true;
+// 	mBallInfo[mBallIndex]->GetPosition(p_3d);
+// 	bool isleft = false;
+// 	if(mAnchorPoint.first->getName().find("L")!=std::string::npos)
+// 		isleft = true;
 
-	if(isleft)
-		p2[0] = -0.3;
-	else
-		p2[0] = 0.3;
-	p2[1] = 0.2;
+// 	if(isleft)
+// 		p2[0] = -0.3;
+// 	else
+// 		p2[0] = 0.3;
+// 	p2[1] = 0.2;
 
-	v2[0] = -2.0*p2[0]/t;
-	// v2[0] = 0;
-	v2[1] = 0.5*9.81*t;
+// 	v2[0] = -2.0*p2[0]/t;
+// 	// v2[0] = 0;
+// 	v2[1] = 0.5*9.81*t;
 
-	std::cout<<"Target Velocity : "<<v2.transpose()<<std::endl;
+// 	std::cout<<"Target Velocity : "<<v2.transpose()<<std::endl;
 
-	p0[1] = 0.2;
-	//Free parameter Optimization
-	p0[0] = p2[0] - mD*mT*v2[0];
-	p1[0] = p2[0] - 0.5*mD*mT*v2[0];
-	p1[1] = p2[1] - 0.5*mD*mT*v2[1];
+// 	p0[1] = 0.2;
+// 	//Free parameter Optimization
+// 	p0[0] = p2[0] - mD*mT*v2[0];
+// 	p1[0] = p2[0] - 0.5*mD*mT*v2[0];
+// 	p1[1] = p2[1] - 0.5*mD*mT*v2[1];
 
-	std::cout<<"LOOK AHEAD start"<<std::endl;
+// 	std::cout<<"LOOK AHEAD start"<<std::endl;
 
-	double vel_diff_norm = 1E6;
-	int sample_check = -1;
-	int result_release_count = -1;
-	Eigen::Vector2d result_velocity;
-	Eigen::Vector2d rp0,rp1;
+// 	double vel_diff_norm = 1E6;
+// 	int sample_check = -1;
+// 	int result_release_count = -1;
+// 	Eigen::Vector2d result_velocity;
+// 	Eigen::Vector2d rp0,rp1;
 
-	for(int j=0;j<3;j++)
-	{
-		std::vector<std::pair<Eigen::Vector4d,Eigen::Vector3d>> samples;
-		for(int i =0;i<num_samples;i++)
-		{
-			std::cout<<"\n\tSample "<<i<<std::endl;
-			Eigen::Vector2d new_p0,new_p1;
-			new_p0 = p0;
-			new_p1 = p1;
-			double deltax0 = dart::math::random(-0.03,0.03);
-			double deltay0 = dart::math::random(-0.07,0.07);
-			double deltax1 = dart::math::random(-0.1,0.1);
-			double deltay1 = dart::math::random(-0.15,0.15);
+// 	for(int j=0;j<3;j++)
+// 	{
+// 		std::vector<std::pair<Eigen::Vector4d,Eigen::Vector3d>> samples;
+// 		for(int i =0;i<num_samples;i++)
+// 		{
+// 			std::cout<<"\n\tSample "<<i<<std::endl;
+// 			Eigen::Vector2d new_p0,new_p1;
+// 			new_p0 = p0;
+// 			new_p1 = p1;
+// 			double deltax0 = dart::math::random(-0.03,0.03);
+// 			double deltay0 = dart::math::random(-0.07,0.07);
+// 			double deltax1 = dart::math::random(-0.1,0.1);
+// 			double deltay1 = dart::math::random(-0.15,0.15);
 
-			for(int k=0;k<j;k++)
-			{
-				deltax0 *=0.5;
-				deltay0 *=0.5;
-				deltax1 *=0.5;
-				deltay1 *=0.5;
-			}
+// 			for(int k=0;k<j;k++)
+// 			{
+// 				deltax0 *=0.5;
+// 				deltay0 *=0.5;
+// 				deltax1 *=0.5;
+// 				deltay1 *=0.5;
+// 			}
 
-			new_p0[0] += deltax0;
-			new_p0[1] += deltay0;
-			new_p1[0] += deltax1;
-			new_p1[1] += deltay1;
+// 			new_p0[0] += deltax0;
+// 			new_p0[1] += deltay0;
+// 			new_p1[0] += deltax1;
+// 			new_p1[1] += deltay1;
 
-			Eigen::Vector2d v_result;
-			int release_count = -1;
+// 			Eigen::Vector2d v_result;
+// 			int release_count = -1;
 			
-			std::cout<<"\tp : "<<new_p0.transpose()<<"\t"<<new_p1.transpose()<<std::endl;
-			GenerateSample(new_p0,new_p1,p2,v2,v_result,release_count);
+// 			std::cout<<"\tp : "<<new_p0.transpose()<<"\t"<<new_p1.transpose()<<std::endl;
+// 			GenerateSample(new_p0,new_p1,p2,v2,v_result,release_count);
 
-			std::pair<Eigen::Vector4d,Eigen::Vector3d> sample_pair;
-			sample_pair.first.block<2,1>(0,0) = new_p0;
-			sample_pair.first.block<2,1>(2,0) = new_p1;
-			sample_pair.second.block<2,1>(0,0) = v_result;
-			sample_pair.second[2] = release_count;
-			samples.push_back(sample_pair);
-			if((v2-v_result).norm()<vel_diff_norm)
-			{
-				vel_diff_norm = (v2-v_result).norm();
+// 			std::pair<Eigen::Vector4d,Eigen::Vector3d> sample_pair;
+// 			sample_pair.first.block<2,1>(0,0) = new_p0;
+// 			sample_pair.first.block<2,1>(2,0) = new_p1;
+// 			sample_pair.second.block<2,1>(0,0) = v_result;
+// 			sample_pair.second[2] = release_count;
+// 			samples.push_back(sample_pair);
+// 			if((v2-v_result).norm()<vel_diff_norm)
+// 			{
+// 				vel_diff_norm = (v2-v_result).norm();
 				
-				result_velocity = v_result;
-				result_release_count = release_count;
-				rp0 = new_p0;
-				rp1 = new_p1;
-				sample_check = i;
-			}
-		}
+// 				result_velocity = v_result;
+// 				result_release_count = release_count;
+// 				rp0 = new_p0;
+// 				rp1 = new_p1;
+// 				sample_check = i;
+// 			}
+// 		}
 
-		//Linear Regression
-		for(int i =0;i<num_samples;i++)
-			std::cout<<samples[i].first.transpose()<<"\t"<<samples[i].second.transpose()<<std::endl;
+// 		//Linear Regression
+// 		for(int i =0;i<num_samples;i++)
+// 			std::cout<<samples[i].first.transpose()<<"\t"<<samples[i].second.transpose()<<std::endl;
 
-		Eigen::MatrixXd xxt(4,4),yxt(3,4);
-		Eigen::VectorXd x_sum(4),y_sum(3);
-		xxt.setZero();
-		yxt.setZero();
-		x_sum.setZero();
-		y_sum.setZero();
-		for(int i =0;i<num_samples;i++)
-		{
-			xxt += samples[i].first*samples[i].first.transpose();
-			yxt += samples[i].second*samples[i].first.transpose();
-			x_sum += samples[i].first;
-			y_sum += samples[i].second;
-		}
-		Eigen::MatrixXd J(3,4);
-		Eigen::VectorXd b(3);
-		J = yxt*xxt.inverse();
-		b = y_sum-J*x_sum;
+// 		Eigen::MatrixXd xxt(4,4),yxt(3,4);
+// 		Eigen::VectorXd x_sum(4),y_sum(3);
+// 		xxt.setZero();
+// 		yxt.setZero();
+// 		x_sum.setZero();
+// 		y_sum.setZero();
+// 		for(int i =0;i<num_samples;i++)
+// 		{
+// 			xxt += samples[i].first*samples[i].first.transpose();
+// 			yxt += samples[i].second*samples[i].first.transpose();
+// 			x_sum += samples[i].first;
+// 			y_sum += samples[i].second;
+// 		}
+// 		Eigen::MatrixXd J(3,4);
+// 		Eigen::VectorXd b(3);
+// 		J = yxt*xxt.inverse();
+// 		b = y_sum-J*x_sum;
 
-		for(int i =0;i<num_samples;i++)
-			std::cout<<(J*samples[i].first+b).transpose()<<std::endl;
+// 		for(int i =0;i<num_samples;i++)
+// 			std::cout<<(J*samples[i].first+b).transpose()<<std::endl;
 		
 
-		Eigen::Vector3d reg_target;
-		Eigen::Vector4d reg_p;
-		reg_target.block<2,1>(0,0) = v2;
-		reg_target[2] = y_sum[2]/(double)num_samples;
+// 		Eigen::Vector3d reg_target;
+// 		Eigen::Vector4d reg_p;
+// 		reg_target.block<2,1>(0,0) = v2;
+// 		reg_target[2] = y_sum[2]/(double)num_samples;
 
-		reg_p = J.transpose()*((J*J.transpose()).inverse())*(reg_target-b);
-		std::cout<<"regresion result : "<<reg_p.transpose()<<std::endl;
-		// p0 = rp0;
-		// p1 = rp1;
-		p0 = (0.3*reg_p.block<2,1>(0,0)+0.7*rp0);
-		p1 = (0.3*reg_p.block<2,1>(2,0)+0.7*rp1);
+// 		reg_p = J.transpose()*((J*J.transpose()).inverse())*(reg_target-b);
+// 		std::cout<<"regresion result : "<<reg_p.transpose()<<std::endl;
+// 		// p0 = rp0;
+// 		// p1 = rp1;
+// 		p0 = (0.3*reg_p.block<2,1>(0,0)+0.7*rp0);
+// 		p1 = (0.3*reg_p.block<2,1>(2,0)+0.7*rp1);
 
-		std::cout<<"\n\tNew initial Point : : "<<p0.transpose()<<"\t"<<p1.transpose()<<std::endl;
-		std::cout<<"Sample "<<sample_check<<" is choosed."<<std::endl;
-		std::cout<<"Residual : "<<vel_diff_norm<<std::endl;
-		std::cout<<"velocity : "<<result_velocity.transpose()<<std::endl;
-		std::cout<<std::endl;
-	}
-
-	
-	std::cout<<"LOOK AHEAD end"<<std::endl;
-	std::cout<<"Sample "<<sample_check<<" is choosed."<<std::endl;
-	
-	mReleaseCount = result_release_count;
-	mCurve->Initialize(rp0,rp1,p2,mD*mT);
-	
-	std::cout<<"Residual : "<<vel_diff_norm<<std::endl;
-	std::cout<<"velocity : "<<result_velocity.transpose()<<std::endl;
-	std::cout<<"target velocity : "<<v2.transpose()<<std::endl;
-	std::cout<<"Release count : "<<mReleaseCount<<std::endl;
-	
-}
-void
-BezierCurveState::
-GenerateSample(const Eigen::Vector2d& p0,const Eigen::Vector2d& p1,const Eigen::Vector2d& p2, const Eigen::Vector2d& v_target,
-				Eigen::Vector2d& v_result,int& release_count)
-{
-	mCount = 0;
-	mReleaseCount = 10000;
-	mTimeElapsed = 0.0;
-
-	mCurve->Initialize(p0,p1,p2,mD*mT);
-	GenerateMotions(mCurve,mMotions);
-	Record*	current_record = new Record();
-	current_record->Set(mRigidWorld,mSoftWorld,mMusculoSkeletalSystem,mController);
+// 		std::cout<<"\n\tNew initial Point : : "<<p0.transpose()<<"\t"<<p1.transpose()<<std::endl;
+// 		std::cout<<"Sample "<<sample_check<<" is choosed."<<std::endl;
+// 		std::cout<<"Residual : "<<vel_diff_norm<<std::endl;
+// 		std::cout<<"velocity : "<<result_velocity.transpose()<<std::endl;
+// 		std::cout<<std::endl;
+// 	}
 
 	
+// 	std::cout<<"LOOK AHEAD end"<<std::endl;
+// 	std::cout<<"Sample "<<sample_check<<" is choosed."<<std::endl;
+	
+// 	mReleaseCount = result_release_count;
+// 	mCurve->Initialize(rp0,rp1,p2,mD*mT);
+	
+// 	std::cout<<"Residual : "<<vel_diff_norm<<std::endl;
+// 	std::cout<<"velocity : "<<result_velocity.transpose()<<std::endl;
+// 	std::cout<<"target velocity : "<<v2.transpose()<<std::endl;
+// 	std::cout<<"Release count : "<<mReleaseCount<<std::endl;
+	
+// }
+// void
+// BezierCurveState::
+// GenerateSample(const Eigen::Vector2d& p0,const Eigen::Vector2d& p1,const Eigen::Vector2d& p2, const Eigen::Vector2d& v_target,
+// 				Eigen::Vector2d& v_result,int& release_count)
+// {
+// 	mCount = 0;
+// 	mReleaseCount = 10000;
+// 	mTimeElapsed = 0.0;
 
-
-	int closest_velocity_count = 0;
-	double vel_diff_norm = 1E6;
-	Eigen::Vector2d vel_closest;
-	while(true)
-	{
-		//Simulation START
-		bool is_fem_updated = false;
-		if(mSoftWorld->GetTime()<=mRigidWorld->getTime())
-		{
-			is_fem_updated =true;
-			mMusculoSkeletalSystem->SetActivationLevel(mController->Compute());	
-		}
-
-		mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
-
-		if(is_fem_updated)
-		{
-			mMusculoSkeletalSystem->TransformAttachmentPoints();
-			mSoftWorld->TimeStepping();
-		}
-		mRigidWorld->step();
-		//Simulation END
-
-		if(is_fem_updated)
-		{
-			Eigen::Vector3d velocity;
-			mBallInfo[mBallIndex]->GetVelocity(velocity);
-			// std::cout<<"\t\t"<<mCount<<"\t"<<velocity.block<2,1>(0,0).transpose()<<std::endl;
-			if( (v_target-velocity.block<2,1>(0,0)).norm()<vel_diff_norm)
-			{
-				vel_diff_norm = (v_target-velocity.block<2,1>(0,0)).norm();
-				closest_velocity_count = mCount;
-				vel_closest = velocity.block<2,1>(0,0);
-				// std::cout<<mCount<<std::endl;
-			}
-		}
-		if(mTimeElapsed>mMotions[mMotions.size()-2].second)
-			break;
-	}
+// 	mCurve->Initialize(p0,p1,p2,mD*mT);
+// 	GenerateMotions(mCurve,mMotions);
+// 	Record*	current_record = new Record();
+// 	current_record->Set(mRigidWorld,mSoftWorld,mMusculoSkeletalSystem,mController);
 
 	
-	std::cout<<"\tClosest count : "<<closest_velocity_count<<std::endl;
-	std::cout<<"\tres : "<<vel_diff_norm<<std::endl;
-	std::cout<<"\tvelocity : "<<vel_closest.transpose()<<std::endl;
+
+
+// 	int closest_velocity_count = 0;
+// 	double vel_diff_norm = 1E6;
+// 	Eigen::Vector2d vel_closest;
+// 	while(true)
+// 	{
+// 		//Simulation START
+// 		bool is_fem_updated = false;
+// 		if(mSoftWorld->GetTime()<=mRigidWorld->getTime())
+// 		{
+// 			is_fem_updated =true;
+// 			mMusculoSkeletalSystem->SetActivationLevel(mController->Compute());	
+// 		}
+
+// 		mMusculoSkeletalSystem->ApplyForcesToSkeletons(mSoftWorld);
+
+// 		if(is_fem_updated)
+// 		{
+// 			mMusculoSkeletalSystem->TransformAttachmentPoints();
+// 			mSoftWorld->TimeStepping();
+// 		}
+// 		mRigidWorld->step();
+// 		//Simulation END
+
+// 		if(is_fem_updated)
+// 		{
+// 			Eigen::Vector3d velocity;
+// 			mBallInfo[mBallIndex]->GetVelocity(velocity);
+// 			// std::cout<<"\t\t"<<mCount<<"\t"<<velocity.block<2,1>(0,0).transpose()<<std::endl;
+// 			if( (v_target-velocity.block<2,1>(0,0)).norm()<vel_diff_norm)
+// 			{
+// 				vel_diff_norm = (v_target-velocity.block<2,1>(0,0)).norm();
+// 				closest_velocity_count = mCount;
+// 				vel_closest = velocity.block<2,1>(0,0);
+// 				// std::cout<<mCount<<std::endl;
+// 			}
+// 		}
+// 		if(mTimeElapsed>mMotions[mMotions.size()-2].second)
+// 			break;
+// 	}
+
+	
+// 	std::cout<<"\tClosest count : "<<closest_velocity_count<<std::endl;
+// 	std::cout<<"\tres : "<<vel_diff_norm<<std::endl;
+// 	std::cout<<"\tvelocity : "<<vel_closest.transpose()<<std::endl;
 	
 
-	current_record->Get(mRigidWorld,mSoftWorld,mMusculoSkeletalSystem,mController);
+// 	current_record->Get(mRigidWorld,mSoftWorld,mMusculoSkeletalSystem,mController);
 
-	mTimeElapsed = 0.0;
-	mCount = 0;
+// 	mTimeElapsed = 0.0;
+// 	mCount = 0;
 
-	release_count = closest_velocity_count;
-	v_result = vel_closest;
-}
+// 	release_count = closest_velocity_count;
+// 	v_result = vel_closest;
+// }
 
 
 
@@ -528,7 +528,38 @@ Initialize(int ball_index,int V)
 	mV = V;
 	// std::cout<<"Swing "<<mBallIndex<<std::endl;
 
-	OptimizeBezierCurvePoint(5);		//This optimize bezier mCurve control point.
+	// OptimizeBezierCurvePoint(5);		//This optimize bezier mCurve control point.
+	double t = ((double)mV-2*mD+0.3)*mT;
+
+	Eigen::Vector3d p_3d;
+	Eigen::Vector2d p0,p1,p2,v2;
+
+	mBallInfo[mBallIndex]->GetPosition(p_3d);
+	bool isleft = false;
+	if(mAnchorPoint.first->getName().find("L")!=std::string::npos)
+		isleft = true;
+
+	if(isleft)
+		p2[0] = -0.3;
+	else
+		p2[0] = 0.3;
+	p2[1] = 0.2;
+
+	v2[0] = -2.0*p2[0]/t;
+	// v2[0] = 0;
+	v2[1] = 0.5*9.81*t;
+
+	std::cout<<"Target Velocity : "<<v2.transpose()<<std::endl;
+
+	p0[1] = 0.2;
+	//Free parameter Optimization
+	p0[0] = p2[0] - mD*mT*v2[0];
+	p1[0] = p2[0] - 0.5*mD*mT*v2[0];
+	p1[1] = p2[1] - 0.5*mD*mT*v2[1];
+	mCurve->Initialize(p0,p1,p2,mD*mT);
+	// mCount = 0;
+	// mReleaseCount = 10000;
+	mTimeElapsed = 0.0;
 
 	GenerateMotions(mCurve,mMotions);
 
@@ -603,7 +634,7 @@ GetMotion(Eigen::VectorXd& p,Eigen::VectorXd& v)
 	
 	std::cout<<mCount<<" Current Velocity : "<<vv.transpose()<<std::endl;
 	std::cout<<mCount<<"\t"<<mReleaseCount<<std::endl;*/
-	if(mCount == mReleaseCount-1)// || ((mTargetVelocity-vv).norm()<5E-1)&&k>5){
+	if(k==mMotions.size()-1)// || ((mTargetVelocity-vv).norm()<5E-1)&&k>5){
 	{
 		// std::cout<<"Release "<<mBallIndex<<std::endl;
 		mBallInfo[mBallIndex]->Release(mRigidWorld);
@@ -771,10 +802,10 @@ Machine(const WorldPtr& rigid_world,
 
 
 	// std::vector<int> V_list{5,3,1,5,3,1,5,3,1,5,3,1,5,3,1};
-	// std::vector<int> V_list{3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
+	std::vector<int> V_list{3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
 	// std::vector<int> V_list{4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4};
 	// std::vector<int> V_list{4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4};
-	std::vector<int> V_list{5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5};
+	// std::vector<int> V_list{5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5};
 	// std::vector<int> V_list{7,7,7,7,7,7,7,7,7};
 	InitializeJugglingState(V_list);
 }
