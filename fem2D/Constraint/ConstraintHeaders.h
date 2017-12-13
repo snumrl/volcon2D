@@ -5,7 +5,7 @@
 // #include "SpringConstraint.h"
 #include "CorotateFEMConstraint.h"
 #include "MuscleConstraint.h"
-// #include "HillTypeMuscleConstraint.h"
+#include "HillTypeMuscleConstraint.h"
 #include "LinearMuscleConstraint.h"
 // #include "PWLinearMuscleConstraint.h"
 

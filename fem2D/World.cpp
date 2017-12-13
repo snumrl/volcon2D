@@ -112,6 +112,15 @@ TimeStepping(bool isIntegrated)
 	default:
 	break;
 	}
+	for(auto& c : mConstraints)
+	{
+		ConstraintType type = c->GetType();
+		if(type == ConstraintType::HILL_TYPE_MUSCLE)
+		{
+			auto* cc = static_cast<HillTypeMuscleConstraint*>(c);
+			cc->SetPreviousL(mX);
+		}
+	}
 	UpdatePositionsAndVelocities(x_n1);
 	mV *= mDampingCoefficinent;
 	if(isIntegrated)

@@ -11,6 +11,7 @@ SET(CMAKE_BUILD_TYPE Release CACHE STRING
 	)
 SET( ENABLE_VMCON2D ON CACHE BOOL "Enable Vmcon2D" )
 SET( ENABLE_OCTOCON2D ON CACHE BOOL "Enable Octocon2D" )
+SET( ENABLE_FEM_TEST ON CACHE BOOL "Enable fem test" )
 
 
 add_subdirectory( fem2D )
@@ -38,6 +39,7 @@ link_directories(./GUI/)
 
 file(GLOB vmcon2d_srcs "vmcon2D/*.h" "vmcon2D/*.cpp" "vmcon2D/iLQR/*.h" "vmcon2D/iLQR/*.cpp")
 file(GLOB octocon2d_srcs "octocon2D/*.h" "octocon2D/*.cpp")
+file(GLOB fem_test_srcs "fem_test/*.h" "fem_test/*.cpp")
 
 if (ENABLE_VMCON2D)
 	project(vmcon2D)
@@ -58,6 +60,18 @@ if (ENABLE_OCTOCON2D)
 
 	add_executable(octocon2D ${octocon2d_srcs})
 	target_link_libraries(octocon2D ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${TINYXML_LIBRARIES} fem2D GUI)
+endif()
+
+
+if (ENABLE_FEM_TEST)
+	project(fem_test)
+
+	find_library(TINYXML_LIBRARIES
+      NAMES tinyxml
+    )
+
+	add_executable(fem_test ${fem_test_srcs})
+	target_link_libraries(fem_test ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${TINYXML_LIBRARIES} fem2D GUI)
 endif()
 
 
