@@ -162,6 +162,7 @@ void
 IKState::
 Solve()
 {
+	std::cout<<"SOLVE IK : "<<mBallIndex<<std::endl;
 	bool need_ik_update= true;
 	
 	Eigen::Vector3d target;
@@ -180,6 +181,7 @@ Solve()
 	}
 	if(need_ik_update)
 	{
+		std::cout<<target.transpose()<<std::endl;
 		ik->AddTargetPositions(mAnchorPoint,target);
 		mIKSolver->ReOptimizeTNLP(mIKOptimization);
 	}
@@ -802,10 +804,10 @@ Machine(const WorldPtr& rigid_world,
 
 
 	// std::vector<int> V_list{5,3,1,5,3,1,5,3,1,5,3,1,5,3,1};
-	std::vector<int> V_list{3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
+	// std::vector<int> V_list{3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
 	// std::vector<int> V_list{4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4};
 	// std::vector<int> V_list{4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4};
-	// std::vector<int> V_list{5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5};
+	std::vector<int> V_list{5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5};
 	// std::vector<int> V_list{7,7,7,7,7,7,7,7,7};
 	InitializeJugglingState(V_list);
 }
@@ -877,6 +879,7 @@ void
 Machine::
 Trigger(const std::string& name)
 {
+
 	std::string re_name = name;
 	if(!name.compare("end"))
 	{
@@ -900,6 +903,7 @@ Trigger(const std::string& name)
 			}
 		}
 
+		
 		mJugglingFrame++;
 		bool isCurrentLeft = mJugglingStates[mJugglingFrame].isLeftHand;
 		if(isCurrentLeft == isPreviousLeft)
@@ -910,6 +914,9 @@ Trigger(const std::string& name)
 	next_state = mCurrentState->GetNextState(re_name);
 	if(next_state!=nullptr){
 		mCurrentState = next_state;
+		std::cout<<mJugglingFrame<<std::endl;
+		std::cout<<mJugglingStates[mJugglingFrame].ball_index<<std::endl;
+		std::cout<<std::endl;
 		mCurrentState->Initialize(mJugglingStates[mJugglingFrame].ball_index,mJugglingStates[mJugglingFrame].V);
 	}	
 	
