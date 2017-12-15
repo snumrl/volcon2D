@@ -64,14 +64,14 @@ endif()
 
 
 if (ENABLE_FEM_TEST)
-	project(fem_test)
+	project(test_fem)
 
 	find_library(TINYXML_LIBRARIES
       NAMES tinyxml
     )
 
-	add_executable(fem_test ${fem_test_srcs})
-	target_link_libraries(fem_test ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${TINYXML_LIBRARIES} fem2D GUI)
+	add_executable(test_fem ${fem_test_srcs})
+	target_link_libraries(test_fem ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${TINYXML_LIBRARIES} fem2D GUI)
 endif()
 
 

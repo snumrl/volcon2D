@@ -16,7 +16,7 @@ SimulationWindow2D()
 	mIsPlay(false)
 {
 	mObjects.push_back(new Object(Eigen::Vector2d(0,0)));
-	mObjects.push_back(new Object(Eigen::Vector2d(0,0.5)));
+	// mObjects.push_back(new Object(Eigen::Vector2d(0,0.5)));
 	Initialize();
 	mDisplayTimeout = mSoftWorld->GetTimeStep()*1000;
 }
@@ -110,11 +110,57 @@ Display()
 	glLineWidth(1.0);
 
 	const auto& x = mSoftWorld->GetPositions();
+
+//yul
+// mesh size check!!
+
+	// double max_x = -100.;
+	// double min_x = 100.;
+	// double max_y = -100.;
+	// double min_y = 100.;
+	// for (int i = 0 ; i < x.size() ; i+=2)
+	// {
+	// 	//std::cout<<"i: "<< i <<std::endl;
+	// 	// std::cout<<"x: "<< x[i] <<std::endl;
+	// 	if(max_x < x[i])
+	// 	{
+	// 		max_x = x[i];
+	// 		//std::cout<<"max_x: "<< max_x <<std::endl;
+	// 	}
+	// 	if(min_x > x[i])
+	// 	{
+	// 		min_x = x[i];
+	// 		// std::cout<<"min_x: "<< min_x <<std::endl; 
+	// 	}
+
+	// }
+	// for (int i = 1 ; i < x.size() ; i+=2)
+	// {
+	// 	if(max_y < x[i])
+	// 		max_y= x[i];
+	// 	if(min_y > x[i])
+	// 		min_y= x[i]; 
+	// }
+	// double x_len = std::abs(max_x - min_x);
+	// double y_len = std::abs(max_y - min_y);
+	// std::cout<<"max_x: "<< max_x <<std::endl;
+	// std::cout<<"min_x: "<< min_x <<std::endl;
+	// std::cout<<"max_y: "<< max_y <<std::endl;
+	// std::cout<<"min_y: "<< min_y <<std::endl;
+	// std::cout<<"x_len: "<< x_len <<std::endl;
+	// std::cout<<"y_len: "<< y_len <<std::endl;
+
+	// // std::cout<<"X?: \n"<< x[0]<<std::endl;
 	
+	// std::cout<<"X size?: \n"<< x.size()<<std::endl;
+	// // std::cout<<"X?: \n"<< x.transpose()<<std::endl;
+	// std::cout<<"==================================="<<std::endl;
+
 	for(auto& c : mSoftWorld->GetConstraints())
 	{
 		DrawConstraint(c,x);
 	}
+
 	if(mIsDrag)
 		DrawConstraint(mDragConstraint,x);
 	glEnable(GL_DEPTH_TEST);
@@ -129,21 +175,21 @@ Keyboard(unsigned char key,int x,int y)
 	{
 		Eigen::Vector2d prev_p0,prev_p1;
 		prev_p0 = mObjects[0]->mAttachementConstraintVector[0]->GetP();
-		prev_p1 = mObjects[1]->mAttachementConstraintVector[0]->GetP();
+		// prev_p1 = mObjects[1]->mAttachementConstraintVector[0]->GetP();
 		prev_p0[0] += -0.05;
 		prev_p1[0] += -0.05;
 		mObjects[0]->mAttachementConstraintVector[0]->GetP() = prev_p0;
-		mObjects[1]->mAttachementConstraintVector[0]->GetP() = prev_p1;
+		// mObjects[1]->mAttachementConstraintVector[0]->GetP() = prev_p1;
 	}
 	else if(key == 'd')
 	{
 		Eigen::Vector2d prev_p0,prev_p1;
 		prev_p0 = mObjects[0]->mAttachementConstraintVector[0]->GetP();
-		prev_p1 = mObjects[1]->mAttachementConstraintVector[0]->GetP();
+		// prev_p1 = mObjects[1]->mAttachementConstraintVector[0]->GetP();
 		prev_p0[0] += 0.05;
-		prev_p1[0] += 0.05;
+		// prev_p1[0] += 0.05;
 		mObjects[0]->mAttachementConstraintVector[0]->GetP() = prev_p0;
-		mObjects[1]->mAttachementConstraintVector[0]->GetP() = prev_p1;
+		// mObjects[1]->mAttachementConstraintVector[0]->GetP() = prev_p1;
 	}
 	Eigen::VectorXd act_set = Eigen::VectorXd::LinSpaced(20, 0, 1.0);
 	Eigen::VectorXd f0(act_set.rows()),f1(act_set.rows());
@@ -167,7 +213,7 @@ Keyboard(unsigned char key,int x,int y)
 		act = mObjects[0]->GetActivationLevel();
 		act.setZero();
 		mObjects[0]->SetActivationLevel(act);
-		mObjects[1]->SetActivationLevel(act);
+		// mObjects[1]->SetActivationLevel(act);
 		break;break;
 		case '1' :
 		act = mObjects[0]->GetActivationLevel();
@@ -175,13 +221,13 @@ Keyboard(unsigned char key,int x,int y)
 		if(act[0]>1.0)
 			act[0]=1.0;
 		mObjects[0]->SetActivationLevel(act);
-		// break;
+		break;
 		case '2' :
-		act = mObjects[1]->GetActivationLevel();
+		// act = mObjects[1]->GetActivationLevel();
 		act[0] +=0.05;
 		if(act[0]>1.0)
 			act[0]=1.0;
-		mObjects[1]->SetActivationLevel(act);
+		// mObjects[1]->SetActivationLevel(act);
 		break;
 		
 		case 27: exit(0);break;

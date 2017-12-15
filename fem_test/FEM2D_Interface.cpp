@@ -2,6 +2,8 @@
 #include "fem2D/Constraint/ConstraintHeaders.h"
 #include "GUI/GL_function.h"
 #include "Object.h"
+
+
 using namespace FEM;
 void
 DrawConstraint(Constraint* c,const Eigen::VectorXd& X)
@@ -37,10 +39,11 @@ DrawConstraint(Constraint* c,const Eigen::VectorXd& X)
         
         
         
-
-
         const auto& act = cc->GetActivationLevel();
         const auto& dir = cc->GetFiberDirection();
+        //std::cout<<"fiber direction : "<<dir<<std::endl;
+		
+
 		const auto& p0 = X.block<2,1>(cc->GetI0()*2,0);
         const auto& p1 = X.block<2,1>(cc->GetI1()*2,0);
 		const auto& p2 = X.block<2,1>(cc->GetI2()*2,0);
